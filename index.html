@@ -218,10 +218,26 @@
     .dash-campo-fecha label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
     .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
     .dash-selector-fecha .btn-mini { height: 44px; }
-    .dash-tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .dash-tarjeta { border-radius: 14px; padding: 16px 10px; text-align: center; }
-    .dash-tarjeta .dash-valor { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-    .dash-tarjeta .dash-etiqueta { font-size: 0.72rem; font-weight: 700; }
+    .dash-tarjetas { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .dash-tarjeta { border-radius: 14px; overflow: hidden; }
+    .dash-tarjeta-header {
+        width: 100%; background: none; border: none; display: flex; align-items: center; gap: 10px;
+        padding: 16px 14px; cursor: pointer; text-align: left; font-family: inherit;
+    }
+    .dash-tarjeta-header .dash-etiqueta { flex: 1; font-size: 0.82rem; font-weight: 700; }
+    .dash-tarjeta-header .dash-valor { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+    .dash-tarjeta-header .flecha-plegable { flex-shrink: 0; transition: transform 0.15s ease; opacity: 0.7; }
+    .dash-tarjeta-header .flecha-plegable.abierta { transform: rotate(180deg); }
+    .dash-tarjeta-body { display: none; padding: 0 14px 14px 14px; }
+    .dash-tarjeta-body.abierto { display: block; }
+    .dash-tarjeta-body .dash-item-vacio { font-size: 0.78rem; opacity: 0.75; padding: 6px 2px; }
+    .dash-tarjeta-body .dash-item-contenedor {
+        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: rgba(255,255,255,0.6); border-radius: 10px; padding: 10px 12px; margin-top: 6px;
+        font-size: 0.82rem; font-weight: 700; cursor: pointer;
+    }
+    .dash-tarjeta-body .dash-item-contenedor:active { transform: scale(0.98); }
+    .dash-tarjeta-body .dash-item-contenedor span.flecha-item { opacity: 0.6; font-weight: 400; }
     .dash-programados { background: #E6F0FA; }
     .dash-programados .dash-valor { color: var(--primary-blue); }
     .dash-programados .dash-etiqueta { color: var(--primary-blue); }
@@ -408,20 +424,36 @@
                 <div id="dashResultado">
                     <div class="dash-tarjetas">
                         <div class="dash-tarjeta dash-programados">
-                            <div class="dash-valor" id="dashProgramados">0</div>
-                            <div class="dash-etiqueta">📋 Programados</div>
+                            <button class="dash-tarjeta-header" data-dash-toggle="programados">
+                                <span class="dash-etiqueta">📋 Programados</span>
+                                <span class="dash-valor" id="dashProgramados">0</span>
+                                <span class="flecha-plegable" id="flechaDash-programados">▾</span>
+                            </button>
+                            <div class="dash-tarjeta-body" id="cuerpoDash-programados"></div>
                         </div>
                         <div class="dash-tarjeta dash-proceso">
-                            <div class="dash-valor" id="dashEnProceso">0</div>
-                            <div class="dash-etiqueta">🟡 En Proceso</div>
+                            <button class="dash-tarjeta-header" data-dash-toggle="proceso">
+                                <span class="dash-etiqueta">🟡 En Proceso</span>
+                                <span class="dash-valor" id="dashEnProceso">0</span>
+                                <span class="flecha-plegable" id="flechaDash-proceso">▾</span>
+                            </button>
+                            <div class="dash-tarjeta-body" id="cuerpoDash-proceso"></div>
                         </div>
                         <div class="dash-tarjeta dash-ejecutados">
-                            <div class="dash-valor" id="dashEjecutados">0</div>
-                            <div class="dash-etiqueta">✅ Ejecutados</div>
+                            <button class="dash-tarjeta-header" data-dash-toggle="ejecutados">
+                                <span class="dash-etiqueta">✅ Ejecutados</span>
+                                <span class="dash-valor" id="dashEjecutados">0</span>
+                                <span class="flecha-plegable" id="flechaDash-ejecutados">▾</span>
+                            </button>
+                            <div class="dash-tarjeta-body" id="cuerpoDash-ejecutados"></div>
                         </div>
                         <div class="dash-tarjeta dash-sin-iniciar">
-                            <div class="dash-valor" id="dashSinIniciar">0</div>
-                            <div class="dash-etiqueta">🔴 Sin Iniciar</div>
+                            <button class="dash-tarjeta-header" data-dash-toggle="sin-iniciar">
+                                <span class="dash-etiqueta">🔴 Sin Iniciar</span>
+                                <span class="dash-valor" id="dashSinIniciar">0</span>
+                                <span class="flecha-plegable" id="flechaDash-sin-iniciar">▾</span>
+                            </button>
+                            <div class="dash-tarjeta-body" id="cuerpoDash-sin-iniciar"></div>
                         </div>
                     </div>
                     <div class="dash-cumplimiento">
@@ -760,7 +792,7 @@ function renderizarPestañasPrincipales() {
                         <label>🔴 Hora de Finalización</label>
                         <div class="mini-fila">
                             <input type="text" id="horaFinInputLista-${contenedor}" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-${contenedor}" data-finalizar-lista="${contenedor}">🔴 FINALIZAR OPERACIÓN</button>
+                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-${contenedor}" data-finalizar-lista="${contenedor}" disabled>🔴 FINALIZAR OPERACIÓN</button>
                         </div>
                     </div>
                     <div class="mini-seccion">
@@ -844,7 +876,15 @@ function renderizarPestañasPrincipales() {
     listaOp.querySelectorAll('[data-agregar-func-lista]').forEach(btn => {
         btn.onclick = () => agregarFuncionarioDesdeLista(btn.getAttribute('data-agregar-func-lista'));
     });
-    listaOp.querySelectorAll('input[id^="horaFinInputLista-"], input[id^="horaFuncInputLista-"]').forEach(inp => {
+    listaOp.querySelectorAll('input[id^="horaFinInputLista-"]').forEach(inp => {
+        const contenedor = inp.id.replace('horaFinInputLista-', '');
+        const btnFinLista = document.getElementById('btnFinalizarLista-' + contenedor);
+        inp.addEventListener('input', (e) => {
+            formatearHoraEnVivo(e.target);
+            if (btnFinLista) btnFinLista.disabled = !e.target.value.trim();
+        });
+    });
+    listaOp.querySelectorAll('input[id^="horaFuncInputLista-"]').forEach(inp => {
         inp.addEventListener('input', (e) => formatearHoraEnVivo(e.target));
     });
     [listaOp, listaFin].forEach(lista => {
@@ -866,6 +906,7 @@ function renderizarPestañasPrincipales() {
 }
 
 function cambiarPestañaPrincipal(tab) {
+    if (tab !== 'dashboard') cerrarTarjetasDash();
     document.getElementById('tabBtnOperacion').classList.toggle('activo', tab === 'operacion');
     document.getElementById('tabBtnFinalizados').classList.toggle('activo', tab === 'finalizados');
     document.getElementById('tabBtnAgencias').classList.toggle('activo', tab === 'agencias');
@@ -899,6 +940,7 @@ async function consultarDashboard(fecha) {
     if (!fecha) return;
     const nota = document.getElementById('dashCumplimientoNota');
     nota.textContent = 'Consultando...';
+    cerrarTarjetasDash();
 
     const [{ data: programadosData, error: errProg }, { data: opsData, error: errOps }] = await Promise.all([
         sb.from('contenedores_programados').select('contenedor').eq('fecha', fecha),
@@ -910,28 +952,87 @@ async function consultarDashboard(fecha) {
         return;
     }
 
-    const programados = (programadosData || []).length;
+    const programadosLista = (programadosData || []).map(p => p.contenedor);
     const opsPorContenedor = new Map((opsData || []).map(o => [o.contenedor, o]));
-    let ejecutados = 0, enProceso = 0;
-    for (const op of opsPorContenedor.values()) {
-        if (op.hora_inicio && op.hora_fin) ejecutados++;
-        else if (op.hora_inicio) enProceso++;
+    const ejecutadosLista = [], enProcesoLista = [], sinIniciarLista = [];
+    for (const contenedor of programadosLista) {
+        const op = opsPorContenedor.get(contenedor);
+        if (op && op.hora_inicio && op.hora_fin) ejecutadosLista.push(contenedor);
+        else if (op && op.hora_inicio) enProcesoLista.push(contenedor);
+        else sinIniciarLista.push(contenedor);
     }
-    const sinIniciar = Math.max(0, programados - ejecutados - enProceso);
-    const cumplimiento = programados > 0 ? Math.round((ejecutados / programados) * 100) : 0;
+    const cumplimiento = programadosLista.length > 0 ? Math.round((ejecutadosLista.length / programadosLista.length) * 100) : 0;
 
-    document.getElementById('dashProgramados').textContent = programados;
-    document.getElementById('dashEjecutados').textContent = ejecutados;
-    document.getElementById('dashEnProceso').textContent = enProceso;
-    document.getElementById('dashSinIniciar').textContent = sinIniciar;
+    document.getElementById('dashProgramados').textContent = programadosLista.length;
+    document.getElementById('dashEjecutados').textContent = ejecutadosLista.length;
+    document.getElementById('dashEnProceso').textContent = enProcesoLista.length;
+    document.getElementById('dashSinIniciar').textContent = sinIniciarLista.length;
     document.getElementById('dashBarraCumplimiento').style.width = cumplimiento + '%';
     document.getElementById('dashCumplimientoPct').textContent = cumplimiento + '%';
 
+    datosDashPorTarjeta = {
+        programados: programadosLista,
+        proceso: enProcesoLista,
+        ejecutados: ejecutadosLista,
+        'sin-iniciar': sinIniciarLista
+    };
+    // Si alguna tarjeta estaba desplegada de una consulta anterior, se refresca su contenido
+    // en vez de dejarla con datos viejos.
+    if (tarjetaDashAbierta) pintarCuerpoDashTarjeta(tarjetaDashAbierta);
+
     const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-    nota.textContent = programados === 0
+    nota.textContent = programadosLista.length === 0
         ? `No hay contenedores programados registrados para el ${fechaLegible}.`
-        : `${ejecutados} de ${programados} contenedores finalizados — ${fechaLegible}.`;
+        : `${ejecutadosLista.length} de ${programadosLista.length} contenedores finalizados — ${fechaLegible}.`;
 }
+
+// ============ ACORDEÓN VERTICAL DE LAS TARJETAS DEL DASHBOARD ============
+// Cada tarjeta (Programados / En Proceso / Ejecutados / Sin Iniciar) se despliega hacia
+// abajo mostrando la lista de contenedores que la componen. Solo una puede estar abierta
+// a la vez, y se repliega sola al: tocar la pantalla en otro lugar, abrir otra tarjeta,
+// consultar otra fecha, cambiar de pestaña principal, o abrir un contenedor/agencia.
+let datosDashPorTarjeta = { programados: [], proceso: [], ejecutados: [], 'sin-iniciar': [] };
+let tarjetaDashAbierta = null;
+
+function pintarCuerpoDashTarjeta(clave) {
+    const cuerpo = document.getElementById('cuerpoDash-' + clave);
+    if (!cuerpo) return;
+    const lista = datosDashPorTarjeta[clave] || [];
+    cuerpo.innerHTML = lista.length === 0
+        ? `<div class="dash-item-vacio">Sin contenedores en esta categoría.</div>`
+        : lista.slice().sort((a, b) => a.localeCompare(b)).map(contenedor => `
+            <div class="dash-item-contenedor" data-dash-abrir-contenedor="${contenedor}">
+                <span>${contenedor}</span><span class="flecha-item">→</span>
+            </div>`).join('');
+    cuerpo.querySelectorAll('[data-dash-abrir-contenedor]').forEach(item => {
+        item.onclick = () => mostrarContenedor(item.getAttribute('data-dash-abrir-contenedor'));
+    });
+}
+
+function alternarTarjetaDash(clave) {
+    const yaAbierta = tarjetaDashAbierta === clave;
+    cerrarTarjetasDash();
+    if (!yaAbierta) {
+        document.getElementById('cuerpoDash-' + clave).classList.add('abierto');
+        document.getElementById('flechaDash-' + clave).classList.add('abierta');
+        pintarCuerpoDashTarjeta(clave);
+        tarjetaDashAbierta = clave;
+    }
+}
+
+function cerrarTarjetasDash() {
+    document.querySelectorAll('.dash-tarjeta-body.abierto').forEach(b => b.classList.remove('abierto'));
+    document.querySelectorAll('.dash-tarjeta-header .flecha-plegable.abierta').forEach(f => f.classList.remove('abierta'));
+    tarjetaDashAbierta = null;
+}
+
+document.querySelectorAll('[data-dash-toggle]').forEach(btn => {
+    btn.onclick = () => alternarTarjetaDash(btn.getAttribute('data-dash-toggle'));
+});
+// Tocar la pantalla fuera de cualquier tarjeta del dashboard la repliega.
+document.addEventListener('click', (e) => {
+    if (tarjetaDashAbierta && !e.target.closest('.dash-tarjeta')) cerrarTarjetasDash();
+});
 
 // Registra en el histórico (contenedores_programados) los contenedores del Excel
 // actualmente cargado, con la fecha de programación que traiga ese Excel — así queda un
@@ -1160,11 +1261,13 @@ async function cargarOperacion(contenedor) {
     const btnInicio = document.getElementById('btnInicioOperacion');
     const btnFin = document.getElementById('btnFinOperacion');
 
-    // Estado por defecto: campos libres, sin nada guardado todavía.
+    // Estado por defecto: campos libres, sin nada guardado todavía. El botón de
+    // Finalización empieza deshabilitado — solo se habilita cuando hay algo escrito
+    // en el campo de Hora de Finalización (ver actualizarBotonFin).
     inicioInput.value = ''; inicioInput.disabled = false; inicioMeta.textContent = '';
     finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
-    btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
+    btnFin.disabled = true; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
 
     const hoy = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('operaciones_contenedor')
@@ -1337,9 +1440,19 @@ async function marcarOperacion(tipo) {
 }
 
 document.getElementById('horaInicioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
-document.getElementById('horaFinInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
+document.getElementById('horaFinInput').addEventListener('input', (e) => { formatearHoraEnVivo(e.target); actualizarBotonFin(); });
 document.getElementById('btnInicioOperacion').onclick = () => marcarOperacion('inicio');
 document.getElementById('btnFinOperacion').onclick = () => marcarOperacion('fin');
+
+// El botón "FINALIZACIÓN OPERACIÓN" queda deshabilitado mientras el campo de Hora de
+// Finalización esté vacío — no tiene sentido dejarlo tocable si todavía no hay nada escrito.
+// Si la operación ya está finalizada (input deshabilitado y con texto guardado), no se toca.
+function actualizarBotonFin() {
+    const finInput = document.getElementById('horaFinInput');
+    const btnFin = document.getElementById('btnFinOperacion');
+    if (finInput.disabled) return; // ya finalizada, el botón ya está en su estado final
+    btnFin.disabled = !finInput.value.trim();
+}
 
 // ============ FUNCIONARIOS DE AGENCIAS (llegadas por contenedor) ============
 async function cargarFuncionarios(contenedor) {
@@ -1503,6 +1616,7 @@ function ocultarTodasLasVistas() {
     document.getElementById('vistaContenedor').style.display = 'none';
     document.getElementById('predictivo').classList.add('hidden');
     document.getElementById('pestañasPrincipales').classList.add('hidden');
+    cerrarTarjetasDash();
 }
 
 function volverABusqueda() {
