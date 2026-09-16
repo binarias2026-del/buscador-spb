@@ -30,7 +30,13 @@
     /* ---------- LOGIN ---------- */
     #loginScreen {
         min-height: 100vh; display: flex; align-items: center; justify-content: center;
-        padding: 24px; background: linear-gradient(160deg, var(--primary-blue) 0%, #001a33 100%);
+        padding: 24px;
+        background:
+            linear-gradient(160deg, rgba(0,51,102,0.78) 0%, rgba(0,26,51,0.88) 100%),
+            url('login_background_spb.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
     }
     .login-card {
         background: var(--white); border-radius: 20px; padding: 36px 28px; width: 100%; max-width: 360px;
@@ -485,6 +491,8 @@ async function cerrarSesion() {
     indiceContenedores.clear();
     operacionesPorContenedor.clear();
     funcionariosPorContenedor.clear();
+    estadoBLsAbiertos.clear();
+    estadoAcordeones = { operacion: null, finalizados: null, agencia: null, agenciaAbierta: null };
 }
 
 async function mostrarApp() {
@@ -672,6 +680,13 @@ function renderizarPestañasPrincipales() {
 // funcionario) se reabre solo, sin que la persona tenga que tocarlo de nuevo.
 let estadoAcordeones = { operacion: null, finalizados: null, agencia: null, agenciaAbierta: null };
 
+// Guarda, de forma independiente del acordeón del contenedor, qué paneles de "Ver BLs
+// completos" quedaron abiertos (identificados por prefijo-contenedor). Este estado es
+// la ÚNICA fuente de verdad sobre si ese panel se ve o no: solo cambia cuando la persona
+// toca el botón "Ver/Ocultar BLs completos" — nunca como efecto secundario de agregar un
+// funcionario, marcar inicio/fin, o cualquier otro refresco de las listas.
+let estadoBLsAbiertos = new Set();
+
 // Panel de Inicio/Finalización embebido directamente en el acordeón: si el contenedor no
 // tiene inicio registrado, muestra el campo de inicio activo y el de finalización
 // bloqueado; en cuanto el inicio queda registrado, la finalización se activa sola.
@@ -764,14 +779,16 @@ function renderizarFuncionariosInlineHTML(prefijo, contenedor) {
 }
 
 // Arma el cuerpo completo del acordeón de un contenedor: registro de inicio/fin,
-// funcionarios, y los BLs ocultos por defecto (solo se ven al tocar "Ver BLs completos").
+// funcionarios, y los BLs — cuya visibilidad se lee siempre de estadoBLsAbiertos, para
+// que agregar un funcionario, marcar inicio/fin, etc. jamás abra o cierre ese panel solo.
 function renderizarCuerpoAcordeonHTML(prefijo, contenedor, info, op) {
     const idBase = `${prefijo}-${contenedor}`;
+    const blsAbierto = estadoBLsAbiertos.has(idBase);
     return `
         ${renderizarPanelOperacionHTML(prefijo, contenedor, op)}
         ${renderizarFuncionariosInlineHTML(prefijo, contenedor)}
-        <button class="btn-ver-bls" data-toggle-bls="${idBase}">👁️ Ver BLs completos (${info.registros.length})</button>
-        <div class="bls-completos hidden" id="bls-${idBase}">
+        <button class="btn-ver-bls" data-toggle-bls="${idBase}">${blsAbierto ? '🙈 Ocultar BLs completos' : '👁️ Ver BLs completos'} (${info.registros.length})</button>
+        <div class="bls-completos ${blsAbierto ? '' : 'hidden'}" id="bls-${idBase}">
             ${renderizarBLsHTML(info.registros)}
         </div>`;
 }
@@ -813,15 +830,21 @@ function activarAcordeonContenedores(lista, atributoToggle, prefijoId, trackerKe
         }
     }
 
+    // "Ver/Ocultar BLs completos": el único lugar del código donde se lee o se escribe
+    // estadoBLsAbiertos es este click — así el panel nunca cambia de estado por sí solo.
     lista.querySelectorAll('[data-toggle-bls]').forEach(btn => {
         btn.onclick = () => {
             const idBase = btn.getAttribute('data-toggle-bls');
             const cajaBLs = document.getElementById('bls-' + idBase);
             const estabaOculto = cajaBLs.classList.contains('hidden');
             cajaBLs.classList.toggle('hidden');
-            btn.textContent = estabaOculto
-                ? btn.textContent.replace('👁️ Ver', '🙈 Ocultar')
-                : btn.textContent.replace('🙈 Ocultar', '👁️ Ver');
+            if (estabaOculto) {
+                estadoBLsAbiertos.add(idBase);
+                btn.textContent = btn.textContent.replace('👁️ Ver', '🙈 Ocultar');
+            } else {
+                estadoBLsAbiertos.delete(idBase);
+                btn.textContent = btn.textContent.replace('🙈 Ocultar', '👁️ Ver');
+            }
         };
     });
 
