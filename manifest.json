@@ -1,6 +1,6 @@
 {
-  "name": "SPB · Buscador de Contenedores",
-  "short_name": "SPB Buscador",
+  "name": "SPB · Seguimiento Operativo",
+  "short_name": "SPB Seguimiento",
   "description": "Busca contenedores y agencias cargadas en el sistema de Desconsolidación de Carga de SPB.",
   "start_url": "./index.html",
   "scope": "./",
