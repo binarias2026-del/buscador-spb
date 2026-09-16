@@ -155,6 +155,11 @@
     }
     .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
     .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+    .agencia-semaforo-resumen { display: flex; gap: 6px; margin-top: 6px; }
+    .pill-semaforo { font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
+    .pill-rojo { background: #ffebee; color: #c62828; }
+    .pill-amarillo { background: #fff8e1; color: #a17400; }
+    .pill-verde { background: #e8f5e9; color: #2e7d32; }
     .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
@@ -1087,6 +1092,16 @@ function renderizarPorAgencia() {
     const agenciasOrdenadas = Array.from(porAgencia.entries()).sort((a, b) => a[1].nombre.localeCompare(b[1].nombre));
 
     cont.innerHTML = agenciasOrdenadas.map(([codigo, datos]) => {
+        // Resumen por semáforo (rojo/amarillo/verde) — se calcula siempre, aunque la
+        // agencia esté cerrada, para poder mostrarlo en el encabezado sin desplegar nada.
+        let rojos = 0, amarillos = 0, verdes = 0;
+        for (const contenedor of datos.contenedores) {
+            const estado = estadoOperacion(contenedor);
+            if (estado === 'finalizado') verdes++;
+            else if (estado === 'iniciado') amarillos++;
+            else rojos++;
+        }
+
         const contenedoresHtml = datos.contenedores.sort().map(contenedor => {
             const info = indiceContenedores.get(contenedor);
             const sem = semaforoContenedor(contenedor);
@@ -1112,6 +1127,11 @@ function renderizarPorAgencia() {
                 <div>
                     <div class="nombre-agencia">🏢 ${datos.nombre}</div>
                     <div class="conteo-agencia">${datos.contenedores.length} contenedor(es)</div>
+                    <div class="agencia-semaforo-resumen">
+                        <span class="pill-semaforo pill-rojo">🔴 ${rojos}</span>
+                        <span class="pill-semaforo pill-amarillo">🟡 ${amarillos}</span>
+                        <span class="pill-semaforo pill-verde">🟢 ${verdes}</span>
+                    </div>
                 </div>
                 <span class="flecha-plegable">▾</span>
             </button>
