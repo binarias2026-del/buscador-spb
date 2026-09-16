@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0051)https://seguimiento2026-spb.github.io/buscador-spb/ -->
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="es">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SPB · Seguimiento Operativo</title>
-<link rel="manifest" href="https://seguimiento2026-spb.github.io/buscador-spb/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#003366">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
@@ -159,11 +159,7 @@
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
 
-    .contenedor-acordeon {
-        border-radius: 10px; margin-bottom: 6px; overflow: hidden;
-        border-left: 5px solid transparent;
-        transition: border-left-color 0.25s ease;
-    }
+    .contenedor-acordeon { border-radius: 10px; margin-bottom: 6px; overflow: hidden; border-left: 5px solid transparent; }
     .contenedor-acordeon.semaforo-rojo { background: #ffebee; border-left-color: #c62828; }
     .contenedor-acordeon.semaforo-amarillo { background: #fff8e1; border-left-color: #f9a825; }
     .contenedor-acordeon.semaforo-verde { background: #e8f5e9; border-left-color: #2e7d32; }
@@ -175,12 +171,6 @@
     .semaforo-rojo .punto-semaforo { background: #c62828; }
     .semaforo-amarillo .punto-semaforo { background: #f9a825; }
     .semaforo-verde .punto-semaforo { background: #2e7d32; }
-    /* Al desplegar un contenedor, la barrita lateral y el punto pasan al azul
-       corporativo; al contraerlo vuelven solos al color de su semáforo.
-       OJO: este bloque va DESPUÉS de las reglas .semaforo-*, porque tienen la
-       misma especificidad y gana el que esté más abajo. */
-    .contenedor-acordeon.expandido { border-left-color: var(--accent-blue); }
-    .contenedor-acordeon.expandido .punto-semaforo { background: var(--accent-blue); }
     .contenedor-acordeon-header .texto { flex: 1; min-width: 0; }
     .contenedor-acordeon-header .nombre-cont { font-weight: 700; font-size: 0.84rem; color: var(--text-dark); }
     .contenedor-acordeon-header .estado-cont { font-size: 0.68rem; color: var(--text-muted); }
@@ -221,6 +211,38 @@
     }
     .bls-nested { display: none; margin-top: 4px; }
     .bls-nested.abierto { display: block; }
+
+    /* ---------- DASHBOARD ---------- */
+    .dash-selector-fecha { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 16px; background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 14px; }
+    .dash-campo-fecha { flex: 1; }
+    .dash-campo-fecha label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+    .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
+    .dash-selector-fecha .btn-mini { height: 44px; }
+    .dash-tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .dash-tarjeta { border-radius: 14px; padding: 16px 10px; text-align: center; }
+    .dash-tarjeta .dash-valor { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .dash-tarjeta .dash-etiqueta { font-size: 0.72rem; font-weight: 700; }
+    .dash-programados { background: #E6F0FA; }
+    .dash-programados .dash-valor { color: var(--primary-blue); }
+    .dash-programados .dash-etiqueta { color: var(--primary-blue); }
+    .dash-proceso { background: #fff8e1; }
+    .dash-proceso .dash-valor { color: #f9a825; }
+    .dash-proceso .dash-etiqueta { color: #a17400; }
+    .dash-ejecutados { background: #e8f5e9; }
+    .dash-ejecutados .dash-valor { color: #2e7d32; }
+    .dash-ejecutados .dash-etiqueta { color: #2e7d32; }
+    .dash-sin-iniciar { background: #ffebee; }
+    .dash-sin-iniciar .dash-valor { color: #c62828; }
+    .dash-sin-iniciar .dash-etiqueta { color: #c62828; }
+    .dash-cumplimiento { background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px; }
+    .dash-cumplimiento-titulo { font-size: 0.82rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
+    .dash-barra-track { background: #eef2f6; border-radius: 30px; height: 26px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
+    .dash-barra-fill {
+        height: 100%; background: linear-gradient(90deg, #0A558C, #2e7d32); display: flex; align-items: center; justify-content: flex-end;
+        padding-right: 10px; box-sizing: border-box; transition: width 0.4s ease-out; min-width: 40px; border-radius: 30px;
+    }
+    .dash-barra-fill span { color: white; font-size: 0.76rem; font-weight: 800; }
+    .dash-cumplimiento-nota { font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; text-align: center; }
 
     #estadoVacio { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     #estadoVacio .emoji-grande { font-size: 3rem; margin-bottom: 12px; }
@@ -318,7 +340,7 @@
 <body>
 
 <!-- ============ LOGIN ============ -->
-<div id="loginScreen" class="hidden">
+<div id="loginScreen">
     <div class="login-card">
         <img src="icon-192.png" alt="SPB">
         <h1>Seguimiento Operativo</h1>
@@ -331,3315 +353,91 @@
 </div>
 
 <!-- ============ APP ============ -->
-<div id="appScreen" class="">
+<div id="appScreen" class="hidden">
     <header>
         <img src="icon-192.png" alt="SPB">
         <div class="titulo">
             <h1>Seguimiento Operativo</h1>
-            <p id="headerSub">Sesión: EDWARD VALVERDE</p>
+            <p id="headerSub">SPB · Sociedad Portuaria Buenaventura</p>
         </div>
         <button id="btnSync" title="Sincronizar">🔄</button>
         <button id="btnLogout" title="Salir">🚪</button>
     </header>
-    <div id="syncBar">47 contenedores · Sincronizado a las 12:20 p. m.</div>
+    <div id="syncBar">Sin sincronizar todavía</div>
 
     <main>
         <div class="search-wrap">
             <span class="icono-lupa">🔍</span>
             <input type="text" id="searchInput" placeholder="Busca por contenedor o agencia..." autocomplete="off">
-            <button class="btn-limpiar hidden" id="btnLimpiarBusqueda">×</button>
+            <button class="btn-limpiar hidden" id="btnLimpiarBusqueda">&times;</button>
             <div id="predictivo" class="hidden"></div>
         </div>
 
-        <div id="pestañasPrincipales" class="">
+        <div id="pestañasPrincipales" class="hidden">
             <div class="tabs-bar">
                 <button class="tab-btn activo" id="tabBtnOperacion" data-tab="operacion">
                     <span class="tab-icono">🟢</span>
                     <span class="tab-etiqueta">Operaciones</span>
-                    <span class="tab-contador" id="contadorOperacion">5</span>
+                    <span class="tab-contador" id="contadorOperacion">0</span>
                 </button>
                 <button class="tab-btn" id="tabBtnFinalizados" data-tab="finalizados">
                     <span class="tab-icono">✅</span>
                     <span class="tab-etiqueta">Finalizados</span>
-                    <span class="tab-contador" id="contadorFinalizados">3</span>
+                    <span class="tab-contador" id="contadorFinalizados">0</span>
                 </button>
                 <button class="tab-btn" id="tabBtnAgencias" data-tab="agencias">
                     <span class="tab-icono">🏢</span>
                     <span class="tab-etiqueta">Agencias</span>
                 </button>
-            </div>
-            <div id="listaEnOperacion" class="lista-tab"><div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="HLBU8168248">
-                <button class="contenedor-acordeon-header" data-toggle-op="HLBU8168248">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8168248</div>
-                        <div class="estado-cont">AGENCIA DE CARGA AVIATUR S.A. · Iniciado por EDWARDV</div>
-                    </div>
-                    <div class="hora-marca">14:25</div>
-                    <span class="flecha-plegable abierta">▾</span>
+                <button class="tab-btn hidden" id="tabBtnDashboard" data-tab="dashboard">
+                    <span class="tab-icono">📊</span>
+                    <span class="tab-etiqueta">Dashboard</span>
                 </button>
-                <div class="contenedor-acordeon-body abierto" id="cuerpoOp-HLBU8168248">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">14:25</div>
+            </div>
+            <div id="listaEnOperacion" class="lista-tab"></div>
+            <div id="listaFinalizados" class="lista-tab hidden"></div>
+            <div id="listaPorAgencia" class="lista-tab hidden"></div>
+            <div id="panelDashboard" class="lista-tab hidden">
+                <div class="dash-selector-fecha">
+                    <div class="dash-campo-fecha">
+                        <label>📅 Consultar fecha</label>
+                        <input type="date" id="dashFechaInput">
                     </div>
-                    <div class="mini-seccion">
-                        <label>🔴 Hora de Finalización</label>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFinInputLista-HLBU8168248" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-HLBU8168248" data-finalizar-lista="HLBU8168248">🔴 FINALIZAR OPERACIÓN</button>
+                    <button id="btnConsultarDash" class="btn-mini btn-mini-azul">🔍 Consultar</button>
+                </div>
+                <div id="dashResultado">
+                    <div class="dash-tarjetas">
+                        <div class="dash-tarjeta dash-programados">
+                            <div class="dash-valor" id="dashProgramados">0</div>
+                            <div class="dash-etiqueta">📋 Programados</div>
+                        </div>
+                        <div class="dash-tarjeta dash-proceso">
+                            <div class="dash-valor" id="dashEnProceso">0</div>
+                            <div class="dash-etiqueta">🟡 En Proceso</div>
+                        </div>
+                        <div class="dash-tarjeta dash-ejecutados">
+                            <div class="dash-valor" id="dashEjecutados">0</div>
+                            <div class="dash-etiqueta">✅ Ejecutados</div>
+                        </div>
+                        <div class="dash-tarjeta dash-sin-iniciar">
+                            <div class="dash-valor" id="dashSinIniciar">0</div>
+                            <div class="dash-etiqueta">🔴 Sin Iniciar</div>
                         </div>
                     </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-HLBU8168248">1</span>)</label>
-                        <div id="listaFuncLista-HLBU8168248">
-            <div class="lista-funcionario-item">
-                <span class="num-funcionario">1</span>
-                <div class="texto"><div class="nombre-func">Funcionario 1</div><div class="meta-func">Agregado por EDWARDV</div></div>
-                <span class="hora-func">10:00</span>
-                <button class="btn-quitar-func" data-id="ed279ee2-1d6a-4cd5-b553-f03760158287" title="Quitar">🗑️</button>
-            </div></div>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFuncInputLista-HLBU8168248" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-azul" id="btnAgregarFuncLista-HLBU8168248" data-agregar-func-lista="HLBU8168248">➕ Agregar</button>
+                    <div class="dash-cumplimiento">
+                        <div class="dash-cumplimiento-titulo">Cumplimiento de Programación</div>
+                        <div class="dash-barra-track">
+                            <div class="dash-barra-fill" id="dashBarraCumplimiento" style="width:0%;">
+                                <span id="dashCumplimientoPct">0%</span>
+                            </div>
                         </div>
+                        <div class="dash-cumplimiento-nota" id="dashCumplimientoNota">Consulta una fecha para ver los datos.</div>
                     </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-op-HLBU8168248" data-toggle-bls="op-HLBU8168248">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-op-HLBU8168248">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260329117</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div><div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="MSNU8703817">
-                <button class="contenedor-acordeon-header" data-toggle-op="MSNU8703817">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">MSNU8703817</div>
-                        <div class="estado-cont">NEGOCIOS GENERALES PROVI · Iniciado por EDWARDV</div>
-                    </div>
-                    <div class="hora-marca">14:16</div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoOp-MSNU8703817">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">14:16</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>🔴 Hora de Finalización</label>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFinInputLista-MSNU8703817" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-MSNU8703817" data-finalizar-lista="MSNU8703817">🔴 FINALIZAR OPERACIÓN</button>
-                        </div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-MSNU8703817">0</span>)</label>
-                        <div id="listaFuncLista-MSNU8703817"></div>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFuncInputLista-MSNU8703817" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-azul" id="btnAgregarFuncLista-MSNU8703817" data-agregar-func-lista="MSNU8703817">➕ Agregar</button>
-                        </div>
-                    </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-op-MSNU8703817" data-toggle-bls="op-MSNU8703817">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-op-MSNU8703817">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300045</div>
-            <div class="bl-datos">
-                <span>📦 56</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 456 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300072</div>
-            <div class="bl-datos">
-                <span>📦 305</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 3805 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300094</div>
-            <div class="bl-datos">
-                <span>📦 72</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1116 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300395</div>
-            <div class="bl-datos">
-                <span>📦 52</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 496 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400279</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 2831 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400315</div>
-            <div class="bl-datos">
-                <span>📦 125</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 2700 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400407</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1030 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400621</div>
-            <div class="bl-datos">
-                <span>📦 174</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 4560 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div><div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="CAAU4032746">
-                <button class="contenedor-acordeon-header" data-toggle-op="CAAU4032746">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">CAAU4032746</div>
-                        <div class="estado-cont">COLOMBIANA KIMBERLY COLPAPEL S · Iniciado por SINDIR</div>
-                    </div>
-                    <div class="hora-marca">10:20</div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoOp-CAAU4032746">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">10:20</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>🔴 Hora de Finalización</label>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFinInputLista-CAAU4032746" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-CAAU4032746" data-finalizar-lista="CAAU4032746">🔴 FINALIZAR OPERACIÓN</button>
-                        </div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-CAAU4032746">0</span>)</label>
-                        <div id="listaFuncLista-CAAU4032746"></div>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFuncInputLista-CAAU4032746" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-azul" id="btnAgregarFuncLista-CAAU4032746" data-agregar-func-lista="CAAU4032746">➕ Agregar</button>
-                        </div>
-                    </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-op-CAAU4032746" data-toggle-bls="op-CAAU4032746">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-op-CAAU4032746">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073867377</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5406 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073922782</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2624 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1074052825</div>
-            <div class="bl-datos">
-                <span>📦 293</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5208 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1074140731</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2783 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div><div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="HLBU9385823">
-                <button class="contenedor-acordeon-header" data-toggle-op="HLBU9385823">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU9385823</div>
-                        <div class="estado-cont">AGENCIA DE ADUANAS SIACOMEX SAS NIVEL 1 · Iniciado por EDWARDV</div>
-                    </div>
-                    <div class="hora-marca">10:00</div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoOp-HLBU9385823">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">10:00</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>🔴 Hora de Finalización</label>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFinInputLista-HLBU9385823" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-HLBU9385823" data-finalizar-lista="HLBU9385823">🔴 FINALIZAR OPERACIÓN</button>
-                        </div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-HLBU9385823">0</span>)</label>
-                        <div id="listaFuncLista-HLBU9385823"></div>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFuncInputLista-HLBU9385823" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-azul" id="btnAgregarFuncLista-HLBU9385823" data-agregar-func-lista="HLBU9385823">➕ Agregar</button>
-                        </div>
-                    </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-op-HLBU9385823" data-toggle-bls="op-HLBU9385823">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-op-HLBU9385823">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26016799</div>
-            <div class="bl-datos">
-                <span>📦 235</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4457 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017479</div>
-            <div class="bl-datos">
-                <span>📦 140</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1688 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017557</div>
-            <div class="bl-datos">
-                <span>📦 58</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 948 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017603</div>
-            <div class="bl-datos">
-                <span>📦 213</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4526 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017990</div>
-            <div class="bl-datos">
-                <span>📦 74</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1494 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBSKY202604037</div>
-            <div class="bl-datos">
-                <span>📦 231</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5064 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div><div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="MEDU9154463">
-                <button class="contenedor-acordeon-header" data-toggle-op="MEDU9154463">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">MEDU9154463</div>
-                        <div class="estado-cont">AGENCIA DE ADUANAS JUNIOR ADUANAS S.A NIVEL 2 · Iniciado por EDWARDV</div>
-                    </div>
-                    <div class="hora-marca">09:00</div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoOp-MEDU9154463">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">09:00</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>🔴 Hora de Finalización</label>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFinInputLista-MEDU9154463" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-MEDU9154463" data-finalizar-lista="MEDU9154463">🔴 FINALIZAR OPERACIÓN</button>
-                        </div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-MEDU9154463">0</span>)</label>
-                        <div id="listaFuncLista-MEDU9154463"></div>
-                        <div class="mini-fila">
-                            <input type="text" id="horaFuncInputLista-MEDU9154463" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-azul" id="btnAgregarFuncLista-MEDU9154463" data-agregar-func-lista="MEDU9154463">➕ Agregar</button>
-                        </div>
-                    </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-op-MEDU9154463" data-toggle-bls="op-MEDU9154463">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-op-MEDU9154463">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260162516A</div>
-            <div class="bl-datos">
-                <span>📦 38</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 572 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260162776A</div>
-            <div class="bl-datos">
-                <span>📦 66</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1294 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260168864A</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1625 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260175609A</div>
-            <div class="bl-datos">
-                <span>📦 13</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 6654 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260182694A</div>
-            <div class="bl-datos">
-                <span>📦 16</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1187 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260189876A</div>
-            <div class="bl-datos">
-                <span>📦 100</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 360 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260191101A</div>
-            <div class="bl-datos">
-                <span>📦 7</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 11500 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260192865A</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 30 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div></div>
-            <div id="listaFinalizados" class="lista-tab hidden"><div class="contenedor-acordeon semaforo-verde" data-contenedor-op="MSBU3017761">
-                <button class="contenedor-acordeon-header" data-toggle-fin="MSBU3017761">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">MSBU3017761</div>
-                        <div class="estado-cont">INTERMODAL S.A.S · Finalizado por EDWARDV</div>
-                    </div>
-                    <div class="hora-marca">15:20</div>
-                    <span class="flecha-plegable abierta">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body abierto" id="cuerpoFin-MSBU3017761">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">12:45</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>✅ Hora de Finalización</label>
-                        <div class="hora-fija">15:20</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-MSBU3017761">1</span>)</label>
-                        <div id="listaFuncLista-MSBU3017761">
-            <div class="lista-funcionario-item">
-                <span class="num-funcionario">1</span>
-                <div class="texto"><div class="nombre-func">Funcionario 1</div><div class="meta-func">Agregado por EDWARDV</div></div>
-                <span class="hora-func">14:00</span>
-                
-            </div></div>
-                    </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-fin-MSBU3017761" data-toggle-bls="fin-MSBU3017761">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-fin-MSBU3017761">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">MEDUXJ678887.</div>
-            <div class="bl-datos">
-                <span>📦 400</span>
-                <span>📋 ROLL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 4960 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div><div class="contenedor-acordeon semaforo-verde" data-contenedor-op="HLBU8242833">
-                <button class="contenedor-acordeon-header" data-toggle-fin="HLBU8242833">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8242833</div>
-                        <div class="estado-cont">AGENCIA DE ADUANAS BLU LOGISTICS S.A. NIVEL 1 · Finalizado por TAMARAG</div>
-                    </div>
-                    <div class="hora-marca">10:00</div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoFin-HLBU8242833">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">08:00</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>✅ Hora de Finalización</label>
-                        <div class="hora-fija">10:00</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-HLBU8242833">0</span>)</label>
-                        <div id="listaFuncLista-HLBU8242833"></div>
-                    </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-fin-HLBU8242833" data-toggle-bls="fin-HLBU8242833">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-fin-HLBU8242833">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260317583</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div><div class="contenedor-acordeon semaforo-verde" data-contenedor-op="DAYU6717701">
-                <button class="contenedor-acordeon-header" data-toggle-fin="DAYU6717701">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">DAYU6717701</div>
-                        <div class="estado-cont">ALGRANEL S A · Finalizado por TAMARAG</div>
-                    </div>
-                    <div class="hora-marca">08:30</div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoFin-DAYU6717701">
-                    <div class="mini-seccion">
-                        <label>⏱️ Hora de Inicio</label>
-                        <div class="hora-fija">07:00</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>✅ Hora de Finalización</label>
-                        <div class="hora-fija">08:30</div>
-                    </div>
-                    <div class="mini-seccion">
-                        <label>👥 Funcionarios (<span id="contadorFuncLista-DAYU6717701">0</span>)</label>
-                        <div id="listaFuncLista-DAYU6717701"></div>
-                    </div>
-                    <button class="btn-ver-bls" id="btnVerBLs-fin-DAYU6717701" data-toggle-bls="fin-DAYU6717701">📋 Ver BLs completos ▾</button>
-                    <div class="bls-nested" id="cuerpoBLs-fin-DAYU6717701">
-        <div class="lista-bl-item">
-            <div class="bl-nombre">95217</div>
-            <div class="bl-datos">
-                <span>📦 28</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3400 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">95306</div>
-            <div class="bl-datos">
-                <span>📦 93</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1512 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00269442</div>
-            <div class="bl-datos">
-                <span>📦 22</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 11974 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00269849</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4279 kg</span>
-            </div>
-        </div></div>
-                </div>
-            </div></div>
-            <div id="listaPorAgencia" class="lista-tab hidden">
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12318">
-                <div>
-                    <div class="nombre-agencia">🏢 AGENCIA DE ADUANAS BLU LOGISTICS S.A. NIVEL 1</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12318">
-                
-            <div class="contenedor-acordeon semaforo-verde" data-contenedor-acordeon="HLBU8242833">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8242833">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8242833</div>
-                        <div class="estado-cont">Finalizado · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8242833">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260317583</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="1156">
-                <div>
-                    <div class="nombre-agencia">🏢 AGENCIA DE ADUANAS JUNIOR ADUANAS S.A NIVEL 2</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-1156">
-                
-            <div class="contenedor-acordeon semaforo-amarillo" data-contenedor-acordeon="MEDU9154463">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="MEDU9154463">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">MEDU9154463</div>
-                        <div class="estado-cont">En operación · 8 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-MEDU9154463">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260162516A</div>
-            <div class="bl-datos">
-                <span>📦 38</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 572 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260162776A</div>
-            <div class="bl-datos">
-                <span>📦 66</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1294 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260168864A</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1625 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260175609A</div>
-            <div class="bl-datos">
-                <span>📦 13</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 6654 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260182694A</div>
-            <div class="bl-datos">
-                <span>📦 16</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1187 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260189876A</div>
-            <div class="bl-datos">
-                <span>📦 100</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 360 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260191101A</div>
-            <div class="bl-datos">
-                <span>📦 7</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 11500 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260192865A</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 30 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12000">
-                <div>
-                    <div class="nombre-agencia">🏢 AGENCIA DE ADUANAS PANADUANAS</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12000">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="SEGU9067180">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="SEGU9067180">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">SEGU9067180</div>
-                        <div class="estado-cont">Sin iniciar · 5 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-SEGU9067180">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073821902</div>
-            <div class="bl-datos">
-                <span>📦 167</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3557 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073829498</div>
-            <div class="bl-datos">
-                <span>📦 230</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2375 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073858391</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 220 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1074141731</div>
-            <div class="bl-datos">
-                <span>📦 255</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 7212 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">ALJ_100046</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1717 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="10844">
-                <div>
-                    <div class="nombre-agencia">🏢 AGENCIA DE ADUANAS SIACOMEX SAS NIVEL 1</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-10844">
-                
-            <div class="contenedor-acordeon semaforo-amarillo" data-contenedor-acordeon="HLBU9385823">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU9385823">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU9385823</div>
-                        <div class="estado-cont">En operación · 6 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU9385823">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26016799</div>
-            <div class="bl-datos">
-                <span>📦 235</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4457 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017479</div>
-            <div class="bl-datos">
-                <span>📦 140</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1688 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017557</div>
-            <div class="bl-datos">
-                <span>📦 58</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 948 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017603</div>
-            <div class="bl-datos">
-                <span>📦 213</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4526 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017990</div>
-            <div class="bl-datos">
-                <span>📦 74</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1494 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBSKY202604037</div>
-            <div class="bl-datos">
-                <span>📦 231</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5064 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="MEDU9852280">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="MEDU9852280">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">MEDU9852280</div>
-                        <div class="estado-cont">Sin iniciar · 5 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-MEDU9852280">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">ADL2604176</div>
-            <div class="bl-datos">
-                <span>📦 22</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 4430 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260165387A</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 968 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260168409A</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 CAJ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 148 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">AMIGL260169500A</div>
-            <div class="bl-datos">
-                <span>📦 127</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1690 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CPSE26040573</div>
-            <div class="bl-datos">
-                <span>📦 17</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 2260 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12188">
-                <div>
-                    <div class="nombre-agencia">🏢 AGENCIA DE ADUANAS TECHCOMEX L</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12188">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8168989">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8168989">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8168989</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8168989">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260327250</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU9870583">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU9870583">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU9870583</div>
-                        <div class="estado-cont">Sin iniciar · 14 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU9870583">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CPLHKG26000093</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 120 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CTLKO2501372</div>
-            <div class="bl-datos">
-                <span>📦 75</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2281 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CWTMF260401327</div>
-            <div class="bl-datos">
-                <span>📦 25</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 906 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">FCLBVT26000900</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 417 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HKBVT26045097</div>
-            <div class="bl-datos">
-                <span>📦 6</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 76 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">JBRCLB-</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3300 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">MI-LCL 2606003</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 998 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">QSTY2604164</div>
-            <div class="bl-datos">
-                <span>📦 7</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5490 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SE2603068</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 997 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">XCLBVT26009761</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 460 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">XCLBVT26010184</div>
-            <div class="bl-datos">
-                <span>📦 50</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 400 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">XCLBVT26010753</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 278 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">ZSBVT26001537</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 CAJ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1684 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">ZSBVT26001618</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 323 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="11092">
-                <div>
-                    <div class="nombre-agencia">🏢 AGENCIA DE CARGA AVIATUR S.A.</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-11092">
-                
-            <div class="contenedor-acordeon semaforo-amarillo" data-contenedor-acordeon="HLBU8168248">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8168248">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8168248</div>
-                        <div class="estado-cont">En operación · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8168248">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260329117</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="10569">
-                <div>
-                    <div class="nombre-agencia">🏢 AGENCIA OCEANICA S.A.S. "OCEANIC"</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-10569">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU9637870">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU9637870">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU9637870</div>
-                        <div class="estado-cont">Sin iniciar · 8 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU9637870">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26019870</div>
-            <div class="bl-datos">
-                <span>📦 46</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 191 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26020542</div>
-            <div class="bl-datos">
-                <span>📦 7</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2750 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26020688</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4827 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26021136</div>
-            <div class="bl-datos">
-                <span>📦 65</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1768 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26021370</div>
-            <div class="bl-datos">
-                <span>📦 36</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 546 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26021627</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 CAJ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 7580 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26021748</div>
-            <div class="bl-datos">
-                <span>📦 20</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1989 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBBVT26022675</div>
-            <div class="bl-datos">
-                <span>📦 122</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 516 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="1132">
-                <div>
-                    <div class="nombre-agencia">🏢 ALGRANEL S A</div>
-                    <div class="conteo-agencia">3 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-1132">
-                
-            <div class="contenedor-acordeon semaforo-verde" data-contenedor-acordeon="DAYU6717701">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="DAYU6717701">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">DAYU6717701</div>
-                        <div class="estado-cont">Finalizado · 4 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-DAYU6717701">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">95217</div>
-            <div class="bl-datos">
-                <span>📦 28</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3400 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">95306</div>
-            <div class="bl-datos">
-                <span>📦 93</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1512 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00269442</div>
-            <div class="bl-datos">
-                <span>📦 22</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 11974 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00269849</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4279 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8285809">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8285809">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8285809</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8285809">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260317583</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8289023">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8289023">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8289023</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8289023">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260329117</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12017">
-                <div>
-                    <div class="nombre-agencia">🏢 AVIOMAR S.A.S EXPRESOS AEREOS Y MARITIMOS</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12017">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="CXRU1584429">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="CXRU1584429">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">CXRU1584429</div>
-                        <div class="estado-cont">Sin iniciar · 9 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-CXRU1584429">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260200355</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1186 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300683</div>
-            <div class="bl-datos">
-                <span>📦 36</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1133 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400007</div>
-            <div class="bl-datos">
-                <span>📦 352</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 7312 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400166</div>
-            <div class="bl-datos">
-                <span>📦 76</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 688 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400171</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 700 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400187</div>
-            <div class="bl-datos">
-                <span>📦 12</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2381 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400189</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5812 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400235</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 140 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400277</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1875 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="104">
-                <div>
-                    <div class="nombre-agencia">🏢 COLOMBIANA KIMBERLY COLPAPEL S</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-104">
-                
-            <div class="contenedor-acordeon semaforo-amarillo" data-contenedor-acordeon="CAAU4032746">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="CAAU4032746">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">CAAU4032746</div>
-                        <div class="estado-cont">En operación · 4 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-CAAU4032746">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073867377</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5406 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073922782</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2624 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1074052825</div>
-            <div class="bl-datos">
-                <span>📦 293</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5208 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1074140731</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2783 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12420">
-                <div>
-                    <div class="nombre-agencia">🏢 EUROCARGA OPERADOR PORTUARIO S.A.S</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12420">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="TGBU9853376">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="TGBU9853376">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">TGBU9853376</div>
-                        <div class="estado-cont">Sin iniciar · 10 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-TGBU9853376">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE251200663</div>
-            <div class="bl-datos">
-                <span>📦 83</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 901 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300059</div>
-            <div class="bl-datos">
-                <span>📦 498</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 6441 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300486</div>
-            <div class="bl-datos">
-                <span>📦 16</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 174 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300542</div>
-            <div class="bl-datos">
-                <span>📦 70</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 750 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300678</div>
-            <div class="bl-datos">
-                <span>📦 30</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 390 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400542</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 7458 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400550</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 720 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400615</div>
-            <div class="bl-datos">
-                <span>📦 12</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 283 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400674</div>
-            <div class="bl-datos">
-                <span>📦 80</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1059 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400717</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 2297 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="TLLU1117024">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="TLLU1117024">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">TLLU1117024</div>
-                        <div class="estado-cont">Sin iniciar · 9 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-TLLU1117024">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">FBBUN260082</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAL</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 386 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">FBBUN260083</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAL</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 538 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">FBBUN260084</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 4546 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GAMDBUN26030015</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 PAL</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 1170 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GBKKBUND2600005</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAL</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 1370 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GICDBUN260300197</div>
-            <div class="bl-datos">
-                <span>📦 76</span>
-                <span>📋 CAR</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 1030 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GLUHBUN260300050</div>
-            <div class="bl-datos">
-                <span>📦 91</span>
-                <span>📋 CAR</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 1602 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GSAPBUN260300083</div>
-            <div class="bl-datos">
-                <span>📦 10</span>
-                <span>📋 CAR</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 125 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NSQPT260478088</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 CAJ</span>
-                <span>🚢 ONE</span>
-                <span>⚖️ 264 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12003">
-                <div>
-                    <div class="nombre-agencia">🏢 EXPEDITORS DE COLOMBIA LTDA</div>
-                    <div class="conteo-agencia">4 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12003">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="CXRU1221589">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="CXRU1221589">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">CXRU1221589</div>
-                        <div class="estado-cont">Sin iniciar · 7 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-CXRU1221589">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAS00268320</div>
-            <div class="bl-datos">
-                <span>📦 30</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 267 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAS00268616</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 500 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAS00268841</div>
-            <div class="bl-datos">
-                <span>📦 56</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 795 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAS00268961</div>
-            <div class="bl-datos">
-                <span>📦 20</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 236 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAS00269216</div>
-            <div class="bl-datos">
-                <span>📦 52</span>
-                <span>📋 BUL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2055 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAS00269382</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1960 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAS00269737</div>
-            <div class="bl-datos">
-                <span>📦 15</span>
-                <span>📋 BUL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 436 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU1191170">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU1191170">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU1191170</div>
-                        <div class="estado-cont">Sin iniciar · 2 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU1191170">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAI78077</div>
-            <div class="bl-datos">
-                <span>📦 26</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 6092 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAI81899</div>
-            <div class="bl-datos">
-                <span>📦 25</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5030 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="UACU4768890">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="UACU4768890">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">UACU4768890</div>
-                        <div class="estado-cont">Sin iniciar · 5 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-UACU4768890">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26047038</div>
-            <div class="bl-datos">
-                <span>📦 58</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 856 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26048462</div>
-            <div class="bl-datos">
-                <span>📦 338</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2910 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26049118</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5880 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26049866</div>
-            <div class="bl-datos">
-                <span>📦 167</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1630 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">TMSELC4133781</div>
-            <div class="bl-datos">
-                <span>📦 66</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 583 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="UAEU9606436">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="UAEU9606436">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">UAEU9606436</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-UAEU9606436">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260329117</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12479">
-                <div>
-                    <div class="nombre-agencia">🏢 GEODIS COLOMBIA LTDA</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12479">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8279154">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8279154">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8279154</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8279154">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260329117</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU9031814">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU9031814">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU9031814</div>
-                        <div class="estado-cont">Sin iniciar · 5 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU9031814">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">MI-LCL 2606006</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 412 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26043117</div>
-            <div class="bl-datos">
-                <span>📦 22</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 620 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26046984</div>
-            <div class="bl-datos">
-                <span>📦 50</span>
-                <span>📋 CAJ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1440 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26047620</div>
-            <div class="bl-datos">
-                <span>📦 136</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1200 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZCLI/BVT-</div>
-            <div class="bl-datos">
-                <span>📦 181</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2060 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="10298">
-                <div>
-                    <div class="nombre-agencia">🏢 IGLESIA CRISTIANA DE LOS TESTI</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-10298">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8283806">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8283806">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8283806</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8283806">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260326733</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU9852893">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU9852893">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU9852893</div>
-                        <div class="estado-cont">Sin iniciar · 5 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU9852893">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26047553</div>
-            <div class="bl-datos">
-                <span>📦 10</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5090 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26049087</div>
-            <div class="bl-datos">
-                <span>📦 301</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3690 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26050146</div>
-            <div class="bl-datos">
-                <span>📦 210</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4400 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZXLE2600995</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 80 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZXS00269033</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1142 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="112">
-                <div>
-                    <div class="nombre-agencia">🏢 INTERMODAL S.A.S</div>
-                    <div class="conteo-agencia">6 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-112">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="BMOU4958848">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="BMOU4958848">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">BMOU4958848</div>
-                        <div class="estado-cont">Sin iniciar · 13 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-BMOU4958848">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260200308</div>
-            <div class="bl-datos">
-                <span>📦 120</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 989 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300048</div>
-            <div class="bl-datos">
-                <span>📦 71</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1099 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300071</div>
-            <div class="bl-datos">
-                <span>📦 25</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 270 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300407</div>
-            <div class="bl-datos">
-                <span>📦 56</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 641 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300518</div>
-            <div class="bl-datos">
-                <span>📦 40</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 540 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300591</div>
-            <div class="bl-datos">
-                <span>📦 110</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 748 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300613</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 336 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300729</div>
-            <div class="bl-datos">
-                <span>📦 32</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 794 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300777</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 836 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400003</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 475 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400137</div>
-            <div class="bl-datos">
-                <span>📦 78</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 826 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400188</div>
-            <div class="bl-datos">
-                <span>📦 6</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4613 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400209</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3204 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8267826">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8267826">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8267826</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8267826">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260326733</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8270537">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8270537">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8270537</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8270537">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260326733</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLXU8764033">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLXU8764033">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLXU8764033</div>
-                        <div class="estado-cont">Sin iniciar · 4 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLXU8764033">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">95207</div>
-            <div class="bl-datos">
-                <span>📦 34</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 705 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00267433</div>
-            <div class="bl-datos">
-                <span>📦 15</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 9685 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00270470</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 716 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00270529</div>
-            <div class="bl-datos">
-                <span>📦 254</span>
-                <span>📋 ROLL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 8216 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-verde" data-contenedor-acordeon="MSBU3017761">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="MSBU3017761">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">MSBU3017761</div>
-                        <div class="estado-cont">Finalizado · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-MSBU3017761">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">MEDUXJ678887.</div>
-            <div class="bl-datos">
-                <span>📦 400</span>
-                <span>📋 ROLL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 4960 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="TCLU1179959">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="TCLU1179959">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">TCLU1179959</div>
-                        <div class="estado-cont">Sin iniciar · 8 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-TCLU1179959">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">MI-LCL 2606005</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 484 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBGT26045502</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26044617</div>
-            <div class="bl-datos">
-                <span>📦 274</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4590 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26045641</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 974 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26047044</div>
-            <div class="bl-datos">
-                <span>📦 78</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 730 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26047476</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 89 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26047939</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 672 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SZBVT26049196</div>
-            <div class="bl-datos">
-                <span>📦 9</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="11635">
-                <div>
-                    <div class="nombre-agencia">🏢 J.B. LOGISTIC LTDA</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-11635">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU9674908">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU9674908">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU9674908</div>
-                        <div class="estado-cont">Sin iniciar · 5 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU9674908">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600135</div>
-            <div class="bl-datos">
-                <span>📦 7</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4770 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600146</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 482 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600161</div>
-            <div class="bl-datos">
-                <span>📦 6</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2320 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600163</div>
-            <div class="bl-datos">
-                <span>📦 207</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3850 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600166</div>
-            <div class="bl-datos">
-                <span>📦 147</span>
-                <span>📋 ROLL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 7160 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="UACU4795453">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="UACU4795453">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">UACU4795453</div>
-                        <div class="estado-cont">Sin iniciar · 4 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-UACU4795453">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HGHB44956</div>
-            <div class="bl-datos">
-                <span>📦 89</span>
-                <span>📋 ROLL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2023 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NGBE20258</div>
-            <div class="bl-datos">
-                <span>📦 18</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 10005 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NGBE21772</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1678 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">SHAI89344</div>
-            <div class="bl-datos">
-                <span>📦 72</span>
-                <span>📋 ROLL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1672 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="12378">
-                <div>
-                    <div class="nombre-agencia">🏢 LAMINACION DE COLOMBIA S.A.S.</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-12378">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8279961">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8279961">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8279961</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8279961">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260317583</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLXU8399115">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLXU8399115">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLXU8399115</div>
-                        <div class="estado-cont">Sin iniciar · 10 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLXU8399115">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073156198</div>
-            <div class="bl-datos">
-                <span>📦 501</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2066 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073157100</div>
-            <div class="bl-datos">
-                <span>📦 139</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 577 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073425649</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 7028 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073452705</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 108 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073480493</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 400 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073584694</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4011 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073639958</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 486 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073762541</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1755 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073787709</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 CAJ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1130 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1074023778</div>
-            <div class="bl-datos">
-                <span>📦 409</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 6319 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="10367">
-                <div>
-                    <div class="nombre-agencia">🏢 MAGNUM LOGISTICS S.A.S.</div>
-                    <div class="conteo-agencia">3 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-10367">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8238237">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8238237">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8238237</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8238237">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260329117</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLXU8695734">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLXU8695734">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLXU8695734</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLXU8695734">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260327250</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="TTNU8332360">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="TTNU8332360">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">TTNU8332360</div>
-                        <div class="estado-cont">Sin iniciar · 5 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-TTNU8332360">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE251200689</div>
-            <div class="bl-datos">
-                <span>📦 175</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1250 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300420</div>
-            <div class="bl-datos">
-                <span>📦 334</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 6243 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300723</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3506 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300856</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1615 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400053</div>
-            <div class="bl-datos">
-                <span>📦 10</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 4349 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="11258">
-                <div>
-                    <div class="nombre-agencia">🏢 NEGOCIOS GENERALES PROVI</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-11258">
-                
-            <div class="contenedor-acordeon semaforo-amarillo" data-contenedor-acordeon="MSNU8703817">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="MSNU8703817">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">MSNU8703817</div>
-                        <div class="estado-cont">En operación · 8 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-MSNU8703817">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300045</div>
-            <div class="bl-datos">
-                <span>📦 56</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 456 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300072</div>
-            <div class="bl-datos">
-                <span>📦 305</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 3805 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300094</div>
-            <div class="bl-datos">
-                <span>📦 72</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1116 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260300395</div>
-            <div class="bl-datos">
-                <span>📦 52</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 496 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400279</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 2831 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400315</div>
-            <div class="bl-datos">
-                <span>📦 125</span>
-                <span>📋 CAR</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 2700 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400407</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 PAL</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 1030 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">CNLE260400621</div>
-            <div class="bl-datos">
-                <span>📦 174</span>
-                <span>📋 PAQ</span>
-                <span>🚢 MSC</span>
-                <span>⚖️ 4560 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="1050">
-                <div>
-                    <div class="nombre-agencia">🏢 QUIMPAC DE COLOMBIA S.A.</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-1050">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8201222">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8201222">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8201222</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8201222">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260327250</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="">
-                <div>
-                    <div class="nombre-agencia">🏢 Sin agencia asignada</div>
-                    <div class="conteo-agencia">1 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="UAEU9607670">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="UAEU9607670">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">UAEU9607670</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-UAEU9607670">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260326733</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="10883">
-                <div>
-                    <div class="nombre-agencia">🏢 VALLEY CARGO S.A.S</div>
-                    <div class="conteo-agencia">5 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-10883">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="CXRU1543060">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="CXRU1543060">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">CXRU1543060</div>
-                        <div class="estado-cont">Sin iniciar · 3 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-CXRU1543060">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">95263</div>
-            <div class="bl-datos">
-                <span>📦 94</span>
-                <span>📋 ROLL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2744 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">95264</div>
-            <div class="bl-datos">
-                <span>📦 12</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5422 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">NBOS00264471</div>
-            <div class="bl-datos">
-                <span>📦 244</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 6266 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU6031575">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU6031575">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU6031575</div>
-                        <div class="estado-cont">Sin iniciar · 3 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU6031575">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073922454</div>
-            <div class="bl-datos">
-                <span>📦 33</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5482 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1073926082</div>
-            <div class="bl-datos">
-                <span>📦 961</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 11095 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">1074016013</div>
-            <div class="bl-datos">
-                <span>📦 5</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 2351 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU6059905">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU6059905">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU6059905</div>
-                        <div class="estado-cont">Sin iniciar · 8 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU6059905">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600153</div>
-            <div class="bl-datos">
-                <span>📦 34</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 822 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600155</div>
-            <div class="bl-datos">
-                <span>📦 4</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1226 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600156</div>
-            <div class="bl-datos">
-                <span>📦 12</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 9120 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600157</div>
-            <div class="bl-datos">
-                <span>📦 40</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 443 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600158</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1530 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600162</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 330 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600164</div>
-            <div class="bl-datos">
-                <span>📦 3</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1110 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">KYBUEP2600165</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 372 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8168654">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8168654">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8168654</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8168654">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260326733</div>
-            <div class="bl-datos">
-                <span>📦 1</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 22651 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8290750">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8290750">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8290750</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8290750">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260317583</div>
-            <div class="bl-datos">
-                <span>📦 8</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="agencia-acordeon">
-            <button class="agencia-acordeon-header" data-toggle-agencia="1121">
-                <div>
-                    <div class="nombre-agencia">🏢 VPC COLOMBIA S.A.S</div>
-                    <div class="conteo-agencia">2 contenedor(es)</div>
-                </div>
-                <span class="flecha-plegable">▾</span>
-            </button>
-            <div class="agencia-acordeon-body" id="cuerpoAgencia-1121">
-                
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="HLBU8121235">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="HLBU8121235">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">HLBU8121235</div>
-                        <div class="estado-cont">Sin iniciar · 1 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-HLBU8121235">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">HLCUSHA260329117</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 23000 kg</span>
-            </div>
-        </div>
-                </div>
-            </div>
-            <div class="contenedor-acordeon semaforo-rojo" data-contenedor-acordeon="TEMU9155122">
-                <button class="contenedor-acordeon-header" data-toggle-contenedor="TEMU9155122">
-                    <span class="punto-semaforo"></span>
-                    <div class="texto">
-                        <div class="nombre-cont">TEMU9155122</div>
-                        <div class="estado-cont">Sin iniciar · 7 BL</div>
-                    </div>
-                    <span class="flecha-plegable">▾</span>
-                </button>
-                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-TEMU9155122">
-                    
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26016999</div>
-            <div class="bl-datos">
-                <span>📦 17</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 504 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017237</div>
-            <div class="bl-datos">
-                <span>📦 13</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 5823 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017340</div>
-            <div class="bl-datos">
-                <span>📦 203</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3168 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26017672</div>
-            <div class="bl-datos">
-                <span>📦 24</span>
-                <span>📋 PAL</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 1075 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26018482</div>
-            <div class="bl-datos">
-                <span>📦 2</span>
-                <span>📋 PAQ</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 573 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">GZBVT26018658</div>
-            <div class="bl-datos">
-                <span>📦 198</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 3888 kg</span>
-            </div>
-        </div>
-        <div class="lista-bl-item">
-            <div class="bl-nombre">MI-LCL 2606008</div>
-            <div class="bl-datos">
-                <span>📦 68</span>
-                <span>📋 CAR</span>
-                <span>🚢 HLC</span>
-                <span>⚖️ 630 kg</span>
-            </div>
-        </div>
                 </div>
-            </div>
             </div>
-        </div></div>
         </div>
 
-        <div id="estadoVacio" class="hidden">
+        <div id="estadoVacio">
             <div class="emoji-grande">📭</div>
             <h2>Todavía no hay datos para buscar</h2>
             <p>Sincroniza para traer los contenedores y agencias cargados en el sistema.</p>
@@ -3679,10 +477,10 @@
                             <div class="fila-operacion">
                                 <div class="campo-operacion">
                                     <label>Hora de Finalización</label>
-                                    <input type="text" id="horaFinInput" inputmode="numeric" placeholder="00:00" maxlength="5" disabled>
+                                    <input type="text" id="horaFinInput" inputmode="numeric" placeholder="00:00" maxlength="5">
                                     <span class="operacion-meta" id="finMeta"></span>
                                 </div>
-                                <button class="btn-operacion btn-fin" id="btnFinOperacion" disabled>🔴 FINALIZACIÓN OPERACIÓN</button>
+                                <button class="btn-operacion btn-fin" id="btnFinOperacion">🔴 FINALIZACIÓN OPERACIÓN</button>
                             </div>
                         </div>
                     </div>
@@ -3723,7 +521,7 @@
 
 <div id="toast"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ============================================================================
 // CONFIGURACIÓN — mismo proyecto de Supabase que la app principal de
@@ -3795,15 +593,17 @@ async function iniciarSesion() {
 async function cargarPerfilUsuarioActual() {
     const sesion = (await sb.auth.getSession()).data.session;
     if (!sesion) return false;
-    const { data, error } = await sb.from('profiles').select('nombre_completo, pwa_habilitado').eq('id', sesion.user.id).maybeSingle();
+    const { data, error } = await sb.from('profiles').select('nombre_completo, pwa_habilitado, rol').eq('id', sesion.user.id).maybeSingle();
     if (error || !data) {
         console.warn('No se pudo cargar el perfil del usuario:', error && error.message);
         nombreCompletoUsuarioActual = sesion.user.email.split('@')[0].toUpperCase();
+        rolUsuarioActual = 'user';
         return true; // Si no se pudo verificar por un error de red, no se bloquea a nadie.
     }
     nombreCompletoUsuarioActual = (data.nombre_completo && data.nombre_completo.trim())
         ? data.nombre_completo.trim().toUpperCase()
         : sesion.user.email.split('@')[0].toUpperCase();
+    rolUsuarioActual = data.rol || 'user';
     return data.pwa_habilitado !== false;
 }
 
@@ -3821,6 +621,7 @@ async function mostrarApp() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('appScreen').classList.remove('hidden');
     document.getElementById('headerSub').textContent = `Sesión: ${nombreCompletoUsuarioActual}`;
+    actualizarVisibilidadDashboard();
     await sincronizar(true);
 }
 
@@ -3844,6 +645,7 @@ async function sincronizar(silencioso = false) {
         agenciasList = agData || [];
         allRecords = (excelData && excelData.registros) ? excelData.registros : [];
         construirIndice();
+        registrarProgramadosDeHoy(excelData && excelData.fecha_programacion); // no se espera, no debe frenar el resto
 
         operacionesPorContenedor.clear();
         (opsData || []).forEach(op => operacionesPorContenedor.set(op.contenedor, op));
@@ -4024,12 +826,10 @@ function renderizarPestañasPrincipales() {
 
                 lista.querySelectorAll('.contenedor-acordeon-body').forEach(b => b.classList.remove('abierto'));
                 lista.querySelectorAll('.contenedor-acordeon-header .flecha-plegable').forEach(f => f.classList.remove('abierta'));
-                lista.querySelectorAll('.contenedor-acordeon').forEach(c => c.classList.remove('expandido'));
 
                 if (!yaEstabaAbierto) {
                     body.classList.add('abierto');
                     btn.querySelector('.flecha-plegable').classList.add('abierta');
-                    btn.closest('.contenedor-acordeon').classList.add('expandido');
                     cargarFuncionariosEnLista(contenedor, funcionariosEditables);
                 }
             };
@@ -4069,13 +869,94 @@ function cambiarPestañaPrincipal(tab) {
     document.getElementById('tabBtnOperacion').classList.toggle('activo', tab === 'operacion');
     document.getElementById('tabBtnFinalizados').classList.toggle('activo', tab === 'finalizados');
     document.getElementById('tabBtnAgencias').classList.toggle('activo', tab === 'agencias');
+    document.getElementById('tabBtnDashboard').classList.toggle('activo', tab === 'dashboard');
     document.getElementById('listaEnOperacion').classList.toggle('hidden', tab !== 'operacion');
     document.getElementById('listaFinalizados').classList.toggle('hidden', tab !== 'finalizados');
     document.getElementById('listaPorAgencia').classList.toggle('hidden', tab !== 'agencias');
+    document.getElementById('panelDashboard').classList.toggle('hidden', tab !== 'dashboard');
+    if (tab === 'dashboard') {
+        const fechaInput = document.getElementById('dashFechaInput');
+        if (!fechaInput.value) fechaInput.value = new Date().toISOString().slice(0, 10);
+        consultarDashboard(fechaInput.value);
+    }
 }
 document.getElementById('tabBtnOperacion').onclick = () => cambiarPestañaPrincipal('operacion');
 document.getElementById('tabBtnFinalizados').onclick = () => cambiarPestañaPrincipal('finalizados');
 document.getElementById('tabBtnAgencias').onclick = () => cambiarPestañaPrincipal('agencias');
+document.getElementById('tabBtnDashboard').onclick = () => cambiarPestañaPrincipal('dashboard');
+document.getElementById('btnConsultarDash').onclick = () => consultarDashboard(document.getElementById('dashFechaInput').value);
+
+// Solo Admin (super) y Programador (admin) ven la pestaña Dashboard — un Proveedor (user)
+// no la ve en absoluto.
+function actualizarVisibilidadDashboard() {
+    const puedeVerDashboard = rolUsuarioActual === 'admin' || rolUsuarioActual === 'super';
+    document.getElementById('tabBtnDashboard').classList.toggle('hidden', !puedeVerDashboard);
+}
+
+// Trae, para la fecha elegida: cuántos contenedores estaban programados (tabla histórica
+// contenedores_programados), y cuántos de esos ya iniciaron/finalizaron (operaciones_contenedor).
+async function consultarDashboard(fecha) {
+    if (!fecha) return;
+    const nota = document.getElementById('dashCumplimientoNota');
+    nota.textContent = 'Consultando...';
+
+    const [{ data: programadosData, error: errProg }, { data: opsData, error: errOps }] = await Promise.all([
+        sb.from('contenedores_programados').select('contenedor').eq('fecha', fecha),
+        sb.from('operaciones_contenedor').select('contenedor, hora_inicio, hora_fin').eq('fecha', fecha)
+    ]);
+
+    if (errProg || errOps) {
+        nota.textContent = '❌ ' + ((errProg && errProg.message) || (errOps && errOps.message));
+        return;
+    }
+
+    const programados = (programadosData || []).length;
+    const opsPorContenedor = new Map((opsData || []).map(o => [o.contenedor, o]));
+    let ejecutados = 0, enProceso = 0;
+    for (const op of opsPorContenedor.values()) {
+        if (op.hora_inicio && op.hora_fin) ejecutados++;
+        else if (op.hora_inicio) enProceso++;
+    }
+    const sinIniciar = Math.max(0, programados - ejecutados - enProceso);
+    const cumplimiento = programados > 0 ? Math.round((ejecutados / programados) * 100) : 0;
+
+    document.getElementById('dashProgramados').textContent = programados;
+    document.getElementById('dashEjecutados').textContent = ejecutados;
+    document.getElementById('dashEnProceso').textContent = enProceso;
+    document.getElementById('dashSinIniciar').textContent = sinIniciar;
+    document.getElementById('dashBarraCumplimiento').style.width = cumplimiento + '%';
+    document.getElementById('dashCumplimientoPct').textContent = cumplimiento + '%';
+
+    const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
+    nota.textContent = programados === 0
+        ? `No hay contenedores programados registrados para el ${fechaLegible}.`
+        : `${ejecutados} de ${programados} contenedores finalizados — ${fechaLegible}.`;
+}
+
+// Registra en el histórico (contenedores_programados) los contenedores del Excel
+// actualmente cargado, con la fecha de programación que traiga ese Excel — así queda un
+// registro consultable de "qué estaba programado" ese día, aunque después se cargue un
+// Excel distinto y esta info ya no esté visible en pantalla.
+async function registrarProgramadosDeHoy(fechaProgramacionTexto) {
+    if (indiceContenedores.size === 0) return;
+    let fechaISO;
+    if (fechaProgramacionTexto) {
+        const partes = fechaProgramacionTexto.split('/'); // viene como DD/MM/AAAA
+        if (partes.length === 3) fechaISO = `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+    }
+    if (!fechaISO) fechaISO = new Date().toISOString().slice(0, 10);
+
+    const filas = Array.from(indiceContenedores.entries()).map(([contenedor, info]) => ({
+        contenedor, fecha: fechaISO, agencia_codigo: info.agenciaCodigo || null
+    }));
+    // Se sube en lotes de 200 para no mandar una sola petición gigante si hay muchos
+    // contenedores, y se ignoran los duplicados (mismo contenedor+fecha ya registrado antes).
+    for (let i = 0; i < filas.length; i += 200) {
+        const lote = filas.slice(i, i + 200);
+        const { error } = await sb.from('contenedores_programados').upsert(lote, { onConflict: 'contenedor,fecha', ignoreDuplicates: true });
+        if (error) { console.warn('No se pudo registrar el histórico de programados:', error.message); return; }
+    }
+}
 
 // Semáforo de 3 colores para la pestaña "Por Agencia": rojo = no ha iniciado, amarillo =
 // en operación, verde = finalizado. Es un esquema propio de ESTA pestaña — las otras dos
@@ -4149,7 +1030,6 @@ function renderizarPorAgencia() {
             // agencia queda desplegada a la vez, sin importar cuántas se hayan tocado antes.
             cont.querySelectorAll('.agencia-acordeon-body').forEach(b => b.classList.remove('abierto'));
             cont.querySelectorAll('.agencia-acordeon-header .flecha-plegable').forEach(f => f.classList.remove('abierta'));
-            cont.querySelectorAll('.contenedor-acordeon').forEach(c => c.classList.remove('expandido'));
 
             if (!yaEstabaAbierta) {
                 body.classList.add('abierto');
@@ -4162,9 +1042,8 @@ function renderizarPorAgencia() {
             const contenedor = btn.getAttribute('data-toggle-contenedor');
             const body = document.getElementById('cuerpoAcordeon-' + contenedor);
             const flecha = btn.querySelector('.flecha-plegable');
-            const abierto = body.classList.toggle('abierto');
-            flecha.classList.toggle('abierta', abierto);
-            btn.closest('.contenedor-acordeon').classList.toggle('expandido', abierto);
+            body.classList.toggle('abierto');
+            flecha.classList.toggle('abierta');
         };
     });
 }
@@ -4246,6 +1125,7 @@ function buscar(queryOriginal) {
 // ============ REGISTRO DE OPERACIÓN (Inicio / Finalización) ============
 let contenedorActualOperacion = null;
 let nombreCompletoUsuarioActual = '';
+let rolUsuarioActual = 'user';
 let funcionariosContenedorActual = [];
 
 // Convierte lo que se va escribiendo a formato de hora militar HH:MM en tiempo real —
@@ -4274,12 +1154,10 @@ async function cargarOperacion(contenedor) {
     const btnFin = document.getElementById('btnFinOperacion');
 
     // Estado por defecto: campos libres, sin nada guardado todavía.
-    // La Hora de Finalización arranca deshabilitada — solo se habilita cuando
-    // ya existe una Hora de Inicio registrada (ver más abajo).
     inicioInput.value = ''; inicioInput.disabled = false; inicioMeta.textContent = '';
-    finInput.value = ''; finInput.disabled = true; finMeta.textContent = '';
+    finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
-    btnFin.disabled = true; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
+    btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
 
     const hoy = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('operaciones_contenedor')
@@ -4294,9 +1172,6 @@ async function cargarOperacion(contenedor) {
         inicioMeta.textContent = `Iniciado por ${data.iniciado_por || '—'}`;
         btnInicio.disabled = true;
         btnInicio.textContent = '✅ OPERACIÓN INICIADA';
-        // Ya hay Hora de Inicio: se habilita la Hora de Finalización.
-        finInput.disabled = false;
-        btnFin.disabled = false;
     }
     if (data.hora_fin) {
         finInput.value = data.hora_fin;
@@ -4366,17 +1241,6 @@ async function finalizarDesdeLista(contenedor) {
     const btn = document.getElementById('btnFinalizarLista-' + contenedor);
     const hora = horaInput.value.trim();
     if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida, ej: 14:50', 4000); return; }
-
-    const opActual = operacionesPorContenedor.get(contenedor);
-    if (!opActual || !opActual.hora_inicio) {
-        mostrarToast('⚠️ Primero debes registrar la Hora de Inicio.', 4000);
-        return;
-    }
-    if (hora < opActual.hora_inicio) {
-        mostrarToast('⚠️ La Hora de Finalización no puede ser anterior a la Hora de Inicio.', 4500);
-        return;
-    }
-
     const hoy = new Date().toISOString().slice(0, 10);
     btn.disabled = true; btn.textContent = '⏳ Guardando...';
     const cambios = { contenedor, fecha: hoy, hora_fin: hora, finalizado_por: nombreCompletoUsuarioActual, finalizado_en: new Date().toISOString() };
@@ -4411,18 +1275,6 @@ async function marcarOperacion(tipo) {
         return;
     }
 
-    if (!esInicio) {
-        const opActual = operacionesPorContenedor.get(contenedorActualOperacion);
-        if (!opActual || !opActual.hora_inicio) {
-            mostrarToast('⚠️ Primero debes registrar la Hora de Inicio.', 4000);
-            return;
-        }
-        if (hora < opActual.hora_inicio) {
-            mostrarToast('⚠️ La Hora de Finalización no puede ser anterior a la Hora de Inicio.', 4500);
-            return;
-        }
-    }
-
     const hoy = new Date().toISOString().slice(0, 10);
 
     btn.disabled = true;
@@ -4443,15 +1295,9 @@ async function marcarOperacion(tipo) {
     }
 
     input.disabled = true;
-    meta.textContent = `${esInicio ? 'Iniciado' : 'Finalizado'} por ${nombreCompletoUsuarioActual}`;
+    meta.textContent = `${esInicio ? 'Iniciado' : 'Finalizado'} por ${username}`;
     btn.textContent = esInicio ? '✅ OPERACIÓN INICIADA' : '✅ OPERACIÓN FINALIZADA';
     mostrarToast(`✅ ${esInicio ? 'Inicio' : 'Finalización'} de operación registrado — ${hora}`);
-
-    if (esInicio) {
-        // Ya se registró el Inicio: se habilita la Hora de Finalización.
-        document.getElementById('horaFinInput').disabled = false;
-        document.getElementById('btnFinOperacion').disabled = false;
-    }
 
     const opExistente = operacionesPorContenedor.get(contenedorActualOperacion) || {};
     operacionesPorContenedor.set(contenedorActualOperacion, { ...opExistente, ...cambios });
@@ -4695,6 +1541,5 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
-
-
-</body></html>
+</body>
+</html>
