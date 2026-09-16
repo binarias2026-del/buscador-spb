@@ -121,6 +121,31 @@
 
     mark { background: #FFE9A8; color: inherit; border-radius: 3px; padding: 0 1px; }
 
+    .tabs-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+    .tab-btn {
+        flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 8px;
+        border: 1.5px solid var(--border-light); background: white; border-radius: 12px; font-size: 0.8rem;
+        font-weight: 700; color: var(--text-muted); cursor: pointer;
+    }
+    .tab-btn.activo { border-color: var(--primary-blue); color: var(--primary-blue); background: var(--light-blue, #E6F0FA); }
+    .tab-contador {
+        background: var(--text-muted); color: white; font-size: 0.68rem; padding: 1px 7px; border-radius: 20px; font-weight: 700;
+    }
+    .tab-btn.activo .tab-contador { background: var(--primary-blue); }
+    .lista-tab.hidden { display: none; }
+    .lista-tab-item {
+        display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 12px; margin-bottom: 8px;
+        cursor: pointer; border-left: 4px solid transparent;
+    }
+    .lista-tab-item.item-iniciado { background: #e8f5e9; border-left-color: #2e7d32; }
+    .lista-tab-item.item-finalizado { background: #eceff1; border-left-color: #78909c; }
+    .lista-tab-item .emoji { font-size: 1.2rem; }
+    .lista-tab-item .texto { flex: 1; min-width: 0; }
+    .lista-tab-item .principal { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
+    .lista-tab-item .secundario { font-size: 0.72rem; color: var(--text-muted); }
+    .lista-tab-item .hora-marca { font-size: 0.72rem; font-weight: 700; color: var(--text-dark); text-align: right; }
+    .lista-tab-vacia { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.85rem; }
+
     #estadoVacio { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     #estadoVacio .emoji-grande { font-size: 3rem; margin-bottom: 12px; }
     #estadoVacio h2 { font-size: 1rem; color: var(--text-dark); margin: 0 0 6px 0; }
@@ -233,6 +258,19 @@
             <input type="text" id="searchInput" placeholder="Busca por contenedor o agencia..." autocomplete="off">
             <button class="btn-limpiar hidden" id="btnLimpiarBusqueda">&times;</button>
             <div id="predictivo" class="hidden"></div>
+        </div>
+
+        <div id="pestañasPrincipales" class="hidden">
+            <div class="tabs-bar">
+                <button class="tab-btn activo" id="tabBtnOperacion" data-tab="operacion">
+                    🟢 En Operación <span class="tab-contador" id="contadorOperacion">0</span>
+                </button>
+                <button class="tab-btn" id="tabBtnFinalizados" data-tab="finalizados">
+                    ✅ Finalizados <span class="tab-contador" id="contadorFinalizados">0</span>
+                </button>
+            </div>
+            <div id="listaEnOperacion" class="lista-tab"></div>
+            <div id="listaFinalizados" class="lista-tab hidden"></div>
         </div>
 
         <div id="estadoVacio">
@@ -404,6 +442,7 @@ async function sincronizar(silencioso = false) {
             document.getElementById('estadoVacio').classList.add('hidden');
         }
 
+        renderizarPestañasPrincipales();
         if (!silencioso) mostrarToast(`✅ Sincronizado: ${indiceContenedores.size} contenedores`);
     } catch (e) {
         syncBar.textContent = '⚠️ No se pudo sincronizar — revisa tu conexión';
@@ -456,6 +495,73 @@ function estadoOperacion(contenedor) {
     if (op.hora_inicio) return 'iniciado';
     return null;
 }
+
+// Arma las dos listas de la pantalla principal: contenedores EN OPERACIÓN (verde) y
+// contenedores FINALIZADOS (gris) — se actualizan solas cada vez que alguien marca un
+// inicio o una finalización, sin que haga falta buscar nada.
+function renderizarPestañasPrincipales() {
+    const panel = document.getElementById('pestañasPrincipales');
+    if (indiceContenedores.size === 0) { panel.classList.add('hidden'); return; }
+
+    const enOperacion = [];
+    const finalizados = [];
+    for (const contenedor of indiceContenedores.keys()) {
+        const estado = estadoOperacion(contenedor);
+        if (estado === 'iniciado') enOperacion.push(contenedor);
+        else if (estado === 'finalizado') finalizados.push(contenedor);
+    }
+    // Los más recientes primero (por hora de inicio/fin registrada).
+    enOperacion.sort((a, b) => (operacionesPorContenedor.get(b).hora_inicio || '').localeCompare(operacionesPorContenedor.get(a).hora_inicio || ''));
+    finalizados.sort((a, b) => (operacionesPorContenedor.get(b).hora_fin || '').localeCompare(operacionesPorContenedor.get(a).hora_fin || ''));
+
+    document.getElementById('contadorOperacion').textContent = enOperacion.length;
+    document.getElementById('contadorFinalizados').textContent = finalizados.length;
+
+    const listaOp = document.getElementById('listaEnOperacion');
+    listaOp.innerHTML = enOperacion.length === 0
+        ? `<div class="lista-tab-vacia">Ningún contenedor en operación todavía.<br>Ábrelo y marca "Inicio Operación" para que aparezca aquí.</div>`
+        : enOperacion.map(contenedor => {
+            const info = indiceContenedores.get(contenedor);
+            const op = operacionesPorContenedor.get(contenedor);
+            return `<div class="lista-tab-item item-iniciado" data-contenedor="${contenedor}">
+                <span class="emoji">🟢</span>
+                <div class="texto"><div class="principal">${contenedor}</div><div class="secundario">${info.agenciaNombre} · Iniciado por ${op.iniciado_por || '—'}</div></div>
+                <div class="hora-marca">${op.hora_inicio || '—'}</div>
+            </div>`;
+        }).join('');
+
+    const listaFin = document.getElementById('listaFinalizados');
+    listaFin.innerHTML = finalizados.length === 0
+        ? `<div class="lista-tab-vacia">Todavía no hay contenedores finalizados hoy.</div>`
+        : finalizados.map(contenedor => {
+            const info = indiceContenedores.get(contenedor);
+            const op = operacionesPorContenedor.get(contenedor);
+            return `<div class="lista-tab-item item-finalizado" data-contenedor="${contenedor}">
+                <span class="emoji">✅</span>
+                <div class="texto"><div class="principal">${contenedor}</div><div class="secundario">${info.agenciaNombre} · Finalizado por ${op.finalizado_por || '—'}</div></div>
+                <div class="hora-marca">${op.hora_fin || '—'}</div>
+            </div>`;
+        }).join('');
+
+    panel.querySelectorAll('.lista-tab-item').forEach(item => {
+        item.onclick = () => mostrarContenedor(item.getAttribute('data-contenedor'));
+    });
+
+    // Solo se muestran las pestañas cuando el buscador está vacío (si la persona está
+    // escribiendo una búsqueda, se le da prioridad a los resultados predictivos).
+    if (!document.getElementById('searchInput').value.trim()) {
+        panel.classList.remove('hidden');
+    }
+}
+
+function cambiarPestañaPrincipal(tab) {
+    document.getElementById('tabBtnOperacion').classList.toggle('activo', tab === 'operacion');
+    document.getElementById('tabBtnFinalizados').classList.toggle('activo', tab === 'finalizados');
+    document.getElementById('listaEnOperacion').classList.toggle('hidden', tab !== 'operacion');
+    document.getElementById('listaFinalizados').classList.toggle('hidden', tab !== 'finalizados');
+}
+document.getElementById('tabBtnOperacion').onclick = () => cambiarPestañaPrincipal('operacion');
+document.getElementById('tabBtnFinalizados').onclick = () => cambiarPestañaPrincipal('finalizados');
 
 function buscar(queryOriginal) {
     const query = queryOriginal.trim();
@@ -628,6 +734,7 @@ async function marcarOperacion(tipo) {
 
     const opExistente = operacionesPorContenedor.get(contenedorActualOperacion) || {};
     operacionesPorContenedor.set(contenedorActualOperacion, { ...opExistente, ...cambios });
+    renderizarPestañasPrincipales();
 }
 
 document.getElementById('horaInicioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
@@ -700,6 +807,7 @@ function ocultarTodasLasVistas() {
     document.getElementById('vistaAgencia').style.display = 'none';
     document.getElementById('vistaContenedor').style.display = 'none';
     document.getElementById('predictivo').classList.add('hidden');
+    document.getElementById('pestañasPrincipales').classList.add('hidden');
 }
 
 function volverABusqueda() {
@@ -707,6 +815,7 @@ function volverABusqueda() {
     document.getElementById('searchInput').value = '';
     document.getElementById('btnLimpiarBusqueda').classList.add('hidden');
     document.getElementById('searchInput').focus();
+    renderizarPestañasPrincipales();
 }
 
 // ============ EVENTOS ============
@@ -723,7 +832,11 @@ const searchInput = document.getElementById('searchInput');
 searchInput.addEventListener('input', (e) => {
     ocultarTodasLasVistas();
     document.getElementById('btnLimpiarBusqueda').classList.toggle('hidden', !e.target.value);
-    buscar(e.target.value);
+    if (!e.target.value.trim()) {
+        renderizarPestañasPrincipales();
+    } else {
+        buscar(e.target.value);
+    }
 });
 document.getElementById('btnLimpiarBusqueda').onclick = volverABusqueda;
 document.addEventListener('click', (e) => {
