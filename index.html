@@ -3679,10 +3679,10 @@
                             <div class="fila-operacion">
                                 <div class="campo-operacion">
                                     <label>Hora de Finalización</label>
-                                    <input type="text" id="horaFinInput" inputmode="numeric" placeholder="00:00" maxlength="5">
+                                    <input type="text" id="horaFinInput" inputmode="numeric" placeholder="00:00" maxlength="5" disabled>
                                     <span class="operacion-meta" id="finMeta"></span>
                                 </div>
-                                <button class="btn-operacion btn-fin" id="btnFinOperacion">🔴 FINALIZACIÓN OPERACIÓN</button>
+                                <button class="btn-operacion btn-fin" id="btnFinOperacion" disabled>🔴 FINALIZACIÓN OPERACIÓN</button>
                             </div>
                         </div>
                     </div>
@@ -4274,10 +4274,12 @@ async function cargarOperacion(contenedor) {
     const btnFin = document.getElementById('btnFinOperacion');
 
     // Estado por defecto: campos libres, sin nada guardado todavía.
+    // La Hora de Finalización arranca deshabilitada — solo se habilita cuando
+    // ya existe una Hora de Inicio registrada (ver más abajo).
     inicioInput.value = ''; inicioInput.disabled = false; inicioMeta.textContent = '';
-    finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
+    finInput.value = ''; finInput.disabled = true; finMeta.textContent = '';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
-    btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
+    btnFin.disabled = true; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
 
     const hoy = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('operaciones_contenedor')
@@ -4292,6 +4294,9 @@ async function cargarOperacion(contenedor) {
         inicioMeta.textContent = `Iniciado por ${data.iniciado_por || '—'}`;
         btnInicio.disabled = true;
         btnInicio.textContent = '✅ OPERACIÓN INICIADA';
+        // Ya hay Hora de Inicio: se habilita la Hora de Finalización.
+        finInput.disabled = false;
+        btnFin.disabled = false;
     }
     if (data.hora_fin) {
         finInput.value = data.hora_fin;
@@ -4441,6 +4446,12 @@ async function marcarOperacion(tipo) {
     meta.textContent = `${esInicio ? 'Iniciado' : 'Finalizado'} por ${nombreCompletoUsuarioActual}`;
     btn.textContent = esInicio ? '✅ OPERACIÓN INICIADA' : '✅ OPERACIÓN FINALIZADA';
     mostrarToast(`✅ ${esInicio ? 'Inicio' : 'Finalización'} de operación registrado — ${hora}`);
+
+    if (esInicio) {
+        // Ya se registró el Inicio: se habilita la Hora de Finalización.
+        document.getElementById('horaFinInput').disabled = false;
+        document.getElementById('btnFinOperacion').disabled = false;
+    }
 
     const opExistente = operacionesPorContenedor.get(contenedorActualOperacion) || {};
     operacionesPorContenedor.set(contenedorActualOperacion, { ...opExistente, ...cambios });
