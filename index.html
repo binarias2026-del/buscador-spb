@@ -177,27 +177,12 @@
     .contenedor-acordeon-body { display: none; padding: 0 12px 12px 12px; }
     .contenedor-acordeon-body.abierto { display: block; }
     .contenedor-acordeon-body .lista-bl-item { background: white; }
-    .btn-ver-registro {
-        width: 100%; margin-top: 8px; padding: 11px; border: none; border-radius: 10px; background: var(--primary-blue);
-        color: white; font-weight: 700; font-size: 0.78rem; cursor: pointer;
-    }
-
-    /* ---------- Resumen dentro del acordeón (horas + funcionarios) ---------- */
-    .resumen-acordeon { background: white; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
-    .resumen-acordeon .fila-resumen { display: flex; justify-content: space-between; gap: 10px; font-size: 0.76rem; padding: 4px 0; }
-    .resumen-acordeon .fila-resumen:not(:last-child) { border-bottom: 1px dashed var(--border-light); }
-    .resumen-acordeon .fila-resumen .etiqueta-resumen { color: var(--text-muted); }
-    .resumen-acordeon .fila-resumen .valor-resumen { font-weight: 700; color: var(--text-dark); text-align: right; }
-    .resumen-acordeon .titulo-funcionarios { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; margin: 8px 0 4px 0; }
-    .mini-funcionario { display: flex; justify-content: space-between; gap: 8px; font-size: 0.76rem; padding: 3px 0; }
-    .mini-funcionario .mini-func-nombre { color: var(--text-dark); }
-    .mini-funcionario .mini-func-hora { font-weight: 700; color: var(--primary-blue); }
-    .sin-funcionarios-mini { font-size: 0.74rem; color: var(--text-muted); font-style: italic; }
+    .contenedor-acordeon-body .card-operacion { margin-bottom: 10px; }
     .btn-ver-bls {
-        width: 100%; margin-top: 4px; padding: 10px; border: 1.5px solid var(--accent-blue); border-radius: 10px;
+        width: 100%; margin-top: 4px; margin-bottom: 4px; padding: 10px; border: 1.5px solid var(--accent-blue); border-radius: 10px;
         background: white; color: var(--accent-blue); font-weight: 700; font-size: 0.76rem; cursor: pointer;
     }
-    .bls-completos { margin-top: 8px; }
+    .bls-completos { margin-top: 4px; }
 
     #estadoVacio { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     #estadoVacio .emoji-grande { font-size: 3rem; margin-bottom: 12px; }
@@ -642,7 +627,7 @@ function renderizarPestañasPrincipales() {
                     <span class="flecha-plegable">▾</span>
                 </button>
                 <div class="contenedor-acordeon-body" id="cuerpoOp-${contenedor}">
-                    ${renderizarCuerpoAcordeonHTML(contenedor, info, op, false)}
+                    ${renderizarCuerpoAcordeonHTML('op', contenedor, info, op)}
                 </div>
             </div>`;
         }).join('');
@@ -664,16 +649,16 @@ function renderizarPestañasPrincipales() {
                     <span class="flecha-plegable">▾</span>
                 </button>
                 <div class="contenedor-acordeon-body" id="cuerpoFin-${contenedor}">
-                    ${renderizarCuerpoAcordeonHTML(contenedor, info, op, true)}
+                    ${renderizarCuerpoAcordeonHTML('fin', contenedor, info, op)}
                 </div>
             </div>`;
         }).join('');
 
     // Acordeón de "Operaciones" y de "Finalizados": tocar el nombre despliega su detalle
-    // (horas + funcionarios); tocarlo de nuevo lo cierra; y abrir OTRO contenedor retrae
-    // automáticamente el que estuviera abierto — solo uno puede quedar desplegado a la vez.
-    activarAcordeonContenedores(listaOp, 'data-toggle-op', 'cuerpoOp-');
-    activarAcordeonContenedores(listaFin, 'data-toggle-fin', 'cuerpoFin-');
+    // (registro de inicio/fin + funcionarios), tocarlo de nuevo lo cierra, y abrir OTRO
+    // contenedor retrae automáticamente el que estuviera abierto.
+    activarAcordeonContenedores(listaOp, 'data-toggle-op', 'cuerpoOp-', 'operacion');
+    activarAcordeonContenedores(listaFin, 'data-toggle-fin', 'cuerpoFin-', 'finalizados');
 
     // Solo se muestran las pestañas cuando el buscador está vacío (si la persona está
     // escribiendo una búsqueda, se le da prioridad a los resultados predictivos).
@@ -682,46 +667,121 @@ function renderizarPestañasPrincipales() {
     }
 }
 
-// Construye las filas de horas (inicio, y fin si aplica) + la mini-lista de funcionarios
-// de agencias que llegaron a ese contenedor. Los BLs quedan ocultos por defecto: solo se
-// muestran si la persona toca "Ver BLs completos".
-function renderizarCuerpoAcordeonHTML(contenedor, info, op, incluirHoraFin) {
+// Guarda, por cada lista de acordeones, cuál contenedor (o agencia) quedó desplegado —
+// así al volver a renderizar (por ejemplo justo después de guardar una hora o agregar un
+// funcionario) se reabre solo, sin que la persona tenga que tocarlo de nuevo.
+let estadoAcordeones = { operacion: null, finalizados: null, agencia: null, agenciaAbierta: null };
+
+// Panel de Inicio/Finalización embebido directamente en el acordeón: si el contenedor no
+// tiene inicio registrado, muestra el campo de inicio activo y el de finalización
+// bloqueado; en cuanto el inicio queda registrado, la finalización se activa sola.
+function renderizarPanelOperacionHTML(prefijo, contenedor, op) {
+    op = op || {};
+    const idBase = `${prefijo}-${contenedor}`;
+    const inicioHecho = !!op.hora_inicio;
+    const finHecho = !!op.hora_fin;
+
+    const filaInicio = inicioHecho
+        ? `<div class="fila-operacion">
+                <div class="campo-operacion">
+                    <label>Hora de Inicio</label>
+                    <input type="text" value="${op.hora_inicio}" disabled>
+                    <span class="operacion-meta">Iniciado por ${op.iniciado_por || '—'}</span>
+                </div>
+                <button class="btn-operacion btn-inicio" disabled>✅ OPERACIÓN INICIADA</button>
+           </div>`
+        : `<div class="fila-operacion">
+                <div class="campo-operacion">
+                    <label>Hora de Inicio</label>
+                    <input type="text" id="horaInicioInput-${idBase}" inputmode="numeric" placeholder="00:00" maxlength="5">
+                </div>
+                <button class="btn-operacion btn-inicio" data-contenedor-inicio="${contenedor}" data-prefijo="${prefijo}">🟢 INICIO OPERACIÓN</button>
+           </div>`;
+
+    let filaFin;
+    if (finHecho) {
+        filaFin = `<div class="fila-operacion">
+                <div class="campo-operacion">
+                    <label>Hora de Finalización</label>
+                    <input type="text" value="${op.hora_fin}" disabled>
+                    <span class="operacion-meta">Finalizado por ${op.finalizado_por || '—'}</span>
+                </div>
+                <button class="btn-operacion btn-fin" disabled>✅ OPERACIÓN FINALIZADA</button>
+           </div>`;
+    } else if (inicioHecho) {
+        filaFin = `<div class="fila-operacion">
+                <div class="campo-operacion">
+                    <label>Hora de Finalización</label>
+                    <input type="text" id="horaFinInput-${idBase}" inputmode="numeric" placeholder="00:00" maxlength="5">
+                </div>
+                <button class="btn-operacion btn-fin" data-contenedor-fin="${contenedor}" data-prefijo="${prefijo}">🔴 FINALIZACIÓN OPERACIÓN</button>
+           </div>`;
+    } else {
+        filaFin = `<div class="fila-operacion">
+                <div class="campo-operacion">
+                    <label>Hora de Finalización</label>
+                    <input type="text" placeholder="00:00" disabled>
+                    <span class="operacion-meta">Se activa cuando registres el inicio</span>
+                </div>
+                <button class="btn-operacion btn-fin" disabled>🔴 FINALIZACIÓN OPERACIÓN</button>
+           </div>`;
+    }
+
+    return `<div class="card-operacion">${filaInicio}${filaFin}</div>`;
+}
+
+// Mini sección de funcionarios embebida en el acordeón: lista + campo para escribir la
+// hora y agregar uno nuevo, sin salir de la tarjeta del contenedor.
+function renderizarFuncionariosInlineHTML(prefijo, contenedor) {
     const funcs = funcionariosPorContenedor.get(contenedor) || [];
-    const filasFuncionarios = funcs.length === 0
-        ? `<div class="sin-funcionarios-mini">Todavía no ha llegado ningún funcionario registrado.</div>`
+    const idBase = `${prefijo}-${contenedor}`;
+
+    const listaHtml = funcs.length === 0
+        ? `<div class="lista-funcionarios-vacia">Todavía no ha llegado ningún funcionario registrado.</div>`
         : funcs.map((f, i) => `
-            <div class="mini-funcionario">
-                <span class="mini-func-nombre">${i + 1}. Funcionario ${i + 1}${f.agregado_por ? ` · ${f.agregado_por}` : ''}</span>
-                <span class="mini-func-hora">${f.hora_llegada}</span>
+            <div class="lista-funcionario-item">
+                <span class="num-funcionario">${i + 1}</span>
+                <div class="texto">
+                    <div class="nombre-func">Funcionario ${i + 1}</div>
+                    <div class="meta-func">Agregado por ${f.agregado_por || '—'}</div>
+                </div>
+                <span class="hora-func">${f.hora_llegada}</span>
+                <button class="btn-quitar-func" data-id="${f.id}" data-contenedor-quitar="${contenedor}" data-prefijo="${prefijo}" title="Quitar">🗑️</button>
             </div>`).join('');
 
     return `
-        <div class="resumen-acordeon">
-            <div class="fila-resumen">
-                <span class="etiqueta-resumen">🟢 Inicio</span>
-                <span class="valor-resumen">${op.hora_inicio || '—'} · ${op.iniciado_por || '—'}</span>
+        <div class="card-operacion">
+            <h3>👥 Funcionarios de Agencias (${funcs.length})</h3>
+            <div class="fila-operacion">
+                <div class="campo-operacion">
+                    <label>Hora de llegada</label>
+                    <input type="text" id="horaFuncionarioInput-${idBase}" inputmode="numeric" placeholder="00:00" maxlength="5">
+                </div>
+                <button class="btn-operacion btn-agregar-funcionario" data-contenedor-func="${contenedor}" data-prefijo="${prefijo}">➕ AGREGAR FUNCIONARIO</button>
             </div>
-            ${incluirHoraFin ? `
-            <div class="fila-resumen">
-                <span class="etiqueta-resumen">🔴 Fin</span>
-                <span class="valor-resumen">${op.hora_fin || '—'} · ${op.finalizado_por || '—'}</span>
-            </div>` : ''}
-            <div class="titulo-funcionarios">👥 Funcionarios (${funcs.length})</div>
-            ${filasFuncionarios}
         </div>
-        <button class="btn-ver-bls" data-toggle-bls="${contenedor}">👁️ Ver BLs completos (${info.registros.length})</button>
-        <div class="bls-completos hidden" id="bls-${contenedor}">
-            ${renderizarBLsHTML(info.registros)}
-        </div>
-        <button class="btn-ver-registro" data-abrir-registro="${contenedor}">📋 Ver registro completo →</button>`;
+        <div id="listaFuncionariosInline-${idBase}">${listaHtml}</div>`;
 }
 
-// Conecta el comportamiento de acordeón (abrir/cerrar, uno a la vez) de una lista de
-// contenedores, más los botones internos de "Ver BLs completos" y "Ver registro completo".
-function activarAcordeonContenedores(lista, atributoToggle, prefijoId) {
+// Arma el cuerpo completo del acordeón de un contenedor: registro de inicio/fin,
+// funcionarios, y los BLs ocultos por defecto (solo se ven al tocar "Ver BLs completos").
+function renderizarCuerpoAcordeonHTML(prefijo, contenedor, info, op) {
+    const idBase = `${prefijo}-${contenedor}`;
+    return `
+        ${renderizarPanelOperacionHTML(prefijo, contenedor, op)}
+        ${renderizarFuncionariosInlineHTML(prefijo, contenedor)}
+        <button class="btn-ver-bls" data-toggle-bls="${idBase}">👁️ Ver BLs completos (${info.registros.length})</button>
+        <div class="bls-completos hidden" id="bls-${idBase}">
+            ${renderizarBLsHTML(info.registros)}
+        </div>`;
+}
+
+// Conecta el comportamiento de acordeón (abrir/cerrar, uno a la vez, recordando cuál
+// quedó abierto entre renders) de una lista de contenedores, más los controles internos:
+// inicio/fin de operación, agregar/quitar funcionarios y mostrar/ocultar BLs.
+function activarAcordeonContenedores(lista, atributoToggle, prefijoId, trackerKey) {
     lista.querySelectorAll(`[${atributoToggle}]`).forEach(btn => {
-        btn.onclick = (e) => {
-            if (e.target.closest('[data-abrir-registro]') || e.target.closest('[data-toggle-bls]')) return;
+        btn.onclick = () => {
             const contenedor = btn.getAttribute(atributoToggle);
             const body = document.getElementById(prefijoId + contenedor);
             const yaEstabaAbierto = body.classList.contains('abierto');
@@ -732,16 +792,31 @@ function activarAcordeonContenedores(lista, atributoToggle, prefijoId) {
             if (!yaEstabaAbierto) {
                 body.classList.add('abierto');
                 btn.querySelector('.flecha-plegable').classList.add('abierta');
+                estadoAcordeones[trackerKey] = contenedor;
+            } else {
+                estadoAcordeones[trackerKey] = null;
             }
         };
     });
-    lista.querySelectorAll('[data-abrir-registro]').forEach(btn => {
-        btn.onclick = () => mostrarContenedor(btn.getAttribute('data-abrir-registro'));
-    });
+
+    // Si había un contenedor desplegado antes de este render, se vuelve a abrir solo.
+    const abierto = estadoAcordeones[trackerKey];
+    if (abierto) {
+        const body = document.getElementById(prefijoId + abierto);
+        if (body) {
+            body.classList.add('abierto');
+            lista.querySelectorAll(`[${atributoToggle}]`).forEach(h => {
+                if (h.getAttribute(atributoToggle) === abierto) h.querySelector('.flecha-plegable').classList.add('abierta');
+            });
+        } else {
+            estadoAcordeones[trackerKey] = null;
+        }
+    }
+
     lista.querySelectorAll('[data-toggle-bls]').forEach(btn => {
         btn.onclick = () => {
-            const contenedor = btn.getAttribute('data-toggle-bls');
-            const cajaBLs = document.getElementById('bls-' + contenedor);
+            const idBase = btn.getAttribute('data-toggle-bls');
+            const cajaBLs = document.getElementById('bls-' + idBase);
             const estabaOculto = cajaBLs.classList.contains('hidden');
             cajaBLs.classList.toggle('hidden');
             btn.textContent = estabaOculto
@@ -749,6 +824,120 @@ function activarAcordeonContenedores(lista, atributoToggle, prefijoId) {
                 : btn.textContent.replace('🙈 Ocultar', '👁️ Ver');
         };
     });
+
+    activarControlesOperacionInline(lista);
+}
+
+// Conecta los inputs y botones de inicio/fin de operación y de funcionarios que quedaron
+// embebidos dentro de los acordeones (no dependen de la vista de detalle por separado).
+function activarControlesOperacionInline(root) {
+    root.querySelectorAll('input[id^="horaInicioInput-"], input[id^="horaFinInput-"], input[id^="horaFuncionarioInput-"]').forEach(inp => {
+        inp.oninput = () => formatearHoraEnVivo(inp);
+    });
+    root.querySelectorAll('[data-contenedor-inicio]').forEach(btn => {
+        btn.onclick = () => marcarOperacionInline('inicio', btn.getAttribute('data-contenedor-inicio'), btn.getAttribute('data-prefijo'));
+    });
+    root.querySelectorAll('[data-contenedor-fin]').forEach(btn => {
+        btn.onclick = () => marcarOperacionInline('fin', btn.getAttribute('data-contenedor-fin'), btn.getAttribute('data-prefijo'));
+    });
+    root.querySelectorAll('[data-contenedor-func]').forEach(btn => {
+        btn.onclick = () => agregarFuncionarioInline(btn.getAttribute('data-contenedor-func'), btn.getAttribute('data-prefijo'));
+    });
+    root.querySelectorAll('[data-contenedor-quitar]').forEach(btn => {
+        btn.onclick = () => quitarFuncionarioInline(btn.getAttribute('data-id'), btn.getAttribute('data-contenedor-quitar'), btn.getAttribute('data-prefijo'));
+    });
+}
+
+// Marca inicio o finalización directamente desde el acordeón (sin ir a otra pantalla).
+// La finalización exige que ya exista un inicio, y su hora debe ser ESTRICTAMENTE mayor
+// a la de inicio (nunca igual ni anterior).
+async function marcarOperacionInline(tipo, contenedor, prefijo) {
+    const esInicio = tipo === 'inicio';
+    const idBase = `${prefijo}-${contenedor}`;
+    const input = document.getElementById(`${esInicio ? 'horaInicioInput' : 'horaFinInput'}-${idBase}`);
+    const btn = document.querySelector(esInicio ? `[data-contenedor-inicio="${contenedor}"][data-prefijo="${prefijo}"]` : `[data-contenedor-fin="${contenedor}"][data-prefijo="${prefijo}"]`);
+    const hora = input.value.trim();
+
+    if (!horaValida(hora)) {
+        mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10 o 14:50', 4000);
+        return;
+    }
+
+    if (!esInicio) {
+        const opActual = operacionesPorContenedor.get(contenedor) || {};
+        if (!opActual.hora_inicio) {
+            mostrarToast('⚠️ Primero registra la hora de inicio.', 4000);
+            return;
+        }
+        if (hora <= opActual.hora_inicio) {
+            mostrarToast('⚠️ La hora de finalización debe ser mayor a la hora de inicio.', 4500);
+            return;
+        }
+    }
+
+    const sesion = (await sb.auth.getSession()).data.session;
+    const username = sesion ? sesion.user.email.split('@')[0].toUpperCase() : 'DESCONOCIDO';
+    const hoy = new Date().toISOString().slice(0, 10);
+
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Guardando...'; }
+
+    const cambios = esInicio
+        ? { contenedor, fecha: hoy, hora_inicio: hora, iniciado_por: username, iniciado_en: new Date().toISOString() }
+        : { contenedor, fecha: hoy, hora_fin: hora, finalizado_por: username, finalizado_en: new Date().toISOString() };
+
+    const { error } = await sb.from('operaciones_contenedor')
+        .upsert(cambios, { onConflict: 'contenedor,fecha' });
+
+    if (error) {
+        mostrarToast('❌ ' + error.message, 5000);
+        if (btn) { btn.disabled = false; btn.textContent = esInicio ? '🟢 INICIO OPERACIÓN' : '🔴 FINALIZACIÓN OPERACIÓN'; }
+        return;
+    }
+
+    mostrarToast(`✅ ${esInicio ? 'Inicio' : 'Finalización'} de operación registrado — ${hora}`);
+
+    const opExistente = operacionesPorContenedor.get(contenedor) || {};
+    operacionesPorContenedor.set(contenedor, { ...opExistente, ...cambios });
+
+    renderizarPestañasPrincipales();
+    renderizarPorAgencia();
+}
+
+// Agrega o quita un funcionario directamente desde el acordeón y refresca las listas.
+async function agregarFuncionarioInline(contenedor, prefijo) {
+    const idBase = `${prefijo}-${contenedor}`;
+    const horaInput = document.getElementById(`horaFuncionarioInput-${idBase}`);
+    const btn = document.querySelector(`[data-contenedor-func="${contenedor}"][data-prefijo="${prefijo}"]`);
+    const hora = horaInput.value.trim();
+
+    if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10', 4000); return; }
+
+    const sesion = (await sb.auth.getSession()).data.session;
+    const username = sesion ? sesion.user.email.split('@')[0].toUpperCase() : 'DESCONOCIDO';
+    const hoy = new Date().toISOString().slice(0, 10);
+    const funcsActuales = funcionariosPorContenedor.get(contenedor) || [];
+    const numeroFuncionario = funcsActuales.length + 1;
+
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Agregando...'; }
+
+    const { error } = await sb.from('funcionarios_contenedor').insert({
+        contenedor, fecha: hoy, nombre_funcionario: `Funcionario ${numeroFuncionario}`,
+        hora_llegada: hora, agregado_por: username
+    });
+
+    if (btn) { btn.disabled = false; btn.textContent = '➕ AGREGAR FUNCIONARIO'; }
+
+    if (error) { mostrarToast('❌ ' + error.message, 5000); return; }
+
+    mostrarToast(`✅ Funcionario ${numeroFuncionario} agregado — ${hora}`);
+    await sincronizarFuncionariosDeContenedor(contenedor);
+}
+
+async function quitarFuncionarioInline(id, contenedor, prefijo) {
+    if (!confirm('¿Quitar este funcionario de la lista?')) return;
+    const { error } = await sb.from('funcionarios_contenedor').delete().eq('id', id);
+    if (error) { mostrarToast('❌ ' + error.message, 4000); return; }
+    await sincronizarFuncionariosDeContenedor(contenedor);
 }
 
 function cambiarPestañaPrincipal(tab) {
@@ -794,6 +983,7 @@ function renderizarPorAgencia() {
         const contenedoresHtml = datos.contenedores.sort().map(contenedor => {
             const info = indiceContenedores.get(contenedor);
             const sem = semaforoContenedor(contenedor);
+            const op = operacionesPorContenedor.get(contenedor);
             return `
             <div class="contenedor-acordeon ${sem.clase}" data-contenedor-acordeon="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-contenedor="${contenedor}">
@@ -805,7 +995,7 @@ function renderizarPorAgencia() {
                     <span class="flecha-plegable">▾</span>
                 </button>
                 <div class="contenedor-acordeon-body" id="cuerpoAcordeon-${contenedor}">
-                    ${renderizarBLsHTML(info.registros)}
+                    ${renderizarCuerpoAcordeonHTML('ag', contenedor, info, op)}
                 </div>
             </div>`;
         }).join('');
@@ -839,18 +1029,30 @@ function renderizarPorAgencia() {
             if (!yaEstabaAbierta) {
                 body.classList.add('abierto');
                 btn.querySelector('.flecha-plegable').classList.add('abierta');
+                estadoAcordeones.agenciaAbierta = codigo;
+            } else {
+                estadoAcordeones.agenciaAbierta = null;
             }
         };
     });
-    cont.querySelectorAll('[data-toggle-contenedor]').forEach(btn => {
-        btn.onclick = () => {
-            const contenedor = btn.getAttribute('data-toggle-contenedor');
-            const body = document.getElementById('cuerpoAcordeon-' + contenedor);
-            const flecha = btn.querySelector('.flecha-plegable');
-            body.classList.toggle('abierto');
-            flecha.classList.toggle('abierta');
-        };
-    });
+
+    // Reabre la agencia que hubiera quedado desplegada antes de este render.
+    if (estadoAcordeones.agenciaAbierta) {
+        const codigoAbierto = estadoAcordeones.agenciaAbierta;
+        const bodyAg = document.getElementById('cuerpoAgencia-' + codigoAbierto);
+        if (bodyAg) {
+            bodyAg.classList.add('abierto');
+            cont.querySelectorAll('[data-toggle-agencia]').forEach(h => {
+                if (h.getAttribute('data-toggle-agencia') === codigoAbierto) h.querySelector('.flecha-plegable').classList.add('abierta');
+            });
+        } else {
+            estadoAcordeones.agenciaAbierta = null;
+        }
+    }
+
+    // Mismo acordeón interactivo (inicio/fin + funcionarios + BLs) que en las otras
+    // pestañas, aplicado a los contenedores dentro de cada agencia.
+    activarAcordeonContenedores(cont, 'data-toggle-contenedor', 'cuerpoAcordeon-', 'agencia');
 }
 
 function buscar(queryOriginal) {
@@ -956,11 +1158,12 @@ async function cargarOperacion(contenedor) {
     const btnInicio = document.getElementById('btnInicioOperacion');
     const btnFin = document.getElementById('btnFinOperacion');
 
-    // Estado por defecto: campos libres, sin nada guardado todavía.
+    // Estado por defecto: el inicio está libre, pero la finalización empieza BLOQUEADA
+    // hasta que se registre el inicio — no tiene sentido finalizar algo que no ha iniciado.
     inicioInput.value = ''; inicioInput.disabled = false; inicioMeta.textContent = '';
-    finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
+    finInput.value = ''; finInput.disabled = true; finMeta.textContent = 'Se activa cuando registres el inicio';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
-    btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
+    btnFin.disabled = true; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
 
     const hoy = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('operaciones_contenedor')
@@ -975,6 +1178,10 @@ async function cargarOperacion(contenedor) {
         inicioMeta.textContent = `Iniciado por ${data.iniciado_por || '—'}`;
         btnInicio.disabled = true;
         btnInicio.textContent = '✅ OPERACIÓN INICIADA';
+        // El inicio ya está registrado: ahora sí se activa la finalización.
+        finInput.disabled = false;
+        finMeta.textContent = '';
+        btnFin.disabled = false;
     }
     if (data.hora_fin) {
         finInput.value = data.hora_fin;
@@ -995,6 +1202,18 @@ async function marcarOperacion(tipo) {
     if (!horaValida(hora)) {
         mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10 o 14:50', 4000);
         return;
+    }
+
+    if (!esInicio) {
+        const opActual = operacionesPorContenedor.get(contenedorActualOperacion) || {};
+        if (!opActual.hora_inicio) {
+            mostrarToast('⚠️ Primero registra la hora de inicio.', 4000);
+            return;
+        }
+        if (hora <= opActual.hora_inicio) {
+            mostrarToast('⚠️ La hora de finalización debe ser mayor a la hora de inicio.', 4500);
+            return;
+        }
     }
 
     const sesion = (await sb.auth.getSession()).data.session;
@@ -1025,6 +1244,17 @@ async function marcarOperacion(tipo) {
 
     const opExistente = operacionesPorContenedor.get(contenedorActualOperacion) || {};
     operacionesPorContenedor.set(contenedorActualOperacion, { ...opExistente, ...cambios });
+
+    if (esInicio) {
+        // Al terminar de registrar el inicio, la finalización se activa en el acto.
+        const finInput = document.getElementById('horaFinInput');
+        const finMeta = document.getElementById('finMeta');
+        const btnFin = document.getElementById('btnFinOperacion');
+        finInput.disabled = false;
+        finMeta.textContent = '';
+        btnFin.disabled = false;
+    }
+
     renderizarPestañasPrincipales();
     renderizarPorAgencia();
 }
@@ -1119,6 +1349,7 @@ async function sincronizarFuncionariosDeContenedor(contenedor) {
     if (error) { console.warn('No se pudo refrescar funcionarios:', error.message); return; }
     funcionariosPorContenedor.set(contenedor, data || []);
     renderizarPestañasPrincipales();
+    renderizarPorAgencia();
 }
 
 document.getElementById('horaFuncionarioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
