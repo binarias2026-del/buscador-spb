@@ -155,6 +155,11 @@
     }
     .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
     .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+    .agencia-acordeon-header .resumen-agencia { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .mini-badge-estado { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 30px; display: inline-flex; align-items: center; gap: 4px; }
+    .mini-badge-estado.badge-verde { background: #e8f5e9; color: #2e7d32; }
+    .mini-badge-estado.badge-amarillo { background: #fff8e1; color: #a17400; }
+    .mini-badge-estado.badge-rojo { background: #ffebee; color: #c62828; }
     .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
@@ -219,9 +224,29 @@
     .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
     .dash-selector-fecha .btn-mini { height: 44px; }
     .dash-tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .dash-tarjeta { border-radius: 14px; padding: 16px 10px; text-align: center; }
+    .dash-tarjeta { border-radius: 14px; padding: 16px 10px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: transform 0.12s ease-out, border-color 0.12s ease-out; position: relative; }
+    .dash-tarjeta:active { transform: scale(0.97); }
+    .dash-tarjeta.tarjeta-activa { border-color: currentColor; }
     .dash-tarjeta .dash-valor { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
     .dash-tarjeta .dash-etiqueta { font-size: 0.72rem; font-weight: 700; }
+    .dash-tarjeta .dash-tap-hint { font-size: 0.6rem; font-weight: 600; opacity: 0.65; margin-top: 2px; }
+    /* ---- Panel de detalle que se despliega al tocar una tarjeta del dashboard ---- */
+    .dash-detalle { background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 12px; margin-bottom: 16px; }
+    .dash-detalle.hidden { display: none; }
+    .dash-detalle-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border-light); }
+    .dash-detalle-header span { font-size: 0.82rem; font-weight: 700; color: var(--primary-blue); }
+    .dash-detalle-cerrar { border: none; background: var(--light-blue); color: var(--primary-blue); width: 26px; height: 26px; border-radius: 50%; font-size: 0.8rem; cursor: pointer; line-height: 1; }
+    .dash-detalle-lista { max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .dash-detalle-vacio { text-align: center; font-size: 0.78rem; color: var(--text-muted); padding: 16px 4px; }
+    .dash-detalle-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #f8fafe; border-left: 4px solid var(--border-light); }
+    .dash-detalle-item.item-verde { border-left-color: #2e7d32; }
+    .dash-detalle-item.item-amarillo { border-left-color: #f9a825; }
+    .dash-detalle-item.item-rojo { border-left-color: #c62828; }
+    .dash-detalle-item .item-izq { min-width: 0; }
+    .dash-detalle-item .item-contenedor-nombre { font-weight: 700; font-size: 0.78rem; color: var(--text-dark); }
+    .dash-detalle-item .item-agencia-nombre { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; }
+    .dash-detalle-item .item-horas { text-align: right; font-size: 0.68rem; color: var(--text-muted); flex-shrink: 0; line-height: 1.5; white-space: nowrap; }
+    .dash-detalle-item .item-horas b { color: var(--text-dark); }
     .dash-programados { background: #E6F0FA; }
     .dash-programados .dash-valor { color: var(--primary-blue); }
     .dash-programados .dash-etiqueta { color: var(--primary-blue); }
@@ -407,22 +432,33 @@
                 </div>
                 <div id="dashResultado">
                     <div class="dash-tarjetas">
-                        <div class="dash-tarjeta dash-programados">
+                        <div class="dash-tarjeta dash-programados" id="dashCardProgramados" data-dash-cat="programados">
                             <div class="dash-valor" id="dashProgramados">0</div>
                             <div class="dash-etiqueta">📋 Programados</div>
+                            <div class="dash-tap-hint">Toca para ver detalle</div>
                         </div>
-                        <div class="dash-tarjeta dash-proceso">
+                        <div class="dash-tarjeta dash-proceso" id="dashCardEnProceso" data-dash-cat="enProceso">
                             <div class="dash-valor" id="dashEnProceso">0</div>
                             <div class="dash-etiqueta">🟡 En Proceso</div>
+                            <div class="dash-tap-hint">Toca para ver detalle</div>
                         </div>
-                        <div class="dash-tarjeta dash-ejecutados">
+                        <div class="dash-tarjeta dash-ejecutados" id="dashCardEjecutados" data-dash-cat="ejecutados">
                             <div class="dash-valor" id="dashEjecutados">0</div>
                             <div class="dash-etiqueta">✅ Ejecutados</div>
+                            <div class="dash-tap-hint">Toca para ver detalle</div>
                         </div>
-                        <div class="dash-tarjeta dash-sin-iniciar">
+                        <div class="dash-tarjeta dash-sin-iniciar" id="dashCardSinIniciar" data-dash-cat="sinIniciar">
                             <div class="dash-valor" id="dashSinIniciar">0</div>
                             <div class="dash-etiqueta">🔴 Sin Iniciar</div>
+                            <div class="dash-tap-hint">Toca para ver detalle</div>
                         </div>
+                    </div>
+                    <div id="dashDetalle" class="dash-detalle hidden">
+                        <div class="dash-detalle-header">
+                            <span id="dashDetalleTitulo">—</span>
+                            <button id="dashDetalleCerrar" type="button">✕</button>
+                        </div>
+                        <div id="dashDetalleLista" class="dash-detalle-lista"></div>
                     </div>
                     <div class="dash-cumplimiento">
                         <div class="dash-cumplimiento-titulo">Cumplimiento de Programación</div>
@@ -893,15 +929,22 @@ function actualizarVisibilidadDashboard() {
     document.getElementById('tabBtnDashboard').classList.toggle('hidden', !puedeVerDashboard);
 }
 
+// Guarda, para la fecha consultada, el detalle (contenedor + agencia + horas) de cada una
+// de las 4 categorías del dashboard, para poder desplegarlo al tocar la tarjeta
+// correspondiente sin tener que volver a consultar la base de datos.
+let dashDetalle = { programados: [], enProceso: [], ejecutados: [], sinIniciar: [] };
+let dashCategoriaAbierta = null; // 'programados' | 'enProceso' | 'ejecutados' | 'sinIniciar' | null
+
 // Trae, para la fecha elegida: cuántos contenedores estaban programados (tabla histórica
 // contenedores_programados), y cuántos de esos ya iniciaron/finalizaron (operaciones_contenedor).
 async function consultarDashboard(fecha) {
     if (!fecha) return;
     const nota = document.getElementById('dashCumplimientoNota');
     nota.textContent = 'Consultando...';
+    cerrarDashDetalle();
 
     const [{ data: programadosData, error: errProg }, { data: opsData, error: errOps }] = await Promise.all([
-        sb.from('contenedores_programados').select('contenedor').eq('fecha', fecha),
+        sb.from('contenedores_programados').select('contenedor, agencia_codigo').eq('fecha', fecha),
         sb.from('operaciones_contenedor').select('contenedor, hora_inicio, hora_fin').eq('fecha', fecha)
     ]);
 
@@ -910,14 +953,38 @@ async function consultarDashboard(fecha) {
         return;
     }
 
-    const programados = (programadosData || []).length;
     const opsPorContenedor = new Map((opsData || []).map(o => [o.contenedor, o]));
-    let ejecutados = 0, enProceso = 0;
-    for (const op of opsPorContenedor.values()) {
-        if (op.hora_inicio && op.hora_fin) ejecutados++;
-        else if (op.hora_inicio) enProceso++;
-    }
-    const sinIniciar = Math.max(0, programados - ejecutados - enProceso);
+
+    // Arma cada fila del detalle con el nombre de agencia (si lo tenemos en el índice
+    // sincronizado) y las horas de esa operación, si existen.
+    const filaDetalle = (contenedor, agenciaCodigo) => {
+        const op = opsPorContenedor.get(contenedor);
+        const infoIndice = indiceContenedores.get(contenedor);
+        const agencia = agenciasList.find(a => a.codigo === (agenciaCodigo || (infoIndice && infoIndice.agenciaCodigo)));
+        return {
+            contenedor,
+            agenciaNombre: agencia ? agencia.nombre : (infoIndice ? infoIndice.agenciaNombre : ''),
+            hora_inicio: op ? op.hora_inicio : null,
+            hora_fin: op ? op.hora_fin : null
+        };
+    };
+
+    const listaProgramados = (programadosData || []).map(p => filaDetalle(p.contenedor, p.agencia_codigo));
+    const listaEjecutados = [], listaEnProceso = [], listaSinIniciar = [];
+    listaProgramados.forEach(f => {
+        if (f.hora_inicio && f.hora_fin) listaEjecutados.push(f);
+        else if (f.hora_inicio) listaEnProceso.push(f);
+        else listaSinIniciar.push(f);
+    });
+    listaEjecutados.sort((a, b) => (b.hora_fin || '').localeCompare(a.hora_fin || ''));
+    listaEnProceso.sort((a, b) => (b.hora_inicio || '').localeCompare(a.hora_inicio || ''));
+    listaSinIniciar.sort((a, b) => a.contenedor.localeCompare(b.contenedor));
+    dashDetalle = { programados: listaProgramados, enProceso: listaEnProceso, ejecutados: listaEjecutados, sinIniciar: listaSinIniciar };
+
+    const programados = listaProgramados.length;
+    const ejecutados = listaEjecutados.length;
+    const enProceso = listaEnProceso.length;
+    const sinIniciar = listaSinIniciar.length;
     const cumplimiento = programados > 0 ? Math.round((ejecutados / programados) * 100) : 0;
 
     document.getElementById('dashProgramados').textContent = programados;
@@ -932,6 +999,59 @@ async function consultarDashboard(fecha) {
         ? `No hay contenedores programados registrados para el ${fechaLegible}.`
         : `${ejecutados} de ${programados} contenedores finalizados — ${fechaLegible}.`;
 }
+
+// Al tocar una de las 4 tarjetas del dashboard (Programados/En Proceso/Ejecutados/Sin
+// Iniciar), despliega debajo la lista de contenedores de esa categoría con su hora de
+// inicio y finalización. Tocar la misma tarjeta otra vez la cierra; tocar otra cambia el
+// contenido sin necesidad de cerrar antes.
+function toggleDashDetalle(categoria) {
+    if (dashCategoriaAbierta === categoria) { cerrarDashDetalle(); return; }
+    dashCategoriaAbierta = categoria;
+    document.querySelectorAll('#panelDashboard .dash-tarjeta').forEach(t => {
+        t.classList.toggle('tarjeta-activa', t.dataset.dashCat === categoria);
+    });
+
+    const meta = {
+        programados: { titulo: '📋 Contenedores programados', vacio: 'No hay contenedores programados para esta fecha.' },
+        enProceso: { titulo: '🟡 Contenedores en proceso', vacio: 'No hay contenedores en proceso en esta fecha.' },
+        ejecutados: { titulo: '✅ Contenedores ejecutados', vacio: 'No hay contenedores ejecutados en esta fecha.' },
+        sinIniciar: { titulo: '🔴 Contenedores sin iniciar', vacio: 'No hay contenedores sin iniciar en esta fecha.' }
+    }[categoria];
+
+    const filas = dashDetalle[categoria] || [];
+    document.getElementById('dashDetalleTitulo').textContent = `${meta.titulo} (${filas.length})`;
+    const lista = document.getElementById('dashDetalleLista');
+    if (filas.length === 0) {
+        lista.innerHTML = `<div class="dash-detalle-vacio">${meta.vacio}</div>`;
+    } else {
+        lista.innerHTML = filas.map(f => {
+            const claseItem = (f.hora_inicio && f.hora_fin) ? 'item-verde' : (f.hora_inicio ? 'item-amarillo' : 'item-rojo');
+            const horasHtml = (f.hora_inicio || f.hora_fin)
+                ? `<div>⏱️ <b>${f.hora_inicio || '—'}</b></div><div>🏁 <b>${f.hora_fin || '—'}</b></div>`
+                : `<div>Sin horas registradas</div>`;
+            return `
+            <div class="dash-detalle-item ${claseItem}">
+                <div class="item-izq">
+                    <div class="item-contenedor-nombre">📦 ${f.contenedor}</div>
+                    <div class="item-agencia-nombre">🏢 ${f.agenciaNombre || 'Sin agencia'}</div>
+                </div>
+                <div class="item-horas">${horasHtml}</div>
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('dashDetalle').classList.remove('hidden');
+}
+
+function cerrarDashDetalle() {
+    dashCategoriaAbierta = null;
+    document.getElementById('dashDetalle').classList.add('hidden');
+    document.querySelectorAll('#panelDashboard .dash-tarjeta').forEach(t => t.classList.remove('tarjeta-activa'));
+}
+
+document.querySelectorAll('#panelDashboard .dash-tarjeta').forEach(t => {
+    t.onclick = () => toggleDashDetalle(t.dataset.dashCat);
+});
+document.getElementById('dashDetalleCerrar').onclick = () => cerrarDashDetalle();
 
 // Registra en el histórico (contenedores_programados) los contenedores del Excel
 // actualmente cargado, con la fecha de programación que traiga ese Excel — así queda un
@@ -1005,12 +1125,28 @@ function renderizarPorAgencia() {
             </div>`;
         }).join('');
 
+        // Cuenta, sin necesidad de desplegar la agencia, cuántos de sus contenedores ya
+        // iniciaron, cuántos finalizaron y cuántos siguen sin iniciar (según las
+        // operaciones de HOY, mismo criterio que el semáforo de cada contenedor).
+        let cFinalizados = 0, cIniciados = 0, cSinIniciar = 0;
+        datos.contenedores.forEach(contenedor => {
+            const estado = estadoOperacion(contenedor);
+            if (estado === 'finalizado') cFinalizados++;
+            else if (estado === 'iniciado') cIniciados++;
+            else cSinIniciar++;
+        });
+
         return `
         <div class="agencia-acordeon">
             <button class="agencia-acordeon-header" data-toggle-agencia="${codigo}">
                 <div>
                     <div class="nombre-agencia">🏢 ${datos.nombre}</div>
                     <div class="conteo-agencia">${datos.contenedores.length} contenedor(es)</div>
+                    <div class="resumen-agencia">
+                        <span class="mini-badge-estado badge-verde">✅ ${cFinalizados} finalizado(s)</span>
+                        <span class="mini-badge-estado badge-amarillo">🟡 ${cIniciados} iniciado(s)</span>
+                        <span class="mini-badge-estado badge-rojo">🔴 ${cSinIniciar} sin iniciar</span>
+                    </div>
                 </div>
                 <span class="flecha-plegable">▾</span>
             </button>
