@@ -135,6 +135,31 @@
     .ficha-titulo h2 { margin: 0; font-size: 1.3rem; color: var(--primary-blue); }
     .ficha-sub { color: var(--text-muted); font-size: 0.85rem; margin: 0 0 18px 42px; }
 
+    .card-operacion {
+        background: var(--gray-bg); border: 1px solid var(--border-light); border-radius: 14px;
+        padding: 16px; margin-bottom: 18px;
+    }
+    .card-operacion h3 { margin: 0 0 12px 0; font-size: 0.88rem; color: var(--primary-blue); }
+    .fila-operacion { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
+    .fila-operacion:last-child { margin-bottom: 0; }
+    .campo-operacion { flex: 1; min-width: 0; }
+    .campo-operacion label { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
+    .campo-operacion input {
+        width: 100%; padding: 11px 12px; border: 1.5px solid var(--border-light); border-radius: 10px;
+        font-size: 1.05rem; font-weight: 700; text-align: center; letter-spacing: 1px; color: var(--text-dark);
+        background: white; font-variant-numeric: tabular-nums;
+    }
+    .campo-operacion input:focus { outline: none; border-color: var(--accent-blue); }
+    .campo-operacion input:disabled { background: #eef2f6; color: var(--text-muted); border-color: var(--border-light); }
+    .campo-operacion .operacion-meta { display: block; font-size: 0.66rem; color: var(--text-muted); margin-top: 4px; min-height: 14px; }
+    .btn-operacion {
+        border: none; border-radius: 10px; padding: 12px 14px; font-weight: 700; font-size: 0.72rem;
+        color: white; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    }
+    .btn-operacion:disabled { background: #b8c4cf !important; cursor: not-allowed; }
+    .btn-inicio { background: #2e7d32; }
+    .btn-fin { background: #c62828; }
+
     .lista-bl-item {
         border: 1px solid var(--border-light); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
     }
@@ -214,6 +239,27 @@
             <div class="card-detalle">
                 <div class="ficha-titulo"><span class="emoji">📦</span><h2 id="contenedorNombreTitulo">—</h2></div>
                 <p class="ficha-sub" id="contenedorAgenciaSub">—</p>
+
+                <div class="card-operacion">
+                    <h3>⏱️ Registro de Operación</h3>
+                    <div class="fila-operacion">
+                        <div class="campo-operacion">
+                            <label>Hora de Inicio</label>
+                            <input type="text" id="horaInicioInput" inputmode="numeric" placeholder="00:00" maxlength="5">
+                            <span class="operacion-meta" id="inicioMeta"></span>
+                        </div>
+                        <button class="btn-operacion btn-inicio" id="btnInicioOperacion">🟢 INICIO OPERACIÓN</button>
+                    </div>
+                    <div class="fila-operacion">
+                        <div class="campo-operacion">
+                            <label>Hora de Finalización</label>
+                            <input type="text" id="horaFinInput" inputmode="numeric" placeholder="00:00" maxlength="5">
+                            <span class="operacion-meta" id="finMeta"></span>
+                        </div>
+                        <button class="btn-operacion btn-fin" id="btnFinOperacion">🔴 FINALIZACIÓN OPERACIÓN</button>
+                    </div>
+                </div>
+
                 <div id="contenedorListaBL"></div>
             </div>
         </div>
@@ -433,6 +479,107 @@ function buscar(queryOriginal) {
 }
 
 // ============ VISTA: DETALLE DE CONTENEDOR ============
+// ============ REGISTRO DE OPERACIÓN (Inicio / Finalización) ============
+let contenedorActualOperacion = null;
+
+// Convierte lo que se va escribiendo a formato de hora militar HH:MM en tiempo real —
+// si la persona escribe "0810" (solo números, sin dos puntos), lo va acomodando solo a
+// "08:10" a medida que teclea, sin que tenga que escribir el símbolo ":" ella misma.
+function formatearHoraEnVivo(el) {
+    let digitos = el.value.replace(/\D/g, '').slice(0, 4);
+    let resultado = digitos;
+    if (digitos.length >= 3) {
+        resultado = digitos.slice(0, 2) + ':' + digitos.slice(2);
+    }
+    el.value = resultado;
+}
+
+function horaValida(hora) {
+    const m = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.exec(hora);
+    return !!m;
+}
+
+async function cargarOperacion(contenedor) {
+    const inicioInput = document.getElementById('horaInicioInput');
+    const finInput = document.getElementById('horaFinInput');
+    const inicioMeta = document.getElementById('inicioMeta');
+    const finMeta = document.getElementById('finMeta');
+    const btnInicio = document.getElementById('btnInicioOperacion');
+    const btnFin = document.getElementById('btnFinOperacion');
+
+    // Estado por defecto: campos libres, sin nada guardado todavía.
+    inicioInput.value = ''; inicioInput.disabled = false; inicioMeta.textContent = '';
+    finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
+    btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
+    btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
+
+    const hoy = new Date().toISOString().slice(0, 10);
+    const { data, error } = await sb.from('operaciones_contenedor')
+        .select('*').eq('contenedor', contenedor).eq('fecha', hoy).maybeSingle();
+
+    if (error) { console.warn('No se pudo cargar el estado de la operación:', error.message); return; }
+    if (!data) return;
+
+    if (data.hora_inicio) {
+        inicioInput.value = data.hora_inicio;
+        inicioInput.disabled = true;
+        inicioMeta.textContent = `Iniciado por ${data.iniciado_por || '—'}`;
+        btnInicio.disabled = true;
+        btnInicio.textContent = '✅ OPERACIÓN INICIADA';
+    }
+    if (data.hora_fin) {
+        finInput.value = data.hora_fin;
+        finInput.disabled = true;
+        finMeta.textContent = `Finalizado por ${data.finalizado_por || '—'}`;
+        btnFin.disabled = true;
+        btnFin.textContent = '✅ OPERACIÓN FINALIZADA';
+    }
+}
+
+async function marcarOperacion(tipo) {
+    const esInicio = tipo === 'inicio';
+    const input = document.getElementById(esInicio ? 'horaInicioInput' : 'horaFinInput');
+    const btn = document.getElementById(esInicio ? 'btnInicioOperacion' : 'btnFinOperacion');
+    const meta = document.getElementById(esInicio ? 'inicioMeta' : 'finMeta');
+    const hora = input.value.trim();
+
+    if (!horaValida(hora)) {
+        mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10 o 14:50', 4000);
+        return;
+    }
+
+    const sesion = (await sb.auth.getSession()).data.session;
+    const username = sesion ? sesion.user.email.split('@')[0].toUpperCase() : 'DESCONOCIDO';
+    const hoy = new Date().toISOString().slice(0, 10);
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Guardando...';
+
+    const cambios = esInicio
+        ? { contenedor: contenedorActualOperacion, fecha: hoy, hora_inicio: hora, iniciado_por: username, iniciado_en: new Date().toISOString() }
+        : { contenedor: contenedorActualOperacion, fecha: hoy, hora_fin: hora, finalizado_por: username, finalizado_en: new Date().toISOString() };
+
+    const { error } = await sb.from('operaciones_contenedor')
+        .upsert(cambios, { onConflict: 'contenedor,fecha' });
+
+    if (error) {
+        mostrarToast('❌ ' + error.message, 5000);
+        btn.disabled = false;
+        btn.textContent = esInicio ? '🟢 INICIO OPERACIÓN' : '🔴 FINALIZACIÓN OPERACIÓN';
+        return;
+    }
+
+    input.disabled = true;
+    meta.textContent = `${esInicio ? 'Iniciado' : 'Finalizado'} por ${username}`;
+    btn.textContent = esInicio ? '✅ OPERACIÓN INICIADA' : '✅ OPERACIÓN FINALIZADA';
+    mostrarToast(`✅ ${esInicio ? 'Inicio' : 'Finalización'} de operación registrado — ${hora}`);
+}
+
+document.getElementById('horaInicioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
+document.getElementById('horaFinInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
+document.getElementById('btnInicioOperacion').onclick = () => marcarOperacion('inicio');
+document.getElementById('btnFinOperacion').onclick = () => marcarOperacion('fin');
+
 function mostrarContenedor(contenedor) {
     const info = indiceContenedores.get(contenedor);
     if (!info) return;
@@ -452,6 +599,8 @@ function mostrarContenedor(contenedor) {
         </div>`).join('');
     document.getElementById('searchInput').value = contenedor;
     document.getElementById('btnLimpiarBusqueda').classList.remove('hidden');
+    contenedorActualOperacion = contenedor;
+    cargarOperacion(contenedor);
 }
 
 // ============ VISTA: CONTENEDORES DE UNA AGENCIA ============
