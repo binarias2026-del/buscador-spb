@@ -146,6 +146,36 @@
     .lista-tab-item .hora-marca { font-size: 0.72rem; font-weight: 700; color: var(--text-dark); text-align: right; }
     .lista-tab-vacia { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.85rem; }
 
+    .agencia-acordeon { border: 1px solid var(--border-light); border-radius: 14px; margin-bottom: 10px; overflow: hidden; background: white; }
+    .agencia-acordeon-header {
+        width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px;
+        background: white; border: none; cursor: pointer; text-align: left;
+    }
+    .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
+    .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+    .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
+    .agencia-acordeon-body.abierto { display: block; }
+    .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
+
+    .contenedor-acordeon { border-radius: 10px; margin-bottom: 6px; overflow: hidden; border-left: 5px solid transparent; }
+    .contenedor-acordeon.semaforo-rojo { background: #ffebee; border-left-color: #c62828; }
+    .contenedor-acordeon.semaforo-amarillo { background: #fff8e1; border-left-color: #f9a825; }
+    .contenedor-acordeon.semaforo-verde { background: #e8f5e9; border-left-color: #2e7d32; }
+    .contenedor-acordeon-header {
+        width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: none;
+        border: none; cursor: pointer; text-align: left;
+    }
+    .contenedor-acordeon-header .punto-semaforo { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .semaforo-rojo .punto-semaforo { background: #c62828; }
+    .semaforo-amarillo .punto-semaforo { background: #f9a825; }
+    .semaforo-verde .punto-semaforo { background: #2e7d32; }
+    .contenedor-acordeon-header .texto { flex: 1; min-width: 0; }
+    .contenedor-acordeon-header .nombre-cont { font-weight: 700; font-size: 0.84rem; color: var(--text-dark); }
+    .contenedor-acordeon-header .estado-cont { font-size: 0.68rem; color: var(--text-muted); }
+    .contenedor-acordeon-body { display: none; padding: 0 12px 12px 12px; }
+    .contenedor-acordeon-body.abierto { display: block; }
+    .contenedor-acordeon-body .lista-bl-item { background: white; }
+
     #estadoVacio { text-align: center; padding: 60px 20px; color: var(--text-muted); }
     #estadoVacio .emoji-grande { font-size: 3rem; margin-bottom: 12px; }
     #estadoVacio h2 { font-size: 1rem; color: var(--text-dark); margin: 0 0 6px 0; }
@@ -283,9 +313,13 @@
                 <button class="tab-btn" id="tabBtnFinalizados" data-tab="finalizados">
                     ✅ Finalizados <span class="tab-contador" id="contadorFinalizados">0</span>
                 </button>
+                <button class="tab-btn" id="tabBtnAgencias" data-tab="agencias">
+                    🏢 Por Agencia
+                </button>
             </div>
             <div id="listaEnOperacion" class="lista-tab"></div>
             <div id="listaFinalizados" class="lista-tab hidden"></div>
+            <div id="listaPorAgencia" class="lista-tab hidden"></div>
         </div>
 
         <div id="estadoVacio">
@@ -477,6 +511,7 @@ async function sincronizar(silencioso = false) {
         }
 
         renderizarPestañasPrincipales();
+        renderizarPorAgencia();
         if (!silencioso) mostrarToast(`✅ Sincronizado: ${indiceContenedores.size} contenedores`);
     } catch (e) {
         syncBar.textContent = '⚠️ No se pudo sincronizar — revisa tu conexión';
@@ -591,11 +626,96 @@ function renderizarPestañasPrincipales() {
 function cambiarPestañaPrincipal(tab) {
     document.getElementById('tabBtnOperacion').classList.toggle('activo', tab === 'operacion');
     document.getElementById('tabBtnFinalizados').classList.toggle('activo', tab === 'finalizados');
+    document.getElementById('tabBtnAgencias').classList.toggle('activo', tab === 'agencias');
     document.getElementById('listaEnOperacion').classList.toggle('hidden', tab !== 'operacion');
     document.getElementById('listaFinalizados').classList.toggle('hidden', tab !== 'finalizados');
+    document.getElementById('listaPorAgencia').classList.toggle('hidden', tab !== 'agencias');
 }
 document.getElementById('tabBtnOperacion').onclick = () => cambiarPestañaPrincipal('operacion');
 document.getElementById('tabBtnFinalizados').onclick = () => cambiarPestañaPrincipal('finalizados');
+document.getElementById('tabBtnAgencias').onclick = () => cambiarPestañaPrincipal('agencias');
+
+// Semáforo de 3 colores para la pestaña "Por Agencia": rojo = no ha iniciado, amarillo =
+// en operación, verde = finalizado. Es un esquema propio de ESTA pestaña — las otras dos
+// (En Operación / Finalizados) ya están filtradas de antemano y no lo necesitan.
+function semaforoContenedor(contenedor) {
+    const estado = estadoOperacion(contenedor);
+    if (estado === 'finalizado') return { clase: 'semaforo-verde', texto: 'Finalizado' };
+    if (estado === 'iniciado') return { clase: 'semaforo-amarillo', texto: 'En operación' };
+    return { clase: 'semaforo-rojo', texto: 'Sin iniciar' };
+}
+
+// Arma el acordeón: Agencia (nivel 1, se abre/cierra al tocarla) → Contenedores de esa
+// agencia (nivel 2, cada uno con su color) → al tocar un contenedor, se despliega ahí
+// mismo el detalle de sus BLs, sin salir de esta pantalla — y se cierra tocándolo de nuevo.
+function renderizarPorAgencia() {
+    const cont = document.getElementById('listaPorAgencia');
+    if (indiceContenedores.size === 0) { cont.innerHTML = ''; return; }
+
+    const porAgencia = new Map(); // codigo -> { nombre, contenedores: [...] }
+    for (const [contenedor, info] of indiceContenedores.entries()) {
+        if (!porAgencia.has(info.agenciaCodigo)) {
+            porAgencia.set(info.agenciaCodigo, { nombre: info.agenciaNombre, contenedores: [] });
+        }
+        porAgencia.get(info.agenciaCodigo).contenedores.push(contenedor);
+    }
+
+    const agenciasOrdenadas = Array.from(porAgencia.entries()).sort((a, b) => a[1].nombre.localeCompare(b[1].nombre));
+
+    cont.innerHTML = agenciasOrdenadas.map(([codigo, datos]) => {
+        const contenedoresHtml = datos.contenedores.sort().map(contenedor => {
+            const info = indiceContenedores.get(contenedor);
+            const sem = semaforoContenedor(contenedor);
+            return `
+            <div class="contenedor-acordeon ${sem.clase}" data-contenedor-acordeon="${contenedor}">
+                <button class="contenedor-acordeon-header" data-toggle-contenedor="${contenedor}">
+                    <span class="punto-semaforo"></span>
+                    <div class="texto">
+                        <div class="nombre-cont">${contenedor}</div>
+                        <div class="estado-cont">${sem.texto} · ${info.registros.length} BL</div>
+                    </div>
+                    <span class="flecha-plegable">▾</span>
+                </button>
+                <div class="contenedor-acordeon-body" id="cuerpoAcordeon-${contenedor}">
+                    ${renderizarBLsHTML(info.registros)}
+                </div>
+            </div>`;
+        }).join('');
+
+        return `
+        <div class="agencia-acordeon">
+            <button class="agencia-acordeon-header" data-toggle-agencia="${codigo}">
+                <div>
+                    <div class="nombre-agencia">🏢 ${datos.nombre}</div>
+                    <div class="conteo-agencia">${datos.contenedores.length} contenedor(es)</div>
+                </div>
+                <span class="flecha-plegable">▾</span>
+            </button>
+            <div class="agencia-acordeon-body" id="cuerpoAgencia-${codigo}">
+                ${contenedoresHtml}
+            </div>
+        </div>`;
+    }).join('');
+
+    cont.querySelectorAll('[data-toggle-agencia]').forEach(btn => {
+        btn.onclick = () => {
+            const codigo = btn.getAttribute('data-toggle-agencia');
+            const body = document.getElementById('cuerpoAgencia-' + codigo);
+            const flecha = btn.querySelector('.flecha-plegable');
+            body.classList.toggle('abierto');
+            flecha.classList.toggle('abierta');
+        };
+    });
+    cont.querySelectorAll('[data-toggle-contenedor]').forEach(btn => {
+        btn.onclick = () => {
+            const contenedor = btn.getAttribute('data-toggle-contenedor');
+            const body = document.getElementById('cuerpoAcordeon-' + contenedor);
+            const flecha = btn.querySelector('.flecha-plegable');
+            body.classList.toggle('abierto');
+            flecha.classList.toggle('abierta');
+        };
+    });
+}
 
 function buscar(queryOriginal) {
     const query = queryOriginal.trim();
@@ -770,6 +890,7 @@ async function marcarOperacion(tipo) {
     const opExistente = operacionesPorContenedor.get(contenedorActualOperacion) || {};
     operacionesPorContenedor.set(contenedorActualOperacion, { ...opExistente, ...cambios });
     renderizarPestañasPrincipales();
+    renderizarPorAgencia();
 }
 
 document.getElementById('horaInicioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
@@ -853,15 +974,8 @@ document.getElementById('horaFuncionarioInput').addEventListener('input', (e) =>
 document.getElementById('btnAgregarFuncionario').onclick = agregarFuncionario;
 document.getElementById('toggleFuncionarios').onclick = () => alternarSeccion('cuerpoFuncionarios', 'flechaFuncionarios');
 
-function mostrarContenedor(contenedor) {
-    const info = indiceContenedores.get(contenedor);
-    if (!info) return;
-    ocultarTodasLasVistas();
-    document.getElementById('vistaContenedor').style.display = 'block';
-    document.getElementById('contenedorNombreTitulo').textContent = contenedor;
-    document.getElementById('contenedorAgenciaSub').textContent = info.agenciaNombre;
-    document.getElementById('contadorBL').textContent = info.registros.length;
-    document.getElementById('contenedorListaBL').innerHTML = info.registros.map((rec, i) => `
+function renderizarBLsHTML(registros) {
+    return registros.map((rec, i) => `
         <div class="lista-bl-item">
             <div class="bl-nombre">${(rec.Bl && rec.Bl.toString().trim()) ? rec.Bl : `Sin BL (item ${i + 1})`}</div>
             <div class="bl-datos">
@@ -871,6 +985,17 @@ function mostrarContenedor(contenedor) {
                 <span>⚖️ ${rec.Peso || '—'} kg</span>
             </div>
         </div>`).join('');
+}
+
+function mostrarContenedor(contenedor) {
+    const info = indiceContenedores.get(contenedor);
+    if (!info) return;
+    ocultarTodasLasVistas();
+    document.getElementById('vistaContenedor').style.display = 'block';
+    document.getElementById('contenedorNombreTitulo').textContent = contenedor;
+    document.getElementById('contenedorAgenciaSub').textContent = info.agenciaNombre;
+    document.getElementById('contadorBL').textContent = info.registros.length;
+    document.getElementById('contenedorListaBL').innerHTML = renderizarBLsHTML(info.registros);
     // Las 3 secciones empiezan cerradas — la persona decide cuál quiere ver.
     document.getElementById('cuerpoOperacion').classList.add('hidden');
     document.getElementById('flechaOperacion').classList.remove('abierta');
@@ -930,9 +1055,19 @@ function volverABusqueda() {
     document.getElementById('btnLimpiarBusqueda').classList.add('hidden');
     document.getElementById('searchInput').focus();
     renderizarPestañasPrincipales();
+    renderizarPorAgencia();
 }
 
 // ============ EVENTOS ============
+// Usuario y contraseña se escriben siempre en mayúscula sostenida, sin importar cómo
+// las teclee la persona — igual que en el sistema principal de Desembalaje.
+['loginUser', 'loginPass'].forEach(id => {
+    document.getElementById(id).addEventListener('input', (e) => {
+        const inicio = e.target.selectionStart, fin = e.target.selectionEnd;
+        e.target.value = e.target.value.toUpperCase();
+        e.target.setSelectionRange(inicio, fin);
+    });
+});
 document.getElementById('btnLogin').onclick = iniciarSesion;
 document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') iniciarSesion(); });
 document.getElementById('loginUser').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
@@ -948,6 +1083,7 @@ searchInput.addEventListener('input', (e) => {
     document.getElementById('btnLimpiarBusqueda').classList.toggle('hidden', !e.target.value);
     if (!e.target.value.trim()) {
         renderizarPestañasPrincipales();
+        renderizarPorAgencia();
     } else {
         buscar(e.target.value);
     }
