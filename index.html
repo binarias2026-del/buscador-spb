@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SPB · Buscador de Contenedores</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#003366">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+    :root {
+        --primary-blue: #003366;
+        --accent-blue: #0077B6;
+        --gold: #C9A03D;
+        --gray-bg: #F4F7FC;
+        --text-dark: #1E2F3E;
+        --text-muted: #5A7086;
+        --border-light: #DCE5F0;
+        --white: #FFFFFF;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: var(--gray-bg); color: var(--text-dark);
+        -webkit-tap-highlight-color: transparent;
+    }
+    .hidden { display: none !important; }
+
+    /* ---------- LOGIN ---------- */
+    #loginScreen {
+        min-height: 100vh; display: flex; align-items: center; justify-content: center;
+        padding: 24px; background: linear-gradient(160deg, var(--primary-blue) 0%, #001a33 100%);
+    }
+    .login-card {
+        background: var(--white); border-radius: 20px; padding: 36px 28px; width: 100%; max-width: 360px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;
+    }
+    .login-card img { width: 72px; height: 72px; margin-bottom: 12px; }
+    .login-card h1 { font-size: 1.15rem; margin: 0 0 4px 0; color: var(--primary-blue); }
+    .login-card p { font-size: 0.78rem; color: var(--text-muted); margin: 0 0 24px 0; }
+    .login-card input {
+        width: 100%; padding: 13px 16px; border: 1.5px solid var(--border-light); border-radius: 12px;
+        font-size: 0.95rem; margin-bottom: 12px; background: var(--gray-bg); color: var(--text-dark);
+    }
+    .login-card input:focus { outline: none; border-color: var(--accent-blue); background: white; }
+    .login-card button {
+        width: 100%; padding: 14px; border: none; border-radius: 12px; background: var(--primary-blue);
+        color: white; font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-top: 6px;
+    }
+    .login-card button:active { transform: scale(0.98); }
+    #loginError { color: #c62828; font-size: 0.78rem; margin-top: 10px; min-height: 16px; }
+
+    /* ---------- APP ---------- */
+    #appScreen { min-height: 100vh; display: flex; flex-direction: column; }
+    header {
+        background: var(--primary-blue); color: white; padding: 14px 18px;
+        display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 20;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+    header img { width: 38px; height: 38px; border-radius: 50%; background: white; flex-shrink: 0; }
+    header .titulo { flex: 1; min-width: 0; }
+    header .titulo h1 { font-size: 0.95rem; margin: 0; line-height: 1.2; }
+    header .titulo p { font-size: 0.68rem; margin: 0; color: #b8cbe0; }
+    header button {
+        background: rgba(255,255,255,0.12); border: none; color: white; width: 36px; height: 36px;
+        border-radius: 50%; font-size: 1rem; cursor: pointer; flex-shrink: 0;
+    }
+    header button:active { transform: scale(0.92); }
+
+    #syncBar {
+        font-size: 0.72rem; color: var(--text-muted); text-align: center; padding: 6px;
+        background: #EAF2FA; border-bottom: 1px solid var(--border-light);
+    }
+    #syncBar.desactualizado { background: #FFF3E0; color: #8a5a00; }
+
+    main { flex: 1; padding: 18px; max-width: 640px; width: 100%; margin: 0 auto; }
+
+    .search-wrap { position: relative; margin-bottom: 18px; }
+    #searchInput {
+        width: 100%; padding: 16px 44px 16px 44px; font-size: 1.05rem; border: 2px solid var(--border-light);
+        border-radius: 16px; background: white; color: var(--text-dark);
+    }
+    #searchInput:focus { outline: none; border-color: var(--accent-blue); }
+    .search-wrap .icono-lupa {
+        position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.5;
+    }
+    .search-wrap .btn-limpiar {
+        position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none;
+        font-size: 1.3rem; color: var(--text-muted); cursor: pointer; padding: 6px;
+    }
+
+    #predictivo {
+        position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: white; border-radius: 14px;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15); border: 1px solid var(--border-light); max-height: 60vh;
+        overflow-y: auto; z-index: 30;
+    }
+    .predictivo-seccion-titulo {
+        font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+        letter-spacing: 0.4px; padding: 10px 16px 4px 16px;
+    }
+    .predictivo-item {
+        display: flex; align-items: center; gap: 10px; padding: 11px 16px; cursor: pointer; border-top: 1px solid #f0f3f7;
+    }
+    .predictivo-item:hover, .predictivo-item.activo { background: var(--gray-bg); }
+    .predictivo-item .emoji { font-size: 1.1rem; flex-shrink: 0; }
+    .predictivo-item .texto { flex: 1; min-width: 0; }
+    .predictivo-item .principal { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
+    .predictivo-item .secundario { font-size: 0.72rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .predictivo-item .contador {
+        font-size: 0.68rem; background: var(--light-blue, #E6F0FA); color: var(--primary-blue); padding: 3px 9px;
+        border-radius: 20px; font-weight: 700; flex-shrink: 0;
+    }
+    .predictivo-vacio { padding: 20px 16px; text-align: center; color: var(--text-muted); font-size: 0.82rem; }
+
+    mark { background: #FFE9A8; color: inherit; border-radius: 3px; padding: 0 1px; }
+
+    #estadoVacio { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    #estadoVacio .emoji-grande { font-size: 3rem; margin-bottom: 12px; }
+    #estadoVacio h2 { font-size: 1rem; color: var(--text-dark); margin: 0 0 6px 0; }
+    #estadoVacio p { font-size: 0.82rem; margin: 0 0 20px 0; }
+    #estadoVacio button {
+        background: var(--primary-blue); color: white; border: none; padding: 12px 26px; border-radius: 30px;
+        font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    }
+
+    #vistaAgencia, #vistaContenedor { display: none; }
+    .card-detalle { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+    .btn-volver {
+        display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: var(--accent-blue);
+        font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 8px 0; margin-bottom: 10px;
+    }
+    .ficha-titulo { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+    .ficha-titulo .emoji { font-size: 1.8rem; }
+    .ficha-titulo h2 { margin: 0; font-size: 1.3rem; color: var(--primary-blue); }
+    .ficha-sub { color: var(--text-muted); font-size: 0.85rem; margin: 0 0 18px 42px; }
+
+    .lista-bl-item {
+        border: 1px solid var(--border-light); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+    }
+    .lista-bl-item .bl-nombre { font-weight: 700; color: var(--primary-blue); font-size: 0.88rem; margin-bottom: 4px; }
+    .lista-bl-item .bl-datos { font-size: 0.76rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+    .lista-contenedores-agencia .item-contenedor {
+        display: flex; justify-content: space-between; align-items: center; padding: 13px 14px;
+        border: 1px solid var(--border-light); border-radius: 12px; margin-bottom: 8px; cursor: pointer;
+    }
+    .lista-contenedores-agencia .item-contenedor:active { background: var(--gray-bg); }
+    .lista-contenedores-agencia .item-contenedor .nombre { font-weight: 700; color: var(--primary-blue); font-size: 0.88rem; }
+    .lista-contenedores-agencia .item-contenedor .meta { font-size: 0.72rem; color: var(--text-muted); }
+
+    #toast {
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--primary-blue);
+        color: white; padding: 11px 20px; border-radius: 30px; font-size: 0.82rem; box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        z-index: 100; opacity: 0; transition: opacity 0.25s; pointer-events: none; max-width: 90vw; text-align: center;
+    }
+    #toast.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginScreen">
+    <div class="login-card">
+        <img src="icon-192.png" alt="SPB">
+        <h1>Buscador de Contenedores</h1>
+        <p>Sociedad Portuaria Buenaventura</p>
+        <input type="text" id="loginUser" placeholder="Usuario" autocomplete="username">
+        <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
+        <button id="btnLogin">Ingresar</button>
+        <div id="loginError"></div>
+    </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appScreen" class="hidden">
+    <header>
+        <img src="icon-192.png" alt="SPB">
+        <div class="titulo">
+            <h1>Buscador de Contenedores</h1>
+            <p id="headerSub">SPB · Sociedad Portuaria Buenaventura</p>
+        </div>
+        <button id="btnSync" title="Sincronizar">🔄</button>
+        <button id="btnLogout" title="Salir">🚪</button>
+    </header>
+    <div id="syncBar">Sin sincronizar todavía</div>
+
+    <main>
+        <div class="search-wrap">
+            <span class="icono-lupa">🔍</span>
+            <input type="text" id="searchInput" placeholder="Busca por contenedor o agencia..." autocomplete="off">
+            <button class="btn-limpiar hidden" id="btnLimpiarBusqueda">&times;</button>
+            <div id="predictivo" class="hidden"></div>
+        </div>
+
+        <div id="estadoVacio">
+            <div class="emoji-grande">📭</div>
+            <h2>Todavía no hay datos para buscar</h2>
+            <p>Sincroniza para traer los contenedores y agencias cargados en el sistema.</p>
+            <button id="btnSyncVacio">🔄 Sincronizar ahora</button>
+        </div>
+
+        <div id="vistaAgencia">
+            <button class="btn-volver" id="btnVolverDeAgencia">← Volver a la búsqueda</button>
+            <div class="card-detalle">
+                <div class="ficha-titulo"><span class="emoji">🏢</span><h2 id="agenciaNombreTitulo">—</h2></div>
+                <p class="ficha-sub" id="agenciaCodigoSub">—</p>
+                <div id="agenciaListaContenedores" class="lista-contenedores-agencia"></div>
+            </div>
+        </div>
+
+        <div id="vistaContenedor">
+            <button class="btn-volver" id="btnVolverDeContenedor">← Volver a la búsqueda</button>
+            <div class="card-detalle">
+                <div class="ficha-titulo"><span class="emoji">📦</span><h2 id="contenedorNombreTitulo">—</h2></div>
+                <p class="ficha-sub" id="contenedorAgenciaSub">—</p>
+                <div id="contenedorListaBL"></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.0/supabase.min.js"></script>
+<script>
+// ============================================================================
+// CONFIGURACIÓN — mismo proyecto de Supabase que la app principal de
+// Desconsolidación de Carga, para leer los mismos contenedores y agencias.
+// ============================================================================
+const SUPABASE_URL = 'https://zqrcxqjjycmqkolqasrb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxcmN4cWpqeWNtcWtvbHFhc3JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTU4MTAsImV4cCI6MjEwMDMzMTgxMH0.bJBmUiSNPA6KVj9iHMrnybVJt7in04NjIzqOZg955L8';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allRecords = [];
+let agenciasList = [];
+let indiceContenedores = new Map(); // Contenedor -> { agenciaNombre, agenciaCodigo, registros: [...] }
+let ultimaSincronizacion = null;
+
+function emailDesdeUsuario(username) {
+    return `${username.trim().toLowerCase()}@spbapp.com`;
+}
+
+function mostrarToast(msg, duracionMs = 3000) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('visible');
+    clearTimeout(window.__toastTimeout);
+    window.__toastTimeout = setTimeout(() => el.classList.remove('visible'), duracionMs);
+}
+
+// ============ LOGIN ============
+async function iniciarSesion() {
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+    const errEl = document.getElementById('loginError');
+    errEl.textContent = '';
+    if (!username || !password) { errEl.textContent = 'Ingresa usuario y contraseña'; return; }
+
+    const btn = document.getElementById('btnLogin');
+    btn.disabled = true; btn.textContent = 'Ingresando...';
+
+    const { data, error } = await sb.auth.signInWithPassword({
+        email: emailDesdeUsuario(username),
+        password
+    });
+
+    btn.disabled = false; btn.textContent = 'Ingresar';
+
+    if (error) {
+        errEl.textContent = 'Usuario o contraseña incorrectos';
+        return;
+    }
+
+    document.getElementById('headerSub').textContent = `Sesión: ${username.toUpperCase()}`;
+    mostrarApp();
+}
+
+async function cerrarSesion() {
+    await sb.auth.signOut();
+    document.getElementById('appScreen').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    allRecords = [];
+    indiceContenedores.clear();
+}
+
+async function mostrarApp() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('appScreen').classList.remove('hidden');
+    await sincronizar(true);
+}
+
+// ============ SINCRONIZACIÓN (lee lo que cargó la app principal) ============
+async function sincronizar(silencioso = false) {
+    const syncBar = document.getElementById('syncBar');
+    if (!silencioso) syncBar.textContent = '🔄 Sincronizando...';
+
+    try {
+        const [{ data: excelData, error: excelErr }, { data: agData, error: agErr }] = await Promise.all([
+            sb.from('excel_cargado').select('*').eq('id', 1).maybeSingle(),
+            sb.from('agencias').select('*')
+        ]);
+
+        if (excelErr) throw excelErr;
+        if (agErr) throw agErr;
+
+        agenciasList = agData || [];
+        allRecords = (excelData && excelData.registros) ? excelData.registros : [];
+        construirIndice();
+
+        ultimaSincronizacion = new Date();
+        actualizarBarraSincronizacion();
+
+        if (allRecords.length === 0) {
+            document.getElementById('estadoVacio').classList.remove('hidden');
+        } else {
+            document.getElementById('estadoVacio').classList.add('hidden');
+        }
+
+        if (!silencioso) mostrarToast(`✅ Sincronizado: ${indiceContenedores.size} contenedores`);
+    } catch (e) {
+        syncBar.textContent = '⚠️ No se pudo sincronizar — revisa tu conexión';
+        syncBar.classList.add('desactualizado');
+        mostrarToast('❌ ' + e.message, 5000);
+    }
+}
+
+function actualizarBarraSincronizacion() {
+    const syncBar = document.getElementById('syncBar');
+    syncBar.classList.remove('desactualizado');
+    const hora = ultimaSincronizacion.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    syncBar.textContent = `${indiceContenedores.size} contenedores · Sincronizado a las ${hora}`;
+}
+
+function construirIndice() {
+    indiceContenedores.clear();
+    for (const rec of allRecords) {
+        const cont = (rec.Contenedor || '').toString().trim();
+        if (!cont) continue;
+        if (!indiceContenedores.has(cont)) {
+            const codigo = (rec.AgenciaCodigo || '').toString().trim();
+            const agencia = agenciasList.find(a => a.codigo === codigo);
+            indiceContenedores.set(cont, {
+                agenciaNombre: agencia ? agencia.nombre : (codigo ? `Agencia ${codigo}` : 'Sin agencia asignada'),
+                agenciaCodigo: codigo,
+                registros: []
+            });
+        }
+        indiceContenedores.get(cont).registros.push(rec);
+    }
+}
+
+// ============ BÚSQUEDA PREDICTIVA ============
+function normalizar(t) {
+    return (t || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function resaltar(texto, query) {
+    if (!query) return texto;
+    const idx = normalizar(texto).indexOf(normalizar(query));
+    if (idx === -1) return texto;
+    return texto.slice(0, idx) + '<mark>' + texto.slice(idx, idx + query.length) + '</mark>' + texto.slice(idx + query.length);
+}
+
+function buscar(queryOriginal) {
+    const query = queryOriginal.trim();
+    const predictivo = document.getElementById('predictivo');
+    if (!query) { predictivo.classList.add('hidden'); return; }
+    const q = normalizar(query);
+
+    const contenedoresMatch = [];
+    for (const [contenedor, info] of indiceContenedores.entries()) {
+        if (normalizar(contenedor).includes(q)) {
+            contenedoresMatch.push({ contenedor, info });
+        }
+    }
+    contenedoresMatch.sort((a, b) => a.contenedor.localeCompare(b.contenedor));
+
+    const agenciasVistas = new Set();
+    const agenciasMatch = [];
+    for (const info of indiceContenedores.values()) {
+        if (agenciasVistas.has(info.agenciaCodigo)) continue;
+        if (normalizar(info.agenciaNombre).includes(q)) {
+            agenciasVistas.add(info.agenciaCodigo);
+            const totalContenedores = Array.from(indiceContenedores.values()).filter(i => i.agenciaCodigo === info.agenciaCodigo).length;
+            agenciasMatch.push({ nombre: info.agenciaNombre, codigo: info.agenciaCodigo, totalContenedores });
+        }
+    }
+    agenciasMatch.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    let html = '';
+    if (agenciasMatch.length > 0) {
+        html += `<div class="predictivo-seccion-titulo">🏢 Agencias</div>`;
+        html += agenciasMatch.slice(0, 5).map(a => `
+            <div class="predictivo-item" data-tipo="agencia" data-codigo="${a.codigo}">
+                <span class="emoji">🏢</span>
+                <div class="texto">
+                    <div class="principal">${resaltar(a.nombre, query)}</div>
+                    <div class="secundario">Código ${a.codigo || '—'}</div>
+                </div>
+                <span class="contador">${a.totalContenedores}</span>
+            </div>`).join('');
+    }
+    if (contenedoresMatch.length > 0) {
+        html += `<div class="predictivo-seccion-titulo">📦 Contenedores</div>`;
+        html += contenedoresMatch.slice(0, 8).map(({ contenedor, info }) => `
+            <div class="predictivo-item" data-tipo="contenedor" data-contenedor="${contenedor}">
+                <span class="emoji">📦</span>
+                <div class="texto">
+                    <div class="principal">${resaltar(contenedor, query)}</div>
+                    <div class="secundario">${info.agenciaNombre}</div>
+                </div>
+                <span class="contador">${info.registros.length} BL</span>
+            </div>`).join('');
+    }
+    if (!html) {
+        html = `<div class="predictivo-vacio">Sin resultados para "${query}"</div>`;
+    }
+    predictivo.innerHTML = html;
+    predictivo.classList.remove('hidden');
+
+    predictivo.querySelectorAll('.predictivo-item').forEach(item => {
+        item.onclick = () => {
+            if (item.getAttribute('data-tipo') === 'contenedor') {
+                mostrarContenedor(item.getAttribute('data-contenedor'));
+            } else {
+                mostrarAgencia(item.getAttribute('data-codigo'));
+            }
+        };
+    });
+}
+
+// ============ VISTA: DETALLE DE CONTENEDOR ============
+function mostrarContenedor(contenedor) {
+    const info = indiceContenedores.get(contenedor);
+    if (!info) return;
+    ocultarTodasLasVistas();
+    document.getElementById('vistaContenedor').style.display = 'block';
+    document.getElementById('contenedorNombreTitulo').textContent = contenedor;
+    document.getElementById('contenedorAgenciaSub').textContent = info.agenciaNombre;
+    document.getElementById('contenedorListaBL').innerHTML = info.registros.map((rec, i) => `
+        <div class="lista-bl-item">
+            <div class="bl-nombre">${(rec.Bl && rec.Bl.toString().trim()) ? rec.Bl : `Sin BL (item ${i + 1})`}</div>
+            <div class="bl-datos">
+                <span>📦 ${rec.Cantidad || '—'}</span>
+                <span>📋 ${rec.Packing || '—'}</span>
+                <span>🚢 ${rec.Linea || '—'}</span>
+                <span>⚖️ ${rec.Peso || '—'} kg</span>
+            </div>
+        </div>`).join('');
+    document.getElementById('searchInput').value = contenedor;
+    document.getElementById('btnLimpiarBusqueda').classList.remove('hidden');
+}
+
+// ============ VISTA: CONTENEDORES DE UNA AGENCIA ============
+function mostrarAgencia(codigo) {
+    const entradas = Array.from(indiceContenedores.entries()).filter(([, info]) => info.agenciaCodigo === codigo);
+    if (entradas.length === 0) return;
+    ocultarTodasLasVistas();
+    document.getElementById('vistaAgencia').style.display = 'block';
+    document.getElementById('agenciaNombreTitulo').textContent = entradas[0][1].agenciaNombre;
+    document.getElementById('agenciaCodigoSub').textContent = `Código ${codigo || '—'} · ${entradas.length} contenedor(es)`;
+    document.getElementById('agenciaListaContenedores').innerHTML = entradas
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([contenedor, info]) => `
+            <div class="item-contenedor" data-contenedor="${contenedor}">
+                <div>
+                    <div class="nombre">${contenedor}</div>
+                    <div class="meta">${info.registros.length} BL</div>
+                </div>
+                <span>→</span>
+            </div>`).join('');
+    document.getElementById('agenciaListaContenedores').querySelectorAll('.item-contenedor').forEach(item => {
+        item.onclick = () => mostrarContenedor(item.getAttribute('data-contenedor'));
+    });
+}
+
+function ocultarTodasLasVistas() {
+    document.getElementById('vistaAgencia').style.display = 'none';
+    document.getElementById('vistaContenedor').style.display = 'none';
+    document.getElementById('predictivo').classList.add('hidden');
+}
+
+function volverABusqueda() {
+    ocultarTodasLasVistas();
+    document.getElementById('searchInput').value = '';
+    document.getElementById('btnLimpiarBusqueda').classList.add('hidden');
+    document.getElementById('searchInput').focus();
+}
+
+// ============ EVENTOS ============
+document.getElementById('btnLogin').onclick = iniciarSesion;
+document.getElementById('loginPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') iniciarSesion(); });
+document.getElementById('loginUser').addEventListener('keydown', (e) => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
+document.getElementById('btnLogout').onclick = cerrarSesion;
+document.getElementById('btnSync').onclick = () => sincronizar(false);
+document.getElementById('btnSyncVacio').onclick = () => sincronizar(false);
+document.getElementById('btnVolverDeAgencia').onclick = volverABusqueda;
+document.getElementById('btnVolverDeContenedor').onclick = volverABusqueda;
+
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', (e) => {
+    ocultarTodasLasVistas();
+    document.getElementById('btnLimpiarBusqueda').classList.toggle('hidden', !e.target.value);
+    buscar(e.target.value);
+});
+document.getElementById('btnLimpiarBusqueda').onclick = volverABusqueda;
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrap')) document.getElementById('predictivo').classList.add('hidden');
+});
+
+// Restaurar sesión si el navegador ya la tenía activa (evita pedir login cada vez)
+sb.auth.getSession().then(({ data }) => {
+    if (data.session) {
+        const username = data.session.user.email.split('@')[0];
+        document.getElementById('headerSub').textContent = `Sesión: ${username.toUpperCase()}`;
+        mostrarApp();
+    }
+});
+
+// Registrar el Service Worker (permite instalar la app y abrirla más rápido)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+}
+</script>
+</body>
+</html>
