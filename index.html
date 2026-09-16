@@ -756,7 +756,32 @@ function estadoOperacion(contenedor) {
 // inicio o una finalización, sin que haga falta buscar nada.
 function renderizarPestañasPrincipales() {
     const panel = document.getElementById('pestañasPrincipales');
-    if (indiceContenedores.size === 0) { panel.classList.add('hidden'); return; }
+    const puedeVerDashboard = rolUsuarioActual === 'admin' || rolUsuarioActual === 'super';
+
+    if (indiceContenedores.size === 0) {
+        if (!puedeVerDashboard) { panel.classList.add('hidden'); return; }
+        // No hay Excel cargado, pero el Dashboard tiene su propio histórico en Supabase
+        // (contenedores_programados / operaciones_contenedor) y NO depende del Excel
+        // actual — así que se mantiene disponible. Solo se ocultan las pestañas que sí
+        // dependen del Excel (no tendrían nada que mostrar).
+        document.getElementById('tabBtnOperacion').classList.add('hidden');
+        document.getElementById('tabBtnFinalizados').classList.add('hidden');
+        document.getElementById('tabBtnAgencias').classList.add('hidden');
+        document.getElementById('contadorOperacion').textContent = '0';
+        document.getElementById('contadorFinalizados').textContent = '0';
+        document.getElementById('listaEnOperacion').innerHTML = '';
+        document.getElementById('listaFinalizados').innerHTML = '';
+        document.getElementById('listaPorAgencia').innerHTML = '';
+        cambiarPestañaPrincipal('dashboard');
+        if (!document.getElementById('searchInput').value.trim()) panel.classList.remove('hidden');
+        return;
+    }
+
+    // Hay Excel cargado: las pestañas de Operaciones/Finalizados/Agencias vuelven a
+    // mostrarse normalmente (por si habían quedado ocultas del estado anterior).
+    document.getElementById('tabBtnOperacion').classList.remove('hidden');
+    document.getElementById('tabBtnFinalizados').classList.remove('hidden');
+    document.getElementById('tabBtnAgencias').classList.remove('hidden');
 
     const enOperacion = [];
     const finalizados = [];
