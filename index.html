@@ -113,6 +113,12 @@
     }
     .predictivo-vacio { padding: 20px 16px; text-align: center; color: var(--text-muted); font-size: 0.82rem; }
 
+    .predictivo-item.estado-iniciado { background: #e8f5e9; border-left: 4px solid #2e7d32; }
+    .predictivo-item.estado-finalizado { background: #eceff1; border-left: 4px solid #78909c; }
+    .etiqueta-estado { font-size: 0.64rem; font-weight: 700; padding: 4px 9px; border-radius: 20px; flex-shrink: 0; white-space: nowrap; }
+    .etiqueta-verde { background: #2e7d32; color: white; }
+    .etiqueta-gris { background: #78909c; color: white; }
+
     mark { background: #FFE9A8; color: inherit; border-radius: 3px; padding: 0 1px; }
 
     #estadoVacio { text-align: center; padding: 60px 20px; color: var(--text-muted); }
@@ -135,17 +141,28 @@
     .ficha-titulo h2 { margin: 0; font-size: 1.3rem; color: var(--primary-blue); }
     .ficha-sub { color: var(--text-muted); font-size: 0.85rem; margin: 0 0 18px 42px; }
 
+    .seccion-plegable { border: 1px solid var(--border-light); border-radius: 14px; margin-bottom: 12px; overflow: hidden; }
+    .seccion-plegable-header {
+        width: 100%; display: flex; justify-content: space-between; align-items: center; background: white;
+        border: none; padding: 14px 16px; font-size: 0.88rem; font-weight: 700; color: var(--primary-blue);
+        cursor: pointer; text-align: left;
+    }
+    .seccion-plegable-header:active { background: var(--gray-bg); }
+    .flecha-plegable { transition: transform 0.2s; color: var(--text-muted); }
+    .flecha-plegable.abierta { transform: rotate(180deg); }
+    .seccion-plegable-body { padding: 0 14px 14px 14px; background: white; }
+    .seccion-plegable-body.hidden { display: none; }
+
     .card-operacion {
         background: var(--gray-bg); border: 1px solid var(--border-light); border-radius: 14px;
         padding: 16px; margin-bottom: 18px;
     }
     .card-operacion h3 { margin: 0 0 12px 0; font-size: 0.88rem; color: var(--primary-blue); }
-    .fila-operacion { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
+    .fila-operacion { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
     .fila-operacion:last-child { margin-bottom: 0; }
-    .campo-operacion { flex: 1; min-width: 0; }
     .campo-operacion label { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
     .campo-operacion input {
-        width: 100%; padding: 11px 12px; border: 1.5px solid var(--border-light); border-radius: 10px;
+        width: 100%; box-sizing: border-box; height: 48px; padding: 0 12px; border: 1.5px solid var(--border-light); border-radius: 10px;
         font-size: 1.05rem; font-weight: 700; text-align: center; letter-spacing: 1px; color: var(--text-dark);
         background: white; font-variant-numeric: tabular-nums;
     }
@@ -153,8 +170,8 @@
     .campo-operacion input:disabled { background: #eef2f6; color: var(--text-muted); border-color: var(--border-light); }
     .campo-operacion .operacion-meta { display: block; font-size: 0.66rem; color: var(--text-muted); margin-top: 4px; min-height: 14px; }
     .btn-operacion {
-        border: none; border-radius: 10px; padding: 12px 14px; font-weight: 700; font-size: 0.72rem;
-        color: white; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+        width: 100%; height: 48px; box-sizing: border-box; border: none; border-radius: 10px;
+        font-weight: 700; font-size: 0.8rem; color: white; cursor: pointer;
     }
     .btn-operacion:disabled { background: #b8c4cf !important; cursor: not-allowed; }
     .btn-inicio { background: #2e7d32; }
@@ -240,27 +257,42 @@
                 <div class="ficha-titulo"><span class="emoji">📦</span><h2 id="contenedorNombreTitulo">—</h2></div>
                 <p class="ficha-sub" id="contenedorAgenciaSub">—</p>
 
-                <div class="card-operacion">
-                    <h3>⏱️ Registro de Operación</h3>
-                    <div class="fila-operacion">
-                        <div class="campo-operacion">
-                            <label>Hora de Inicio</label>
-                            <input type="text" id="horaInicioInput" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <span class="operacion-meta" id="inicioMeta"></span>
+                <div class="seccion-plegable">
+                    <button class="seccion-plegable-header" id="toggleOperacion">
+                        <span>⏱️ Registro de Operación</span>
+                        <span class="flecha-plegable" id="flechaOperacion">▾</span>
+                    </button>
+                    <div class="seccion-plegable-body hidden" id="cuerpoOperacion">
+                        <div class="card-operacion">
+                            <div class="fila-operacion">
+                                <div class="campo-operacion">
+                                    <label>Hora de Inicio</label>
+                                    <input type="text" id="horaInicioInput" inputmode="numeric" placeholder="00:00" maxlength="5">
+                                    <span class="operacion-meta" id="inicioMeta"></span>
+                                </div>
+                                <button class="btn-operacion btn-inicio" id="btnInicioOperacion">🟢 INICIO OPERACIÓN</button>
+                            </div>
+                            <div class="fila-operacion">
+                                <div class="campo-operacion">
+                                    <label>Hora de Finalización</label>
+                                    <input type="text" id="horaFinInput" inputmode="numeric" placeholder="00:00" maxlength="5">
+                                    <span class="operacion-meta" id="finMeta"></span>
+                                </div>
+                                <button class="btn-operacion btn-fin" id="btnFinOperacion">🔴 FINALIZACIÓN OPERACIÓN</button>
+                            </div>
                         </div>
-                        <button class="btn-operacion btn-inicio" id="btnInicioOperacion">🟢 INICIO OPERACIÓN</button>
-                    </div>
-                    <div class="fila-operacion">
-                        <div class="campo-operacion">
-                            <label>Hora de Finalización</label>
-                            <input type="text" id="horaFinInput" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <span class="operacion-meta" id="finMeta"></span>
-                        </div>
-                        <button class="btn-operacion btn-fin" id="btnFinOperacion">🔴 FINALIZACIÓN OPERACIÓN</button>
                     </div>
                 </div>
 
-                <div id="contenedorListaBL"></div>
+                <div class="seccion-plegable">
+                    <button class="seccion-plegable-header" id="toggleBL">
+                        <span>📋 Lista de BLs (<span id="contadorBL">0</span>)</span>
+                        <span class="flecha-plegable" id="flechaBL">▾</span>
+                    </button>
+                    <div class="seccion-plegable-body hidden" id="cuerpoBL">
+                        <div id="contenedorListaBL"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -281,6 +313,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let allRecords = [];
 let agenciasList = [];
 let indiceContenedores = new Map(); // Contenedor -> { agenciaNombre, agenciaCodigo, registros: [...] }
+let operacionesPorContenedor = new Map(); // Contenedor -> fila de operaciones_contenedor (de hoy)
 let ultimaSincronizacion = null;
 
 function emailDesdeUsuario(username) {
@@ -344,17 +377,23 @@ async function sincronizar(silencioso = false) {
     if (!silencioso) syncBar.textContent = '🔄 Sincronizando...';
 
     try {
-        const [{ data: excelData, error: excelErr }, { data: agData, error: agErr }] = await Promise.all([
+        const hoy = new Date().toISOString().slice(0, 10);
+        const [{ data: excelData, error: excelErr }, { data: agData, error: agErr }, { data: opsData, error: opsErr }] = await Promise.all([
             sb.from('excel_cargado').select('*').eq('id', 1).maybeSingle(),
-            sb.from('agencias').select('*')
+            sb.from('agencias').select('*'),
+            sb.from('operaciones_contenedor').select('*').eq('fecha', hoy)
         ]);
 
         if (excelErr) throw excelErr;
         if (agErr) throw agErr;
+        if (opsErr) throw opsErr;
 
         agenciasList = agData || [];
         allRecords = (excelData && excelData.registros) ? excelData.registros : [];
         construirIndice();
+
+        operacionesPorContenedor.clear();
+        (opsData || []).forEach(op => operacionesPorContenedor.set(op.contenedor, op));
 
         ultimaSincronizacion = new Date();
         actualizarBarraSincronizacion();
@@ -410,6 +449,14 @@ function resaltar(texto, query) {
     return texto.slice(0, idx) + '<mark>' + texto.slice(idx, idx + query.length) + '</mark>' + texto.slice(idx + query.length);
 }
 
+function estadoOperacion(contenedor) {
+    const op = operacionesPorContenedor.get(contenedor);
+    if (!op) return null;
+    if (op.hora_inicio && op.hora_fin) return 'finalizado';
+    if (op.hora_inicio) return 'iniciado';
+    return null;
+}
+
 function buscar(queryOriginal) {
     const query = queryOriginal.trim();
     const predictivo = document.getElementById('predictivo');
@@ -451,15 +498,20 @@ function buscar(queryOriginal) {
     }
     if (contenedoresMatch.length > 0) {
         html += `<div class="predictivo-seccion-titulo">📦 Contenedores</div>`;
-        html += contenedoresMatch.slice(0, 8).map(({ contenedor, info }) => `
-            <div class="predictivo-item" data-tipo="contenedor" data-contenedor="${contenedor}">
+        html += contenedoresMatch.slice(0, 8).map(({ contenedor, info }) => {
+            const estado = estadoOperacion(contenedor);
+            const claseEstado = estado === 'finalizado' ? 'estado-finalizado' : (estado === 'iniciado' ? 'estado-iniciado' : '');
+            const etiquetaEstado = estado === 'finalizado' ? '<span class="etiqueta-estado etiqueta-gris">✅ Finalizado</span>' : (estado === 'iniciado' ? '<span class="etiqueta-estado etiqueta-verde">🟢 En operación</span>' : '');
+            return `
+            <div class="predictivo-item ${claseEstado}" data-tipo="contenedor" data-contenedor="${contenedor}">
                 <span class="emoji">📦</span>
                 <div class="texto">
                     <div class="principal">${resaltar(contenedor, query)}</div>
                     <div class="secundario">${info.agenciaNombre}</div>
                 </div>
-                <span class="contador">${info.registros.length} BL</span>
-            </div>`).join('');
+                ${etiquetaEstado || `<span class="contador">${info.registros.length} BL</span>`}
+            </div>`;
+        }).join('');
     }
     if (!html) {
         html = `<div class="predictivo-vacio">Sin resultados para "${query}"</div>`;
@@ -573,6 +625,9 @@ async function marcarOperacion(tipo) {
     meta.textContent = `${esInicio ? 'Iniciado' : 'Finalizado'} por ${username}`;
     btn.textContent = esInicio ? '✅ OPERACIÓN INICIADA' : '✅ OPERACIÓN FINALIZADA';
     mostrarToast(`✅ ${esInicio ? 'Inicio' : 'Finalización'} de operación registrado — ${hora}`);
+
+    const opExistente = operacionesPorContenedor.get(contenedorActualOperacion) || {};
+    operacionesPorContenedor.set(contenedorActualOperacion, { ...opExistente, ...cambios });
 }
 
 document.getElementById('horaInicioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
@@ -587,6 +642,7 @@ function mostrarContenedor(contenedor) {
     document.getElementById('vistaContenedor').style.display = 'block';
     document.getElementById('contenedorNombreTitulo').textContent = contenedor;
     document.getElementById('contenedorAgenciaSub').textContent = info.agenciaNombre;
+    document.getElementById('contadorBL').textContent = info.registros.length;
     document.getElementById('contenedorListaBL').innerHTML = info.registros.map((rec, i) => `
         <div class="lista-bl-item">
             <div class="bl-nombre">${(rec.Bl && rec.Bl.toString().trim()) ? rec.Bl : `Sin BL (item ${i + 1})`}</div>
@@ -597,11 +653,25 @@ function mostrarContenedor(contenedor) {
                 <span>⚖️ ${rec.Peso || '—'} kg</span>
             </div>
         </div>`).join('');
+    // Ambas secciones empiezan cerradas — la persona decide si quiere verlas.
+    document.getElementById('cuerpoOperacion').classList.add('hidden');
+    document.getElementById('flechaOperacion').classList.remove('abierta');
+    document.getElementById('cuerpoBL').classList.add('hidden');
+    document.getElementById('flechaBL').classList.remove('abierta');
     document.getElementById('searchInput').value = contenedor;
     document.getElementById('btnLimpiarBusqueda').classList.remove('hidden');
     contenedorActualOperacion = contenedor;
     cargarOperacion(contenedor);
 }
+
+function alternarSeccion(idCuerpo, idFlecha) {
+    const cuerpo = document.getElementById(idCuerpo);
+    const flecha = document.getElementById(idFlecha);
+    cuerpo.classList.toggle('hidden');
+    flecha.classList.toggle('abierta');
+}
+document.getElementById('toggleOperacion').onclick = () => alternarSeccion('cuerpoOperacion', 'flechaOperacion');
+document.getElementById('toggleBL').onclick = () => alternarSeccion('cuerpoBL', 'flechaBL');
 
 // ============ VISTA: CONTENEDORES DE UNA AGENCIA ============
 function mostrarAgencia(codigo) {
