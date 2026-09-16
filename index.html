@@ -229,7 +229,7 @@
     .dash-tarjeta-header .flecha-plegable { flex-shrink: 0; transition: transform 0.15s ease; opacity: 0.7; }
     .dash-tarjeta-header .flecha-plegable.abierta { transform: rotate(180deg); }
     .dash-tarjeta-body { display: none; padding: 0 14px 14px 14px; }
-    .dash-tarjeta-body.abierto { display: block; }
+    .dash-tarjeta-body.abierto { display: block; max-height: 420px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .dash-tarjeta-body .dash-item-vacio { font-size: 0.78rem; opacity: 0.75; padding: 6px 2px; }
     .dash-tarjeta-body .dash-item-contenedor {
         display: flex; align-items: center; justify-content: space-between; gap: 8px;
