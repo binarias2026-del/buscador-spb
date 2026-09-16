@@ -200,6 +200,21 @@
     }
     .btn-operacion:disabled { background: #b8c4cf !important; cursor: not-allowed; }
     .btn-inicio { background: #2e7d32; }
+    .btn-agregar-funcionario { background: var(--accent-blue); }
+    .lista-funcionario-item {
+        display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid var(--border-light);
+        border-radius: 12px; margin-bottom: 8px;
+    }
+    .lista-funcionario-item .num-funcionario {
+        width: 26px; height: 26px; border-radius: 50%; background: var(--light-blue, #E6F0FA); color: var(--primary-blue);
+        display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; flex-shrink: 0;
+    }
+    .lista-funcionario-item .texto { flex: 1; min-width: 0; }
+    .lista-funcionario-item .nombre-func { font-weight: 700; font-size: 0.86rem; color: var(--text-dark); }
+    .lista-funcionario-item .meta-func { font-size: 0.7rem; color: var(--text-muted); }
+    .lista-funcionario-item .hora-func { font-weight: 700; color: var(--primary-blue); font-size: 0.9rem; }
+    .lista-funcionario-item .btn-quitar-func { background: none; border: none; color: #c62828; font-size: 1rem; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    .lista-funcionarios-vacia { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.8rem; }
     .btn-fin { background: #c62828; }
 
     .lista-bl-item {
@@ -319,6 +334,25 @@
                                 <button class="btn-operacion btn-fin" id="btnFinOperacion">🔴 FINALIZACIÓN OPERACIÓN</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="seccion-plegable">
+                    <button class="seccion-plegable-header" id="toggleFuncionarios">
+                        <span>👥 Funcionarios de Agencias (<span id="contadorFuncionarios">0</span>)</span>
+                        <span class="flecha-plegable" id="flechaFuncionarios">▾</span>
+                    </button>
+                    <div class="seccion-plegable-body hidden" id="cuerpoFuncionarios">
+                        <div class="card-operacion">
+                            <div class="fila-operacion">
+                                <div class="campo-operacion">
+                                    <label>Hora de llegada</label>
+                                    <input type="text" id="horaFuncionarioInput" inputmode="numeric" placeholder="00:00" maxlength="5">
+                                </div>
+                                <button class="btn-operacion btn-agregar-funcionario" id="btnAgregarFuncionario">➕ AGREGAR FUNCIONARIO</button>
+                            </div>
+                        </div>
+                        <div id="listaFuncionarios"></div>
                     </div>
                 </div>
 
@@ -639,6 +673,7 @@ function buscar(queryOriginal) {
 // ============ VISTA: DETALLE DE CONTENEDOR ============
 // ============ REGISTRO DE OPERACIÓN (Inicio / Finalización) ============
 let contenedorActualOperacion = null;
+let funcionariosContenedorActual = [];
 
 // Convierte lo que se va escribiendo a formato de hora militar HH:MM en tiempo real —
 // si la persona escribe "0810" (solo números, sin dos puntos), lo va acomodando solo a
@@ -742,6 +777,82 @@ document.getElementById('horaFinInput').addEventListener('input', (e) => formate
 document.getElementById('btnInicioOperacion').onclick = () => marcarOperacion('inicio');
 document.getElementById('btnFinOperacion').onclick = () => marcarOperacion('fin');
 
+// ============ FUNCIONARIOS DE AGENCIAS (llegadas por contenedor) ============
+async function cargarFuncionarios(contenedor) {
+    const lista = document.getElementById('listaFuncionarios');
+    const contador = document.getElementById('contadorFuncionarios');
+    const hoy = new Date().toISOString().slice(0, 10);
+
+    const { data, error } = await sb.from('funcionarios_contenedor')
+        .select('*').eq('contenedor', contenedor).eq('fecha', hoy).order('creado_en', { ascending: true });
+
+    if (error) { console.warn('No se pudo cargar la lista de funcionarios:', error.message); return; }
+
+    funcionariosContenedorActual = data || [];
+    contador.textContent = funcionariosContenedorActual.length;
+
+    lista.innerHTML = funcionariosContenedorActual.length === 0
+        ? `<div class="lista-funcionarios-vacia">Todavía no ha llegado ningún funcionario registrado para este contenedor.</div>`
+        : funcionariosContenedorActual.map((f, i) => `
+            <div class="lista-funcionario-item">
+                <span class="num-funcionario">${i + 1}</span>
+                <div class="texto">
+                    <div class="nombre-func">Funcionario ${i + 1}</div>
+                    <div class="meta-func">Agregado por ${f.agregado_por || '—'}</div>
+                </div>
+                <span class="hora-func">${f.hora_llegada}</span>
+                <button class="btn-quitar-func" data-id="${f.id}" title="Quitar">🗑️</button>
+            </div>`).join('');
+
+    lista.querySelectorAll('.btn-quitar-func').forEach(btn => {
+        btn.onclick = () => quitarFuncionario(btn.getAttribute('data-id'), contenedor);
+    });
+}
+
+async function agregarFuncionario() {
+    const horaInput = document.getElementById('horaFuncionarioInput');
+    const btn = document.getElementById('btnAgregarFuncionario');
+    const hora = horaInput.value.trim();
+
+    if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10', 4000); return; }
+
+    const sesion = (await sb.auth.getSession()).data.session;
+    const username = sesion ? sesion.user.email.split('@')[0].toUpperCase() : 'DESCONOCIDO';
+    const hoy = new Date().toISOString().slice(0, 10);
+    const numeroFuncionario = funcionariosContenedorActual.length + 1;
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Agregando...';
+
+    const { error } = await sb.from('funcionarios_contenedor').insert({
+        contenedor: contenedorActualOperacion,
+        fecha: hoy,
+        nombre_funcionario: `Funcionario ${numeroFuncionario}`,
+        hora_llegada: hora,
+        agregado_por: username
+    });
+
+    btn.disabled = false;
+    btn.textContent = '➕ AGREGAR FUNCIONARIO';
+
+    if (error) { mostrarToast('❌ ' + error.message, 5000); return; }
+
+    horaInput.value = '';
+    mostrarToast(`✅ Funcionario ${numeroFuncionario} agregado — ${hora}`);
+    cargarFuncionarios(contenedorActualOperacion);
+}
+
+async function quitarFuncionario(id, contenedor) {
+    if (!confirm('¿Quitar este funcionario de la lista?')) return;
+    const { error } = await sb.from('funcionarios_contenedor').delete().eq('id', id);
+    if (error) { mostrarToast('❌ ' + error.message, 4000); return; }
+    cargarFuncionarios(contenedor);
+}
+
+document.getElementById('horaFuncionarioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
+document.getElementById('btnAgregarFuncionario').onclick = agregarFuncionario;
+document.getElementById('toggleFuncionarios').onclick = () => alternarSeccion('cuerpoFuncionarios', 'flechaFuncionarios');
+
 function mostrarContenedor(contenedor) {
     const info = indiceContenedores.get(contenedor);
     if (!info) return;
@@ -760,15 +871,18 @@ function mostrarContenedor(contenedor) {
                 <span>⚖️ ${rec.Peso || '—'} kg</span>
             </div>
         </div>`).join('');
-    // Ambas secciones empiezan cerradas — la persona decide si quiere verlas.
+    // Las 3 secciones empiezan cerradas — la persona decide cuál quiere ver.
     document.getElementById('cuerpoOperacion').classList.add('hidden');
     document.getElementById('flechaOperacion').classList.remove('abierta');
+    document.getElementById('cuerpoFuncionarios').classList.add('hidden');
+    document.getElementById('flechaFuncionarios').classList.remove('abierta');
     document.getElementById('cuerpoBL').classList.add('hidden');
     document.getElementById('flechaBL').classList.remove('abierta');
     document.getElementById('searchInput').value = contenedor;
     document.getElementById('btnLimpiarBusqueda').classList.remove('hidden');
     contenedorActualOperacion = contenedor;
     cargarOperacion(contenedor);
+    cargarFuncionarios(contenedor);
 }
 
 function alternarSeccion(idCuerpo, idFlecha) {
