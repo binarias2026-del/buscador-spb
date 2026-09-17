@@ -717,9 +717,24 @@ async function sincronizar(silencioso = false) {
         if (agErr) throw agErr;
         if (opsErr) throw opsErr;
 
-        agenciasList = agData || [];
-        allRecords = (excelData && excelData.registros) ? excelData.registros : [];
-        construirIndice();
+        // Mientras se está recargando el Excel en el sistema del Informe, la tabla
+        // "excel_cargado" (y a veces "agencias") queda momentáneamente vacía entre que se
+        // borra lo viejo y se sube lo nuevo. Si en ese instante justo cae este sync (por
+        // Realtime o por el polling), NO se reemplazan las tarjetas por una pantalla en
+        // blanco: se conserva lo último que había en pantalla hasta que llegue el Excel
+        // nuevo completo. Solo se acepta un resultado vacío si de verdad nunca hubo datos.
+        const nuevosRegistros = (excelData && excelData.registros) ? excelData.registros : [];
+        if (nuevosRegistros.length > 0) {
+            allRecords = nuevosRegistros;
+            construirIndice();
+        } else if (allRecords.length === 0) {
+            construirIndice(); // primera vez: sí mostramos el estado vacío real
+        } // si ya había datos y el Excel llegó vacío, se dejan las tarjetas como estaban
+
+        if (agData && agData.length > 0) {
+            agenciasList = agData;
+        } // igual que arriba: no se reemplaza por una lista vacía momentánea
+
         registrarProgramadosDeHoy(excelData && excelData.fecha_programacion); // no se espera, no debe frenar el resto
 
         operacionesPorContenedor.clear();
