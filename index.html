@@ -167,10 +167,13 @@
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
 
-    .contenedor-acordeon { border-radius: 10px; margin-bottom: 6px; overflow: hidden; border-left: 5px solid transparent; }
+    .contenedor-acordeon { border-radius: 10px; margin-bottom: 6px; overflow: hidden; border-left: 5px solid transparent; transition: border-left-color 0.25s ease; }
     .contenedor-acordeon.semaforo-rojo { background: #ffebee; border-left-color: #c62828; }
     .contenedor-acordeon.semaforo-amarillo { background: #fff8e1; border-left-color: #f9a825; }
     .contenedor-acordeon.semaforo-verde { background: #e8f5e9; border-left-color: #2e7d32; }
+    /* Mientras el contenedor está desplegado, la línea vertical se pone azul; al
+       cerrarlo vuelve sola a su color habitual (rojo/amarillo/verde). */
+    .contenedor-acordeon:has(> .contenedor-acordeon-body.abierto) { border-left-color: #0077B6; }
     .contenedor-acordeon-header {
         width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: none;
         border: none; cursor: pointer; text-align: left;
