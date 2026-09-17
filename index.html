@@ -148,11 +148,19 @@
     .lista-tab-item .hora-marca { font-size: 0.72rem; font-weight: 700; color: var(--text-dark); text-align: right; }
     .lista-tab-vacia { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 0.85rem; }
 
-    .agencia-acordeon { border: 1px solid var(--border-light); border-radius: 14px; margin-bottom: 10px; overflow: hidden; background: white; }
+    .agencia-acordeon { border: 1px solid var(--border-light); border-radius: 14px; margin-bottom: 10px; overflow: hidden; background: white; border-left: 5px solid transparent; }
+    .agencia-acordeon.semaforo-rojo { border-left-color: #c62828; }
+    .agencia-acordeon.semaforo-amarillo { border-left-color: #f9a825; }
+    .agencia-acordeon.semaforo-verde { border-left-color: #2e7d32; }
     .agencia-acordeon-header {
         width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px;
         background: white; border: none; cursor: pointer; text-align: left;
     }
+    .agencia-acordeon-header .agencia-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .agencia-acordeon-header .punto-semaforo-agencia { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+    .punto-semaforo-agencia.semaforo-rojo { background: #c62828; }
+    .punto-semaforo-agencia.semaforo-amarillo { background: #f9a825; }
+    .punto-semaforo-agencia.semaforo-verde { background: #2e7d32; }
     .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
     .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
@@ -218,22 +226,37 @@
     .dash-campo-fecha label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
     .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
     .dash-selector-fecha .btn-mini { height: 44px; }
-    .dash-tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-    .dash-tarjeta { border-radius: 14px; padding: 16px 10px; text-align: center; }
-    .dash-tarjeta .dash-valor { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
-    .dash-tarjeta .dash-etiqueta { font-size: 0.72rem; font-weight: 700; }
-    .dash-programados { background: #E6F0FA; }
-    .dash-programados .dash-valor { color: var(--primary-blue); }
-    .dash-programados .dash-etiqueta { color: var(--primary-blue); }
-    .dash-proceso { background: #fff8e1; }
-    .dash-proceso .dash-valor { color: #f9a825; }
-    .dash-proceso .dash-etiqueta { color: #a17400; }
-    .dash-ejecutados { background: #e8f5e9; }
-    .dash-ejecutados .dash-valor { color: #2e7d32; }
-    .dash-ejecutados .dash-etiqueta { color: #2e7d32; }
-    .dash-sin-iniciar { background: #ffebee; }
-    .dash-sin-iniciar .dash-valor { color: #c62828; }
-    .dash-sin-iniciar .dash-etiqueta { color: #c62828; }
+    .dash-barras-container {
+        display: flex; align-items: flex-end; gap: 10px; height: 190px; margin-bottom: 12px;
+        background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px 10px 12px;
+    }
+    .dash-barra-vertical {
+        flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; -webkit-tap-highlight-color: transparent;
+    }
+    .dash-barra-vertical .barra-valor { font-size: 1.35rem; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+    .dash-barra-vertical .barra-track { width: 100%; max-width: 54px; flex: 1; display: flex; align-items: flex-end; }
+    .dash-barra-vertical .barra-fill { width: 100%; min-height: 6px; height: 4%; border-radius: 8px 8px 3px 3px; transition: height 0.4s ease-out; }
+    .dash-barra-vertical .barra-etiqueta { font-size: 0.68rem; font-weight: 700; margin-top: 8px; text-align: center; line-height: 1.2; }
+    .dash-barra-vertical.activa .barra-fill { box-shadow: 0 0 0 3px rgba(10, 85, 140, 0.18) inset, 0 0 0 2px white inset; }
+    .dash-barra-vertical.activa .barra-etiqueta { text-decoration: underline; }
+    .dash-barra-programados .barra-fill { background: var(--primary-blue); }
+    .dash-barra-programados .barra-valor, .dash-barra-programados .barra-etiqueta { color: var(--primary-blue); }
+    .dash-barra-proceso .barra-fill { background: #f9a825; }
+    .dash-barra-proceso .barra-valor, .dash-barra-proceso .barra-etiqueta { color: #a17400; }
+    .dash-barra-ejecutados .barra-fill { background: #2e7d32; }
+    .dash-barra-ejecutados .barra-valor, .dash-barra-ejecutados .barra-etiqueta { color: #2e7d32; }
+    .dash-barra-sin-iniciar .barra-fill { background: #c62828; }
+    .dash-barra-sin-iniciar .barra-valor, .dash-barra-sin-iniciar .barra-etiqueta { color: #c62828; }
+
+    .dash-detalle-categoria { background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+    .dash-detalle-categoria.hidden { display: none; }
+    .dash-detalle-categoria .detalle-titulo { font-size: 0.84rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
+    .dash-detalle-categoria .detalle-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 4px; border-bottom: 1px solid var(--border-light); }
+    .dash-detalle-categoria .detalle-item:last-child { border-bottom: none; }
+    .dash-detalle-categoria .detalle-item .cont { font-weight: 700; font-size: 0.82rem; color: var(--text-dark); }
+    .dash-detalle-categoria .detalle-item .ag { font-size: 0.72rem; color: var(--text-muted); text-align: right; }
+    .dash-detalle-categoria .detalle-vacia { text-align: center; padding: 14px; color: var(--text-muted); font-size: 0.8rem; }
     .dash-cumplimiento { background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px; }
     .dash-cumplimiento-titulo { font-size: 0.82rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
     .dash-barra-track { background: #eef2f6; border-radius: 30px; height: 26px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); }
@@ -406,24 +429,29 @@
                     <button id="btnConsultarDash" class="btn-mini btn-mini-azul">🔍 Consultar</button>
                 </div>
                 <div id="dashResultado">
-                    <div class="dash-tarjetas">
-                        <div class="dash-tarjeta dash-programados">
-                            <div class="dash-valor" id="dashProgramados">0</div>
-                            <div class="dash-etiqueta">📋 Programados</div>
-                        </div>
-                        <div class="dash-tarjeta dash-proceso">
-                            <div class="dash-valor" id="dashEnProceso">0</div>
-                            <div class="dash-etiqueta">🟡 En Proceso</div>
-                        </div>
-                        <div class="dash-tarjeta dash-ejecutados">
-                            <div class="dash-valor" id="dashEjecutados">0</div>
-                            <div class="dash-etiqueta">✅ Ejecutados</div>
-                        </div>
-                        <div class="dash-tarjeta dash-sin-iniciar">
-                            <div class="dash-valor" id="dashSinIniciar">0</div>
-                            <div class="dash-etiqueta">🔴 Sin Iniciar</div>
-                        </div>
+                    <div class="dash-barras-container">
+                        <button class="dash-barra-vertical dash-barra-programados" id="barraBtnProgramados" data-categoria="programados">
+                            <div class="barra-valor" id="dashProgramados">0</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillProgramados"></div></div>
+                            <div class="barra-etiqueta">📋 Programados</div>
+                        </button>
+                        <button class="dash-barra-vertical dash-barra-proceso" id="barraBtnEnProceso" data-categoria="enProceso">
+                            <div class="barra-valor" id="dashEnProceso">0</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillEnProceso"></div></div>
+                            <div class="barra-etiqueta">🟡 En Proceso</div>
+                        </button>
+                        <button class="dash-barra-vertical dash-barra-ejecutados" id="barraBtnEjecutados" data-categoria="ejecutados">
+                            <div class="barra-valor" id="dashEjecutados">0</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillEjecutados"></div></div>
+                            <div class="barra-etiqueta">✅ Ejecutados</div>
+                        </button>
+                        <button class="dash-barra-vertical dash-barra-sin-iniciar" id="barraBtnSinIniciar" data-categoria="sinIniciar">
+                            <div class="barra-valor" id="dashSinIniciar">0</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillSinIniciar"></div></div>
+                            <div class="barra-etiqueta">🔴 Sin Iniciar</div>
+                        </button>
                     </div>
+                    <div id="dashDetalleCategoria" class="dash-detalle-categoria hidden"></div>
                     <div class="dash-cumplimiento">
                         <div class="dash-cumplimiento-titulo">Cumplimiento de Programación</div>
                         <div class="dash-barra-track">
@@ -917,6 +945,12 @@ function actualizarVisibilidadDashboard() {
     document.getElementById('tabBtnDashboard').classList.toggle('hidden', !puedeVerDashboard);
 }
 
+// Guarda, tras cada consulta, el detalle de contenedores de cada categoría del dashboard
+// (programados / en proceso / ejecutados / sin iniciar) para poder mostrarlo al tocar
+// la barra correspondiente, sin tener que volver a consultar la base de datos.
+let dashboardDetalle = { programados: [], enProceso: [], ejecutados: [], sinIniciar: [] };
+let dashboardCategoriaAbierta = null;
+
 // Trae, para la fecha elegida: cuántos contenedores estaban programados (tabla histórica
 // contenedores_programados), y cuántos de esos ya iniciaron/finalizaron (operaciones_contenedor).
 async function consultarDashboard(fecha) {
@@ -925,7 +959,7 @@ async function consultarDashboard(fecha) {
     nota.textContent = 'Consultando...';
 
     const [{ data: programadosData, error: errProg }, { data: opsData, error: errOps }] = await Promise.all([
-        sb.from('contenedores_programados').select('contenedor').eq('fecha', fecha),
+        sb.from('contenedores_programados').select('contenedor, agencia_codigo').eq('fecha', fecha),
         sb.from('operaciones_contenedor').select('contenedor, hora_inicio, hora_fin').eq('fecha', fecha)
     ]);
 
@@ -934,14 +968,29 @@ async function consultarDashboard(fecha) {
         return;
     }
 
-    const programados = (programadosData || []).length;
+    const nombreAgenciaPorCodigo = (codigo) => {
+        const ag = agenciasList.find(a => a.codigo === codigo);
+        return ag ? ag.nombre : (codigo ? `Agencia ${codigo}` : 'Sin agencia asignada');
+    };
+
     const opsPorContenedor = new Map((opsData || []).map(o => [o.contenedor, o]));
-    let ejecutados = 0, enProceso = 0;
-    for (const op of opsPorContenedor.values()) {
-        if (op.hora_inicio && op.hora_fin) ejecutados++;
-        else if (op.hora_inicio) enProceso++;
-    }
-    const sinIniciar = Math.max(0, programados - ejecutados - enProceso);
+    const listaProgramados = programadosData || [];
+    const programados = listaProgramados.length;
+
+    const detalle = { programados: [], enProceso: [], ejecutados: [], sinIniciar: [] };
+    listaProgramados.forEach(p => {
+        const item = { contenedor: p.contenedor, agencia: nombreAgenciaPorCodigo(p.agencia_codigo) };
+        detalle.programados.push(item);
+        const op = opsPorContenedor.get(p.contenedor);
+        if (op && op.hora_inicio && op.hora_fin) detalle.ejecutados.push(item);
+        else if (op && op.hora_inicio) detalle.enProceso.push(item);
+        else detalle.sinIniciar.push(item);
+    });
+    dashboardDetalle = detalle;
+
+    const ejecutados = detalle.ejecutados.length;
+    const enProceso = detalle.enProceso.length;
+    const sinIniciar = detalle.sinIniciar.length;
     const cumplimiento = programados > 0 ? Math.round((ejecutados / programados) * 100) : 0;
 
     document.getElementById('dashProgramados').textContent = programados;
@@ -951,11 +1000,68 @@ async function consultarDashboard(fecha) {
     document.getElementById('dashBarraCumplimiento').style.width = cumplimiento + '%';
     document.getElementById('dashCumplimientoPct').textContent = cumplimiento + '%';
 
+    // Las 4 barras se escalan entre sí (la más alta llega al 100%), no contra un total fijo,
+    // para que las diferencias se vean claras incluso cuando "Programados" domina el conjunto.
+    const maxValor = Math.max(programados, ejecutados, enProceso, sinIniciar, 1);
+    const alturaBarra = (valor) => valor === 0 ? '4%' : Math.max(8, Math.round((valor / maxValor) * 100)) + '%';
+    document.getElementById('barraFillProgramados').style.height = alturaBarra(programados);
+    document.getElementById('barraFillEjecutados').style.height = alturaBarra(ejecutados);
+    document.getElementById('barraFillEnProceso').style.height = alturaBarra(enProceso);
+    document.getElementById('barraFillSinIniciar').style.height = alturaBarra(sinIniciar);
+
     const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
     nota.textContent = programados === 0
         ? `No hay contenedores programados registrados para el ${fechaLegible}.`
         : `${ejecutados} de ${programados} contenedores finalizados — ${fechaLegible}.`;
+
+    // Si había una categoría desplegada de una consulta anterior, se refresca con los
+    // datos nuevos; si no había ninguna, el panel de detalle permanece oculto.
+    if (dashboardCategoriaAbierta) mostrarDetalleDashboard(dashboardCategoriaAbierta);
+    else document.getElementById('dashDetalleCategoria').classList.add('hidden');
 }
+
+// Al tocar una barra se despliega, debajo de las 4 barras, la lista de contenedores (con
+// su agencia) que componen esa categoría — sin necesidad de ir a la pestaña de Agencias.
+// Tocar la misma barra otra vez cierra el detalle.
+const ETIQUETAS_CATEGORIA_DASH = {
+    programados: { titulo: '📋 Contenedores programados', vacio: 'No hay contenedores programados para esta fecha.' },
+    enProceso: { titulo: '🟡 Contenedores en proceso', vacio: 'Ningún contenedor está en proceso en esta fecha.' },
+    ejecutados: { titulo: '✅ Contenedores ejecutados', vacio: 'Ningún contenedor ha finalizado en esta fecha.' },
+    sinIniciar: { titulo: '🔴 Contenedores sin iniciar', vacio: 'Todos los contenedores programados ya iniciaron.' }
+};
+
+function mostrarDetalleDashboard(categoria) {
+    const panel = document.getElementById('dashDetalleCategoria');
+    const yaEstabaAbierta = dashboardCategoriaAbierta === categoria;
+
+    document.querySelectorAll('.dash-barra-vertical').forEach(b => b.classList.remove('activa'));
+    dashboardCategoriaAbierta = null;
+
+    if (yaEstabaAbierta) {
+        panel.classList.add('hidden');
+        return;
+    }
+
+    const items = dashboardDetalle[categoria] || [];
+    const meta = ETIQUETAS_CATEGORIA_DASH[categoria];
+    panel.innerHTML = `
+        <div class="detalle-titulo">${meta.titulo} (${items.length})</div>
+        ${items.length === 0
+            ? `<div class="detalle-vacia">${meta.vacio}</div>`
+            : items.map(it => `
+                <div class="detalle-item">
+                    <span class="cont">${it.contenedor}</span>
+                    <span class="ag">${it.agencia}</span>
+                </div>`).join('')}
+    `;
+    panel.classList.remove('hidden');
+    document.getElementById('barraBtn' + categoria.charAt(0).toUpperCase() + categoria.slice(1)).classList.add('activa');
+    dashboardCategoriaAbierta = categoria;
+}
+
+document.querySelectorAll('.dash-barra-vertical').forEach(btn => {
+    btn.onclick = () => mostrarDetalleDashboard(btn.getAttribute('data-categoria'));
+});
 
 // Registra en el histórico (contenedores_programados) los contenedores del Excel
 // actualmente cargado, con la fecha de programación que traiga ese Excel — así queda un
@@ -990,6 +1096,21 @@ function semaforoContenedor(contenedor) {
     if (estado === 'finalizado') return { clase: 'semaforo-verde', texto: 'Finalizado' };
     if (estado === 'iniciado') return { clase: 'semaforo-amarillo', texto: 'En operación' };
     return { clase: 'semaforo-rojo', texto: 'Sin iniciar' };
+}
+
+// Semáforo agregado a nivel de AGENCIA (sin desplegar el detalle): mira el estado de
+// todos sus contenedores y resume en un solo color — verde solo si TODOS finalizaron,
+// rojo solo si NINGUNO ha iniciado, y amarillo en cualquier otra mezcla (operación en curso).
+function semaforoAgencia(contenedores) {
+    let finalizados = 0, sinIniciar = 0;
+    contenedores.forEach(c => {
+        const estado = estadoOperacion(c);
+        if (estado === 'finalizado') finalizados++;
+        else if (!estado) sinIniciar++;
+    });
+    if (finalizados === contenedores.length) return { clase: 'semaforo-verde', texto: 'Operación finalizada' };
+    if (sinIniciar === contenedores.length) return { clase: 'semaforo-rojo', texto: 'Sin iniciar' };
+    return { clase: 'semaforo-amarillo', texto: 'En operación' };
 }
 
 // Arma el acordeón: Agencia (nivel 1, se abre/cierra al tocarla) → Contenedores de esa
@@ -1029,12 +1150,17 @@ function renderizarPorAgencia() {
             </div>`;
         }).join('');
 
+        const semAgencia = semaforoAgencia(datos.contenedores);
+
         return `
-        <div class="agencia-acordeon">
+        <div class="agencia-acordeon ${semAgencia.clase}">
             <button class="agencia-acordeon-header" data-toggle-agencia="${codigo}">
-                <div>
-                    <div class="nombre-agencia">🏢 ${datos.nombre}</div>
-                    <div class="conteo-agencia">${datos.contenedores.length} contenedor(es)</div>
+                <div class="agencia-info">
+                    <span class="punto-semaforo-agencia ${semAgencia.clase}" title="${semAgencia.texto}"></span>
+                    <div>
+                        <div class="nombre-agencia">🏢 ${datos.nombre}</div>
+                        <div class="conteo-agencia">${datos.contenedores.length} contenedor(es) · ${semAgencia.texto}</div>
+                    </div>
                 </div>
                 <span class="flecha-plegable">▾</span>
             </button>
