@@ -74,6 +74,17 @@
     }
     #syncBar.desactualizado { background: #FFF3E0; color: #8a5a00; }
 
+    #avisoDuplicadosPWA {
+        background: #FFF8E1; border-bottom: 3px solid #f9a825; padding: 10px 14px;
+        font-size: 0.78rem; color: #7a5c00;
+    }
+    #avisoDuplicadosPWA.hidden { display: none; }
+    #avisoDuplicadosPWA .titulo-aviso-dup { font-weight: 800; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    #avisoDuplicadosPWA .titulo-aviso-dup button {
+        background: none; border: none; color: #7a5c00; font-size: 0.9rem; cursor: pointer; flex-shrink: 0;
+    }
+    #avisoDuplicadosPWA ul { margin: 6px 0 0 0; padding-left: 18px; }
+
     main { flex: 1; padding: 18px; max-width: 640px; width: 100%; margin: 0 auto; }
 
     .search-wrap { position: relative; margin-bottom: 18px; }
@@ -385,6 +396,7 @@
         <button id="btnLogout" title="Salir">🚪</button>
     </header>
     <div id="syncBar">Sin sincronizar todavía</div>
+    <div id="avisoDuplicadosPWA" class="hidden"></div>
 
     <main>
         <div class="search-wrap">
@@ -569,6 +581,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allRecords = [];
+let dupAvisoOcultadoPara = null; // guarda el "cargado_en" del Excel cuyo aviso de duplicados ya se ocultó
 let agenciasList = [];
 let indiceContenedores = new Map(); // Contenedor -> { agenciaNombre, agenciaCodigo, registros: [...] }
 let operacionesPorContenedor = new Map(); // Contenedor -> fila de operaciones_contenedor (de hoy)
@@ -683,6 +696,7 @@ async function sincronizar(silencioso = false) {
         allRecords = (excelData && excelData.registros) ? excelData.registros : [];
         construirIndice();
         registrarProgramadosDeHoy(excelData && excelData.fecha_programacion); // no se espera, no debe frenar el resto
+        actualizarAvisoDuplicados(excelData);
 
         operacionesPorContenedor.clear();
         (opsData || []).forEach(op => operacionesPorContenedor.set(op.contenedor, op));
@@ -704,6 +718,39 @@ async function sincronizar(silencioso = false) {
         syncBar.classList.add('desactualizado');
         mostrarToast('❌ ' + e.message, 5000);
     }
+}
+
+// Contenedores que ya tenían una operación registrada (iniciada o finalizada) desde
+// ANTES de que este Excel se cargara/programara — el Informe de Desembalaje ya no
+// bloquea la carga con un confirm(); en vez de eso guarda esos contenedores en
+// excel_cargado.duplicados, y aquí en el PWA (donde los ve Auxiliar/Inspecciones) se
+// muestra como un aviso persistente hasta que alguien lo oculte. Si se carga un Excel
+// nuevo (cambia cargado_en), el aviso se vuelve a mostrar aunque el anterior se haya
+// ocultado.
+function actualizarAvisoDuplicados(excelData) {
+    const caja = document.getElementById('avisoDuplicadosPWA');
+    const duplicados = (excelData && Array.isArray(excelData.duplicados)) ? excelData.duplicados : [];
+    const cargadoEn = excelData ? excelData.cargado_en : null;
+
+    if (duplicados.length === 0 || cargadoEn === dupAvisoOcultadoPara) {
+        caja.classList.add('hidden');
+        caja.innerHTML = '';
+        return;
+    }
+
+    const items = duplicados.map(d => `<li>${d.contenedor} — ${d.estado}${d.fecha ? ` (${d.fecha})` : ''}</li>`).join('');
+    caja.innerHTML = `
+        <div class="titulo-aviso-dup">
+            <span>⚠️ ${duplicados.length} contenedor(es) de este Excel YA tenían una operación registrada</span>
+            <button id="btnOcultarAvisoDup" title="Ocultar">✕</button>
+        </div>
+        <ul>${items}</ul>`;
+    caja.classList.remove('hidden');
+    document.getElementById('btnOcultarAvisoDup').onclick = () => {
+        dupAvisoOcultadoPara = cargadoEn;
+        caja.classList.add('hidden');
+        caja.innerHTML = '';
+    };
 }
 
 function actualizarBarraSincronizacion() {
