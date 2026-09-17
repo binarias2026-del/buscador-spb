@@ -841,11 +841,20 @@ function estadoOperacion(contenedor) {
 // inicio o una finalización, sin que haga falta buscar nada.
 function renderizarPestañasPrincipales() {
     const panel = document.getElementById('pestañasPrincipales');
-    if (indiceContenedores.size === 0) { panel.classList.add('hidden'); return; }
+    // Esta barra (Operaciones/Finalizados/Agencias/Dashboard) muestra lo que quedó
+    // REGISTRADO durante la jornada operativa (tabla operaciones_contenedor) — eso NO
+    // depende de que el Excel siga cargado en este momento. Solo se oculta si de verdad
+    // no hay ni Excel ni ninguna operación registrada hoy; bajar el Excel por sí solo
+    // nunca debe borrar esta barra ni lo ya cargado durante el día.
+    if (indiceContenedores.size === 0 && operacionesPorContenedor.size === 0) { panel.classList.add('hidden'); return; }
 
     const enOperacion = [];
     const finalizados = [];
-    for (const contenedor of indiceContenedores.keys()) {
+    // Se recorren tanto los contenedores que trae el Excel actual como los que ya
+    // tienen una operación registrada hoy (aunque el Excel que los trajo ya no esté
+    // cargado) — así "Operaciones" y "Finalizados" no pierden lo del día.
+    const contenedoresAConsiderar = new Set([...indiceContenedores.keys(), ...operacionesPorContenedor.keys()]);
+    for (const contenedor of contenedoresAConsiderar) {
         const estado = estadoOperacion(contenedor);
         if (estado === 'iniciado') enOperacion.push(contenedor);
         else if (estado === 'finalizado') finalizados.push(contenedor);
@@ -861,7 +870,10 @@ function renderizarPestañasPrincipales() {
     listaOp.innerHTML = enOperacion.length === 0
         ? `<div class="lista-tab-vacia">Ningún contenedor en operación todavía.<br>Ábrelo y marca "Inicio Operación" para que aparezca aquí.</div>`
         : enOperacion.map(contenedor => {
-            const info = indiceContenedores.get(contenedor);
+            // Si el Excel que trajo este contenedor ya no está cargado, se usa un
+            // respaldo en vez de romper la tarjeta — la operación registrada se sigue
+            // viendo igual, solo sin los datos de agencia/BLs que traía ese Excel.
+            const info = indiceContenedores.get(contenedor) || { agenciaNombre: 'Agencia no disponible (Excel no cargado)', agenciaCodigo: '', registros: [] };
             const op = operacionesPorContenedor.get(contenedor);
             return `<div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-op="${contenedor}">
@@ -902,7 +914,7 @@ function renderizarPestañasPrincipales() {
     listaFin.innerHTML = finalizados.length === 0
         ? `<div class="lista-tab-vacia">Todavía no hay contenedores finalizados hoy.</div>`
         : finalizados.map(contenedor => {
-            const info = indiceContenedores.get(contenedor);
+            const info = indiceContenedores.get(contenedor) || { agenciaNombre: 'Agencia no disponible (Excel no cargado)', agenciaCodigo: '', registros: [] };
             const op = operacionesPorContenedor.get(contenedor);
             return `<div class="contenedor-acordeon semaforo-verde" data-contenedor-op="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-fin="${contenedor}">
