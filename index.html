@@ -184,6 +184,11 @@
     .semaforo-rojo .punto-semaforo { background: #c62828; }
     .semaforo-amarillo .punto-semaforo { background: #f9a825; }
     .semaforo-verde .punto-semaforo { background: #2e7d32; }
+    /* Prioridad sobre las reglas de arriba: si el punto trae su propio color (clase directa),
+       ese color manda — así no se hereda por error el color agregado de la agencia que lo envuelve. */
+    .contenedor-acordeon-header .punto-semaforo.semaforo-rojo { background: #c62828; }
+    .contenedor-acordeon-header .punto-semaforo.semaforo-amarillo { background: #f9a825; }
+    .contenedor-acordeon-header .punto-semaforo.semaforo-verde { background: #2e7d32; }
     .contenedor-acordeon-header .texto { flex: 1; min-width: 0; }
     .contenedor-acordeon-header .nombre-cont { font-weight: 700; font-size: 0.84rem; color: var(--text-dark); }
     .contenedor-acordeon-header .estado-cont { font-size: 0.68rem; color: var(--text-muted); }
@@ -1155,7 +1160,7 @@ function renderizarPorAgencia() {
             return `
             <div class="contenedor-acordeon ${sem.clase}" data-contenedor-acordeon="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-contenedor="${contenedor}">
-                    <span class="punto-semaforo"></span>
+                    <span class="punto-semaforo ${sem.clase}"></span>
                     <div class="texto">
                         <div class="nombre-cont">${contenedor}</div>
                         <div class="estado-cont">${sem.texto} · ${info.registros.length} BL</div>
