@@ -74,17 +74,6 @@
     }
     #syncBar.desactualizado { background: #FFF3E0; color: #8a5a00; }
 
-    #avisoDuplicadosPWA {
-        background: #FFF8E1; border-bottom: 3px solid #f9a825; padding: 10px 14px;
-        font-size: 0.78rem; color: #7a5c00;
-    }
-    #avisoDuplicadosPWA.hidden { display: none; }
-    #avisoDuplicadosPWA .titulo-aviso-dup { font-weight: 800; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    #avisoDuplicadosPWA .titulo-aviso-dup button {
-        background: none; border: none; color: #7a5c00; font-size: 0.9rem; cursor: pointer; flex-shrink: 0;
-    }
-    #avisoDuplicadosPWA ul { margin: 6px 0 0 0; padding-left: 18px; }
-
     main { flex: 1; padding: 18px; max-width: 640px; width: 100%; margin: 0 auto; }
 
     .search-wrap { position: relative; margin-bottom: 18px; }
@@ -166,11 +155,6 @@
     }
     .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
     .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-    .agencia-semaforo-resumen { display: flex; gap: 6px; margin-top: 6px; }
-    .pill-semaforo { font-size: 0.68rem; font-weight: 700; padding: 3px 8px; border-radius: 20px; }
-    .pill-rojo { background: #ffebee; color: #c62828; }
-    .pill-amarillo { background: #fff8e1; color: #a17400; }
-    .pill-verde { background: #e8f5e9; color: #2e7d32; }
     .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
@@ -234,26 +218,10 @@
     .dash-campo-fecha label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
     .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
     .dash-selector-fecha .btn-mini { height: 44px; }
-    .dash-tarjetas { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-    .dash-tarjeta { border-radius: 14px; overflow: hidden; }
-    .dash-tarjeta-header {
-        width: 100%; background: none; border: none; display: flex; align-items: center; gap: 10px;
-        padding: 16px 14px; cursor: pointer; text-align: left; font-family: inherit;
-    }
-    .dash-tarjeta-header .dash-etiqueta { flex: 1; font-size: 0.82rem; font-weight: 700; }
-    .dash-tarjeta-header .dash-valor { font-size: 1.4rem; font-weight: 800; line-height: 1; }
-    .dash-tarjeta-header .flecha-plegable { flex-shrink: 0; transition: transform 0.15s ease; opacity: 0.7; }
-    .dash-tarjeta-header .flecha-plegable.abierta { transform: rotate(180deg); }
-    .dash-tarjeta-body { display: none; padding: 0 14px 14px 14px; }
-    .dash-tarjeta-body.abierto { display: block; max-height: 420px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-    .dash-tarjeta-body .dash-item-vacio { font-size: 0.78rem; opacity: 0.75; padding: 6px 2px; }
-    .dash-tarjeta-body .dash-item-contenedor {
-        display: flex; align-items: center; justify-content: space-between; gap: 8px;
-        background: rgba(255,255,255,0.6); border-radius: 10px; padding: 10px 12px; margin-top: 6px;
-        font-size: 0.82rem; font-weight: 700; cursor: pointer;
-    }
-    .dash-tarjeta-body .dash-item-contenedor:active { transform: scale(0.98); }
-    .dash-tarjeta-body .dash-item-contenedor span.flecha-item { opacity: 0.6; font-weight: 400; }
+    .dash-tarjetas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .dash-tarjeta { border-radius: 14px; padding: 16px 10px; text-align: center; }
+    .dash-tarjeta .dash-valor { font-size: 1.8rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+    .dash-tarjeta .dash-etiqueta { font-size: 0.72rem; font-weight: 700; }
     .dash-programados { background: #E6F0FA; }
     .dash-programados .dash-valor { color: var(--primary-blue); }
     .dash-programados .dash-etiqueta { color: var(--primary-blue); }
@@ -396,7 +364,6 @@
         <button id="btnLogout" title="Salir">🚪</button>
     </header>
     <div id="syncBar">Sin sincronizar todavía</div>
-    <div id="avisoDuplicadosPWA" class="hidden"></div>
 
     <main>
         <div class="search-wrap">
@@ -441,36 +408,20 @@
                 <div id="dashResultado">
                     <div class="dash-tarjetas">
                         <div class="dash-tarjeta dash-programados">
-                            <button class="dash-tarjeta-header" data-dash-toggle="programados">
-                                <span class="dash-etiqueta">📋 Programados</span>
-                                <span class="dash-valor" id="dashProgramados">0</span>
-                                <span class="flecha-plegable" id="flechaDash-programados">▾</span>
-                            </button>
-                            <div class="dash-tarjeta-body" id="cuerpoDash-programados"></div>
+                            <div class="dash-valor" id="dashProgramados">0</div>
+                            <div class="dash-etiqueta">📋 Programados</div>
                         </div>
                         <div class="dash-tarjeta dash-proceso">
-                            <button class="dash-tarjeta-header" data-dash-toggle="proceso">
-                                <span class="dash-etiqueta">🟡 En Proceso</span>
-                                <span class="dash-valor" id="dashEnProceso">0</span>
-                                <span class="flecha-plegable" id="flechaDash-proceso">▾</span>
-                            </button>
-                            <div class="dash-tarjeta-body" id="cuerpoDash-proceso"></div>
+                            <div class="dash-valor" id="dashEnProceso">0</div>
+                            <div class="dash-etiqueta">🟡 En Proceso</div>
                         </div>
                         <div class="dash-tarjeta dash-ejecutados">
-                            <button class="dash-tarjeta-header" data-dash-toggle="ejecutados">
-                                <span class="dash-etiqueta">✅ Ejecutados</span>
-                                <span class="dash-valor" id="dashEjecutados">0</span>
-                                <span class="flecha-plegable" id="flechaDash-ejecutados">▾</span>
-                            </button>
-                            <div class="dash-tarjeta-body" id="cuerpoDash-ejecutados"></div>
+                            <div class="dash-valor" id="dashEjecutados">0</div>
+                            <div class="dash-etiqueta">✅ Ejecutados</div>
                         </div>
                         <div class="dash-tarjeta dash-sin-iniciar">
-                            <button class="dash-tarjeta-header" data-dash-toggle="sin-iniciar">
-                                <span class="dash-etiqueta">🔴 Sin Iniciar</span>
-                                <span class="dash-valor" id="dashSinIniciar">0</span>
-                                <span class="flecha-plegable" id="flechaDash-sin-iniciar">▾</span>
-                            </button>
-                            <div class="dash-tarjeta-body" id="cuerpoDash-sin-iniciar"></div>
+                            <div class="dash-valor" id="dashSinIniciar">0</div>
+                            <div class="dash-etiqueta">🔴 Sin Iniciar</div>
                         </div>
                     </div>
                     <div class="dash-cumplimiento">
@@ -581,7 +532,6 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allRecords = [];
-let dupAvisoOcultadoPara = null; // guarda el "cargado_en" del Excel cuyo aviso de duplicados ya se ocultó
 let agenciasList = [];
 let indiceContenedores = new Map(); // Contenedor -> { agenciaNombre, agenciaCodigo, registros: [...] }
 let operacionesPorContenedor = new Map(); // Contenedor -> fila de operaciones_contenedor (de hoy)
@@ -659,6 +609,7 @@ async function cargarPerfilUsuarioActual() {
 
 async function cerrarSesion() {
     await sb.auth.signOut();
+    desactivarSincronizacionAutomatica();
     document.getElementById('appScreen').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('loginUser').value = '';
@@ -673,6 +624,29 @@ async function mostrarApp() {
     document.getElementById('headerSub').textContent = `Sesión: ${nombreCompletoUsuarioActual}`;
     actualizarVisibilidadDashboard();
     await sincronizar(true);
+    activarSincronizacionAutomatica();
+}
+
+// ============ SINCRONIZACIÓN AUTOMÁTICA (Supabase Realtime) ============
+// Cuando en el sistema del Informe se carga un Excel nuevo, se borra el actual, o se
+// sincroniza, Supabase avisa AL INSTANTE a través de este canal — y la PWA se refresca
+// sola, sin que nadie tenga que tocar el botón "Sincronizar" a mano.
+let canalRealtimeExcel = null;
+function activarSincronizacionAutomatica() {
+    if (canalRealtimeExcel) return; // ya estaba activa, no duplicar el canal
+    canalRealtimeExcel = sb
+        .channel('excel_cargado_cambios')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'excel_cargado' }, () => {
+            mostrarToast('🔄 El Excel cambió en el sistema del Informe — actualizando...', 3000);
+            sincronizar(true);
+        })
+        .subscribe();
+}
+function desactivarSincronizacionAutomatica() {
+    if (canalRealtimeExcel) {
+        sb.removeChannel(canalRealtimeExcel);
+        canalRealtimeExcel = null;
+    }
 }
 
 // ============ SINCRONIZACIÓN (lee lo que cargó la app principal) ============
@@ -696,7 +670,6 @@ async function sincronizar(silencioso = false) {
         allRecords = (excelData && excelData.registros) ? excelData.registros : [];
         construirIndice();
         registrarProgramadosDeHoy(excelData && excelData.fecha_programacion); // no se espera, no debe frenar el resto
-        actualizarAvisoDuplicados(excelData);
 
         operacionesPorContenedor.clear();
         (opsData || []).forEach(op => operacionesPorContenedor.set(op.contenedor, op));
@@ -718,39 +691,6 @@ async function sincronizar(silencioso = false) {
         syncBar.classList.add('desactualizado');
         mostrarToast('❌ ' + e.message, 5000);
     }
-}
-
-// Contenedores que ya tenían una operación registrada (iniciada o finalizada) desde
-// ANTES de que este Excel se cargara/programara — el Informe de Desembalaje ya no
-// bloquea la carga con un confirm(); en vez de eso guarda esos contenedores en
-// excel_cargado.duplicados, y aquí en el PWA (donde los ve Auxiliar/Inspecciones) se
-// muestra como un aviso persistente hasta que alguien lo oculte. Si se carga un Excel
-// nuevo (cambia cargado_en), el aviso se vuelve a mostrar aunque el anterior se haya
-// ocultado.
-function actualizarAvisoDuplicados(excelData) {
-    const caja = document.getElementById('avisoDuplicadosPWA');
-    const duplicados = (excelData && Array.isArray(excelData.duplicados)) ? excelData.duplicados : [];
-    const cargadoEn = excelData ? excelData.cargado_en : null;
-
-    if (duplicados.length === 0 || cargadoEn === dupAvisoOcultadoPara) {
-        caja.classList.add('hidden');
-        caja.innerHTML = '';
-        return;
-    }
-
-    const items = duplicados.map(d => `<li>${d.contenedor} — ${d.estado}${d.fecha ? ` (${d.fecha})` : ''}</li>`).join('');
-    caja.innerHTML = `
-        <div class="titulo-aviso-dup">
-            <span>⚠️ ${duplicados.length} contenedor(es) de este Excel YA tenían una operación registrada</span>
-            <button id="btnOcultarAvisoDup" title="Ocultar">✕</button>
-        </div>
-        <ul>${items}</ul>`;
-    caja.classList.remove('hidden');
-    document.getElementById('btnOcultarAvisoDup').onclick = () => {
-        dupAvisoOcultadoPara = cargadoEn;
-        caja.classList.add('hidden');
-        caja.innerHTML = '';
-    };
 }
 
 function actualizarBarraSincronizacion() {
@@ -803,32 +743,7 @@ function estadoOperacion(contenedor) {
 // inicio o una finalización, sin que haga falta buscar nada.
 function renderizarPestañasPrincipales() {
     const panel = document.getElementById('pestañasPrincipales');
-    const puedeVerDashboard = rolUsuarioActual === 'admin' || rolUsuarioActual === 'super';
-
-    if (indiceContenedores.size === 0) {
-        if (!puedeVerDashboard) { panel.classList.add('hidden'); return; }
-        // No hay Excel cargado, pero el Dashboard tiene su propio histórico en Supabase
-        // (contenedores_programados / operaciones_contenedor) y NO depende del Excel
-        // actual — así que se mantiene disponible. Solo se ocultan las pestañas que sí
-        // dependen del Excel (no tendrían nada que mostrar).
-        document.getElementById('tabBtnOperacion').classList.add('hidden');
-        document.getElementById('tabBtnFinalizados').classList.add('hidden');
-        document.getElementById('tabBtnAgencias').classList.add('hidden');
-        document.getElementById('contadorOperacion').textContent = '0';
-        document.getElementById('contadorFinalizados').textContent = '0';
-        document.getElementById('listaEnOperacion').innerHTML = '';
-        document.getElementById('listaFinalizados').innerHTML = '';
-        document.getElementById('listaPorAgencia').innerHTML = '';
-        cambiarPestañaPrincipal('dashboard');
-        if (!document.getElementById('searchInput').value.trim()) panel.classList.remove('hidden');
-        return;
-    }
-
-    // Hay Excel cargado: las pestañas de Operaciones/Finalizados/Agencias vuelven a
-    // mostrarse normalmente (por si habían quedado ocultas del estado anterior).
-    document.getElementById('tabBtnOperacion').classList.remove('hidden');
-    document.getElementById('tabBtnFinalizados').classList.remove('hidden');
-    document.getElementById('tabBtnAgencias').classList.remove('hidden');
+    if (indiceContenedores.size === 0) { panel.classList.add('hidden'); return; }
 
     const enOperacion = [];
     const finalizados = [];
@@ -869,7 +784,7 @@ function renderizarPestañasPrincipales() {
                         <label>🔴 Hora de Finalización</label>
                         <div class="mini-fila">
                             <input type="text" id="horaFinInputLista-${contenedor}" inputmode="numeric" placeholder="00:00" maxlength="5">
-                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-${contenedor}" data-finalizar-lista="${contenedor}" disabled>🔴 FINALIZAR OPERACIÓN</button>
+                            <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-${contenedor}" data-finalizar-lista="${contenedor}">🔴 FINALIZAR OPERACIÓN</button>
                         </div>
                     </div>
                     <div class="mini-seccion">
@@ -953,15 +868,7 @@ function renderizarPestañasPrincipales() {
     listaOp.querySelectorAll('[data-agregar-func-lista]').forEach(btn => {
         btn.onclick = () => agregarFuncionarioDesdeLista(btn.getAttribute('data-agregar-func-lista'));
     });
-    listaOp.querySelectorAll('input[id^="horaFinInputLista-"]').forEach(inp => {
-        const contenedor = inp.id.replace('horaFinInputLista-', '');
-        const btnFinLista = document.getElementById('btnFinalizarLista-' + contenedor);
-        inp.addEventListener('input', (e) => {
-            formatearHoraEnVivo(e.target);
-            if (btnFinLista) btnFinLista.disabled = !e.target.value.trim();
-        });
-    });
-    listaOp.querySelectorAll('input[id^="horaFuncInputLista-"]').forEach(inp => {
+    listaOp.querySelectorAll('input[id^="horaFinInputLista-"], input[id^="horaFuncInputLista-"]').forEach(inp => {
         inp.addEventListener('input', (e) => formatearHoraEnVivo(e.target));
     });
     [listaOp, listaFin].forEach(lista => {
@@ -983,7 +890,6 @@ function renderizarPestañasPrincipales() {
 }
 
 function cambiarPestañaPrincipal(tab) {
-    if (tab !== 'dashboard') cerrarTarjetasDash();
     document.getElementById('tabBtnOperacion').classList.toggle('activo', tab === 'operacion');
     document.getElementById('tabBtnFinalizados').classList.toggle('activo', tab === 'finalizados');
     document.getElementById('tabBtnAgencias').classList.toggle('activo', tab === 'agencias');
@@ -1017,7 +923,6 @@ async function consultarDashboard(fecha) {
     if (!fecha) return;
     const nota = document.getElementById('dashCumplimientoNota');
     nota.textContent = 'Consultando...';
-    cerrarTarjetasDash();
 
     const [{ data: programadosData, error: errProg }, { data: opsData, error: errOps }] = await Promise.all([
         sb.from('contenedores_programados').select('contenedor').eq('fecha', fecha),
@@ -1029,87 +934,28 @@ async function consultarDashboard(fecha) {
         return;
     }
 
-    const programadosLista = (programadosData || []).map(p => p.contenedor);
+    const programados = (programadosData || []).length;
     const opsPorContenedor = new Map((opsData || []).map(o => [o.contenedor, o]));
-    const ejecutadosLista = [], enProcesoLista = [], sinIniciarLista = [];
-    for (const contenedor of programadosLista) {
-        const op = opsPorContenedor.get(contenedor);
-        if (op && op.hora_inicio && op.hora_fin) ejecutadosLista.push(contenedor);
-        else if (op && op.hora_inicio) enProcesoLista.push(contenedor);
-        else sinIniciarLista.push(contenedor);
+    let ejecutados = 0, enProceso = 0;
+    for (const op of opsPorContenedor.values()) {
+        if (op.hora_inicio && op.hora_fin) ejecutados++;
+        else if (op.hora_inicio) enProceso++;
     }
-    const cumplimiento = programadosLista.length > 0 ? Math.round((ejecutadosLista.length / programadosLista.length) * 100) : 0;
+    const sinIniciar = Math.max(0, programados - ejecutados - enProceso);
+    const cumplimiento = programados > 0 ? Math.round((ejecutados / programados) * 100) : 0;
 
-    document.getElementById('dashProgramados').textContent = programadosLista.length;
-    document.getElementById('dashEjecutados').textContent = ejecutadosLista.length;
-    document.getElementById('dashEnProceso').textContent = enProcesoLista.length;
-    document.getElementById('dashSinIniciar').textContent = sinIniciarLista.length;
+    document.getElementById('dashProgramados').textContent = programados;
+    document.getElementById('dashEjecutados').textContent = ejecutados;
+    document.getElementById('dashEnProceso').textContent = enProceso;
+    document.getElementById('dashSinIniciar').textContent = sinIniciar;
     document.getElementById('dashBarraCumplimiento').style.width = cumplimiento + '%';
     document.getElementById('dashCumplimientoPct').textContent = cumplimiento + '%';
 
-    datosDashPorTarjeta = {
-        programados: programadosLista,
-        proceso: enProcesoLista,
-        ejecutados: ejecutadosLista,
-        'sin-iniciar': sinIniciarLista
-    };
-    // Si alguna tarjeta estaba desplegada de una consulta anterior, se refresca su contenido
-    // en vez de dejarla con datos viejos.
-    if (tarjetaDashAbierta) pintarCuerpoDashTarjeta(tarjetaDashAbierta);
-
     const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
-    nota.textContent = programadosLista.length === 0
+    nota.textContent = programados === 0
         ? `No hay contenedores programados registrados para el ${fechaLegible}.`
-        : `${ejecutadosLista.length} de ${programadosLista.length} contenedores finalizados — ${fechaLegible}.`;
+        : `${ejecutados} de ${programados} contenedores finalizados — ${fechaLegible}.`;
 }
-
-// ============ ACORDEÓN VERTICAL DE LAS TARJETAS DEL DASHBOARD ============
-// Cada tarjeta (Programados / En Proceso / Ejecutados / Sin Iniciar) se despliega hacia
-// abajo mostrando la lista de contenedores que la componen. Solo una puede estar abierta
-// a la vez, y se repliega sola al: tocar la pantalla en otro lugar, abrir otra tarjeta,
-// consultar otra fecha, cambiar de pestaña principal, o abrir un contenedor/agencia.
-let datosDashPorTarjeta = { programados: [], proceso: [], ejecutados: [], 'sin-iniciar': [] };
-let tarjetaDashAbierta = null;
-
-function pintarCuerpoDashTarjeta(clave) {
-    const cuerpo = document.getElementById('cuerpoDash-' + clave);
-    if (!cuerpo) return;
-    const lista = datosDashPorTarjeta[clave] || [];
-    cuerpo.innerHTML = lista.length === 0
-        ? `<div class="dash-item-vacio">Sin contenedores en esta categoría.</div>`
-        : lista.slice().sort((a, b) => a.localeCompare(b)).map(contenedor => `
-            <div class="dash-item-contenedor" data-dash-abrir-contenedor="${contenedor}">
-                <span>${contenedor}</span><span class="flecha-item">→</span>
-            </div>`).join('');
-    cuerpo.querySelectorAll('[data-dash-abrir-contenedor]').forEach(item => {
-        item.onclick = () => mostrarContenedor(item.getAttribute('data-dash-abrir-contenedor'));
-    });
-}
-
-function alternarTarjetaDash(clave) {
-    const yaAbierta = tarjetaDashAbierta === clave;
-    cerrarTarjetasDash();
-    if (!yaAbierta) {
-        document.getElementById('cuerpoDash-' + clave).classList.add('abierto');
-        document.getElementById('flechaDash-' + clave).classList.add('abierta');
-        pintarCuerpoDashTarjeta(clave);
-        tarjetaDashAbierta = clave;
-    }
-}
-
-function cerrarTarjetasDash() {
-    document.querySelectorAll('.dash-tarjeta-body.abierto').forEach(b => b.classList.remove('abierto'));
-    document.querySelectorAll('.dash-tarjeta-header .flecha-plegable.abierta').forEach(f => f.classList.remove('abierta'));
-    tarjetaDashAbierta = null;
-}
-
-document.querySelectorAll('[data-dash-toggle]').forEach(btn => {
-    btn.onclick = () => alternarTarjetaDash(btn.getAttribute('data-dash-toggle'));
-});
-// Tocar la pantalla fuera de cualquier tarjeta del dashboard la repliega.
-document.addEventListener('click', (e) => {
-    if (tarjetaDashAbierta && !e.target.closest('.dash-tarjeta')) cerrarTarjetasDash();
-});
 
 // Registra en el histórico (contenedores_programados) los contenedores del Excel
 // actualmente cargado, con la fecha de programación que traiga ese Excel — así queda un
@@ -1164,16 +1010,6 @@ function renderizarPorAgencia() {
     const agenciasOrdenadas = Array.from(porAgencia.entries()).sort((a, b) => a[1].nombre.localeCompare(b[1].nombre));
 
     cont.innerHTML = agenciasOrdenadas.map(([codigo, datos]) => {
-        // Resumen por semáforo (rojo/amarillo/verde) — se calcula siempre, aunque la
-        // agencia esté cerrada, para poder mostrarlo en el encabezado sin desplegar nada.
-        let rojos = 0, amarillos = 0, verdes = 0;
-        for (const contenedor of datos.contenedores) {
-            const estado = estadoOperacion(contenedor);
-            if (estado === 'finalizado') verdes++;
-            else if (estado === 'iniciado') amarillos++;
-            else rojos++;
-        }
-
         const contenedoresHtml = datos.contenedores.sort().map(contenedor => {
             const info = indiceContenedores.get(contenedor);
             const sem = semaforoContenedor(contenedor);
@@ -1199,11 +1035,6 @@ function renderizarPorAgencia() {
                 <div>
                     <div class="nombre-agencia">🏢 ${datos.nombre}</div>
                     <div class="conteo-agencia">${datos.contenedores.length} contenedor(es)</div>
-                    <div class="agencia-semaforo-resumen">
-                        <span class="pill-semaforo pill-rojo">🔴 ${rojos}</span>
-                        <span class="pill-semaforo pill-amarillo">🟡 ${amarillos}</span>
-                        <span class="pill-semaforo pill-verde">🟢 ${verdes}</span>
-                    </div>
                 </div>
                 <span class="flecha-plegable">▾</span>
             </button>
@@ -1338,13 +1169,6 @@ function horaValida(hora) {
     return !!m;
 }
 
-// La Hora de Finalización siempre debe ser MAYOR que la Hora de Inicio (nunca igual ni
-// menor). Como ambas son "HH:MM" de 24h con ceros a la izquierda, comparar como texto
-// funciona igual que comparar como número de minutos.
-function finEsPosteriorAInicio(horaInicio, horaFin) {
-    return horaFin > horaInicio;
-}
-
 async function cargarOperacion(contenedor) {
     const inicioInput = document.getElementById('horaInicioInput');
     const finInput = document.getElementById('horaFinInput');
@@ -1353,13 +1177,11 @@ async function cargarOperacion(contenedor) {
     const btnInicio = document.getElementById('btnInicioOperacion');
     const btnFin = document.getElementById('btnFinOperacion');
 
-    // Estado por defecto: campos libres, sin nada guardado todavía. El botón de
-    // Finalización empieza deshabilitado — solo se habilita cuando hay algo escrito
-    // en el campo de Hora de Finalización (ver actualizarBotonFin).
+    // Estado por defecto: campos libres, sin nada guardado todavía.
     inicioInput.value = ''; inicioInput.disabled = false; inicioMeta.textContent = '';
     finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
-    btnFin.disabled = true; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
+    btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
 
     const hoy = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('operaciones_contenedor')
@@ -1443,15 +1265,6 @@ async function finalizarDesdeLista(contenedor) {
     const btn = document.getElementById('btnFinalizarLista-' + contenedor);
     const hora = horaInput.value.trim();
     if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida, ej: 14:50', 4000); return; }
-    const opActual = operacionesPorContenedor.get(contenedor);
-    if (!opActual || !opActual.hora_inicio) {
-        mostrarToast('⚠️ Este contenedor todavía no tiene Hora de Inicio registrada.', 4500);
-        return;
-    }
-    if (!finEsPosteriorAInicio(opActual.hora_inicio, hora)) {
-        mostrarToast(`❌ La Hora de Finalización (${hora}) debe ser mayor que la Hora de Inicio (${opActual.hora_inicio})`, 5000);
-        return;
-    }
     const hoy = new Date().toISOString().slice(0, 10);
     btn.disabled = true; btn.textContent = '⏳ Guardando...';
     const cambios = { contenedor, fecha: hoy, hora_fin: hora, finalizado_por: nombreCompletoUsuarioActual, finalizado_en: new Date().toISOString() };
@@ -1486,21 +1299,6 @@ async function marcarOperacion(tipo) {
         return;
     }
 
-    // La Finalización nunca puede guardarse sin un Inicio previo, ni con una hora
-    // igual o menor a la del Inicio.
-    if (!esInicio) {
-        const inicioInput = document.getElementById('horaInicioInput');
-        const horaInicioActual = inicioInput.value.trim();
-        if (!horaInicioActual) {
-            mostrarToast('⚠️ Primero debes marcar la Hora de Inicio de la operación.', 4500);
-            return;
-        }
-        if (!finEsPosteriorAInicio(horaInicioActual, hora)) {
-            mostrarToast(`❌ La Hora de Finalización (${hora}) debe ser mayor que la Hora de Inicio (${horaInicioActual})`, 5000);
-            return;
-        }
-    }
-
     const hoy = new Date().toISOString().slice(0, 10);
 
     btn.disabled = true;
@@ -1532,19 +1330,9 @@ async function marcarOperacion(tipo) {
 }
 
 document.getElementById('horaInicioInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
-document.getElementById('horaFinInput').addEventListener('input', (e) => { formatearHoraEnVivo(e.target); actualizarBotonFin(); });
+document.getElementById('horaFinInput').addEventListener('input', (e) => formatearHoraEnVivo(e.target));
 document.getElementById('btnInicioOperacion').onclick = () => marcarOperacion('inicio');
 document.getElementById('btnFinOperacion').onclick = () => marcarOperacion('fin');
-
-// El botón "FINALIZACIÓN OPERACIÓN" queda deshabilitado mientras el campo de Hora de
-// Finalización esté vacío — no tiene sentido dejarlo tocable si todavía no hay nada escrito.
-// Si la operación ya está finalizada (input deshabilitado y con texto guardado), no se toca.
-function actualizarBotonFin() {
-    const finInput = document.getElementById('horaFinInput');
-    const btnFin = document.getElementById('btnFinOperacion');
-    if (finInput.disabled) return; // ya finalizada, el botón ya está en su estado final
-    btnFin.disabled = !finInput.value.trim();
-}
 
 // ============ FUNCIONARIOS DE AGENCIAS (llegadas por contenedor) ============
 async function cargarFuncionarios(contenedor) {
@@ -1708,7 +1496,6 @@ function ocultarTodasLasVistas() {
     document.getElementById('vistaContenedor').style.display = 'none';
     document.getElementById('predictivo').classList.add('hidden');
     document.getElementById('pestañasPrincipales').classList.add('hidden');
-    cerrarTarjetasDash();
 }
 
 function volverABusqueda() {
