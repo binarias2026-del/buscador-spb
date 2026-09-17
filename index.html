@@ -163,6 +163,11 @@
     .punto-semaforo-agencia.semaforo-verde { background: #2e7d32; }
     .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
     .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+    .badges-semaforo-agencia { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+    .badge-conteo-semaforo { font-size: 0.66rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; color: white; flex-shrink: 0; }
+    .badge-conteo-semaforo.semaforo-rojo { background: #c62828; }
+    .badge-conteo-semaforo.semaforo-amarillo { background: #f9a825; color: #4d3600; }
+    .badge-conteo-semaforo.semaforo-verde { background: #2e7d32; }
     .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
@@ -230,17 +235,17 @@
     .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
     .dash-selector-fecha .btn-mini { height: 44px; }
     .dash-barras-container {
-        display: flex; flex-direction: column; gap: 12px; max-height: 440px; overflow-y: auto; margin-bottom: 12px;
-        background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px 14px;
+        display: flex; align-items: flex-end; gap: 10px; height: 190px; margin-bottom: 12px;
+        background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px 10px 12px;
     }
     .dash-barra-vertical {
-        width: 100%; display: flex; flex-direction: row; align-items: center; gap: 10px;
-        background: none; border: none; cursor: pointer; padding: 4px 0; font-family: inherit; -webkit-tap-highlight-color: transparent;
+        flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+        background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; -webkit-tap-highlight-color: transparent;
     }
-    .dash-barra-vertical .barra-etiqueta { order: -1; width: 108px; flex-shrink: 0; font-size: 0.72rem; font-weight: 700; text-align: left; line-height: 1.2; }
-    .dash-barra-vertical .barra-track { flex: 1; max-width: none; height: 22px; display: flex; align-items: center; background: var(--gray-bg); border-radius: 8px; overflow: hidden; }
-    .dash-barra-vertical .barra-fill { height: 100%; min-width: 6px; width: 4%; border-radius: 8px; transition: width 0.4s ease-out; }
-    .dash-barra-vertical .barra-valor { width: 34px; flex-shrink: 0; font-size: 1rem; font-weight: 800; line-height: 1; text-align: right; margin-bottom: 0; }
+    .dash-barra-vertical .barra-valor { font-size: 1.35rem; font-weight: 800; line-height: 1; margin-bottom: 8px; }
+    .dash-barra-vertical .barra-track { width: 100%; max-width: 54px; flex: 1; display: flex; align-items: flex-end; }
+    .dash-barra-vertical .barra-fill { width: 100%; min-height: 6px; height: 4%; border-radius: 8px 8px 3px 3px; transition: height 0.4s ease-out; }
+    .dash-barra-vertical .barra-etiqueta { font-size: 0.68rem; font-weight: 700; margin-top: 8px; text-align: center; line-height: 1.2; }
     .dash-barra-vertical.activa .barra-fill { box-shadow: 0 0 0 3px rgba(10, 85, 140, 0.18) inset, 0 0 0 2px white inset; }
     .dash-barra-vertical.activa .barra-etiqueta { text-decoration: underline; }
     .dash-barra-programados .barra-fill { background: var(--primary-blue); }
@@ -257,7 +262,6 @@
     .dash-detalle-categoria .detalle-titulo { font-size: 0.84rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
     .dash-detalle-categoria .detalle-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 4px; border-bottom: 1px solid var(--border-light); }
     .dash-detalle-categoria .detalle-item:last-child { border-bottom: none; }
-    .dash-detalle-categoria .detalle-items-scroll { max-height: 400px; overflow-y: auto; }
     .dash-detalle-categoria .detalle-item .cont { font-weight: 700; font-size: 0.82rem; color: var(--text-dark); }
     .dash-detalle-categoria .detalle-item .ag { font-size: 0.72rem; color: var(--text-muted); text-align: right; }
     .dash-detalle-categoria .detalle-vacia { text-align: center; padding: 14px; color: var(--text-muted); font-size: 0.8rem; }
@@ -1008,10 +1012,10 @@ async function consultarDashboard(fecha) {
     // para que las diferencias se vean claras incluso cuando "Programados" domina el conjunto.
     const maxValor = Math.max(programados, ejecutados, enProceso, sinIniciar, 1);
     const alturaBarra = (valor) => valor === 0 ? '4%' : Math.max(8, Math.round((valor / maxValor) * 100)) + '%';
-    document.getElementById('barraFillProgramados').style.width = alturaBarra(programados);
-    document.getElementById('barraFillEjecutados').style.width = alturaBarra(ejecutados);
-    document.getElementById('barraFillEnProceso').style.width = alturaBarra(enProceso);
-    document.getElementById('barraFillSinIniciar').style.width = alturaBarra(sinIniciar);
+    document.getElementById('barraFillProgramados').style.height = alturaBarra(programados);
+    document.getElementById('barraFillEjecutados').style.height = alturaBarra(ejecutados);
+    document.getElementById('barraFillEnProceso').style.height = alturaBarra(enProceso);
+    document.getElementById('barraFillSinIniciar').style.height = alturaBarra(sinIniciar);
 
     const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
     nota.textContent = programados === 0
@@ -1052,11 +1056,11 @@ function mostrarDetalleDashboard(categoria) {
         <div class="detalle-titulo">${meta.titulo} (${items.length})</div>
         ${items.length === 0
             ? `<div class="detalle-vacia">${meta.vacio}</div>`
-            : `<div class="detalle-items-scroll">${items.map(it => `
+            : items.map(it => `
                 <div class="detalle-item">
                     <span class="cont">${it.contenedor}</span>
                     <span class="ag">${it.agencia}</span>
-                </div>`).join('')}</div>`}
+                </div>`).join('')}
     `;
     panel.classList.remove('hidden');
     document.getElementById('barraBtn' + categoria.charAt(0).toUpperCase() + categoria.slice(1)).classList.add('activa');
@@ -1117,6 +1121,19 @@ function semaforoAgencia(contenedores) {
     return { clase: 'semaforo-amarillo', texto: 'En operación' };
 }
 
+// Conteo por color para el semáforo visible en la cabecera de cada agencia, sin
+// necesidad de desplegar la tarjeta: cuántos contenedores están en rojo, amarillo y verde.
+function contarSemaforosAgencia(contenedores) {
+    let rojo = 0, amarillo = 0, verde = 0;
+    contenedores.forEach(c => {
+        const estado = estadoOperacion(c);
+        if (estado === 'finalizado') verde++;
+        else if (estado === 'iniciado') amarillo++;
+        else rojo++;
+    });
+    return { rojo, amarillo, verde };
+}
+
 // Arma el acordeón: Agencia (nivel 1, se abre/cierra al tocarla) → Contenedores de esa
 // agencia (nivel 2, cada uno con su color) → al tocar un contenedor, se despliega ahí
 // mismo el detalle de sus BLs, sin salir de esta pantalla — y se cierra tocándolo de nuevo.
@@ -1155,6 +1172,7 @@ function renderizarPorAgencia() {
         }).join('');
 
         const semAgencia = semaforoAgencia(datos.contenedores);
+        const conteos = contarSemaforosAgencia(datos.contenedores);
 
         return `
         <div class="agencia-acordeon ${semAgencia.clase}">
@@ -1164,6 +1182,11 @@ function renderizarPorAgencia() {
                     <div>
                         <div class="nombre-agencia">🏢 ${datos.nombre}</div>
                         <div class="conteo-agencia">${datos.contenedores.length} contenedor(es) · ${semAgencia.texto}</div>
+                        <div class="badges-semaforo-agencia">
+                            <span class="badge-conteo-semaforo semaforo-rojo">🔴 ${conteos.rojo}</span>
+                            <span class="badge-conteo-semaforo semaforo-amarillo">🟡 ${conteos.amarillo}</span>
+                            <span class="badge-conteo-semaforo semaforo-verde">🟢 ${conteos.verde}</span>
+                        </div>
                     </div>
                 </div>
                 <span class="flecha-plegable">▾</span>
