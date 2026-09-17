@@ -1313,6 +1313,16 @@ function horaValida(hora) {
     return !!m;
 }
 
+// Ninguna hora registrada en el sistema (Inicio, Finalización, llegada de Funcionario)
+// puede quedar por delante de la hora actual — todo esto se registra "en el momento",
+// no se puede adelantar el reloj. Como todos estos registros son siempre del día de hoy,
+// basta comparar HH:MM contra la hora actual del dispositivo.
+function horaEsFutura(hora) {
+    const ahora = new Date();
+    const horaActual = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
+    return hora > horaActual;
+}
+
 async function cargarOperacion(contenedor) {
     const inicioInput = document.getElementById('horaInicioInput');
     const finInput = document.getElementById('horaFinInput');
@@ -1397,6 +1407,7 @@ async function agregarFuncionarioDesdeLista(contenedor) {
     const btn = document.getElementById('btnAgregarFuncLista-' + contenedor);
     const hora = horaInput.value.trim();
     if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida, ej: 08:10', 4000); return; }
+    if (horaEsFutura(hora)) { mostrarToast('⚠️ La hora no puede ser posterior a la hora actual del sistema', 4000); return; }
     const hoy = new Date().toISOString().slice(0, 10);
     const contadorActual = parseInt(document.getElementById('contadorFuncLista-' + contenedor).textContent) || 0;
     btn.disabled = true; btn.textContent = '⏳';
@@ -1415,6 +1426,7 @@ async function finalizarDesdeLista(contenedor) {
     const btn = document.getElementById('btnFinalizarLista-' + contenedor);
     const hora = horaInput.value.trim();
     if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida, ej: 14:50', 4000); return; }
+    if (horaEsFutura(hora)) { mostrarToast('⚠️ La hora no puede ser posterior a la hora actual del sistema', 4000); return; }
     const opActual = operacionesPorContenedor.get(contenedor);
     const horaInicioActual = opActual && opActual.hora_inicio;
     if (!horaValida(horaInicioActual)) { mostrarToast('⚠️ Este contenedor todavía no tiene Hora de Inicio', 4000); return; }
@@ -1450,6 +1462,10 @@ async function marcarOperacion(tipo) {
 
     if (!horaValida(hora)) {
         mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10 o 14:50', 4000);
+        return;
+    }
+    if (horaEsFutura(hora)) {
+        mostrarToast('⚠️ La hora no puede ser posterior a la hora actual del sistema', 4000);
         return;
     }
 
@@ -1556,6 +1572,7 @@ async function agregarFuncionario() {
         return;
     }
     if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10', 4000); return; }
+    if (horaEsFutura(hora)) { mostrarToast('⚠️ La hora no puede ser posterior a la hora actual del sistema', 4000); return; }
 
     const hoy = new Date().toISOString().slice(0, 10);
     const numeroFuncionario = funcionariosContenedorActual.length + 1;
