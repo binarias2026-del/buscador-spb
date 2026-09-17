@@ -641,6 +641,7 @@ async function cargarPerfilUsuarioActual() {
 async function cerrarSesion() {
     await sb.auth.signOut();
     desactivarSincronizacionAutomatica();
+    desactivarPollingCambios();
     document.getElementById('appScreen').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('loginUser').value = '';
@@ -656,6 +657,7 @@ async function mostrarApp() {
     actualizarVisibilidadDashboard();
     await sincronizar(true);
     activarSincronizacionAutomatica();
+    activarPollingCambios();
 }
 
 // ============ SINCRONIZACIÓN AUTOMÁTICA (Supabase Realtime) ============
@@ -677,6 +679,24 @@ function desactivarSincronizacionAutomatica() {
     if (canalRealtimeExcel) {
         sb.removeChannel(canalRealtimeExcel);
         canalRealtimeExcel = null;
+    }
+}
+
+// ============ POLLING CADA 10 SEGUNDOS (Horas de Inicio/Fin y Funcionarios) ============
+// El canal Realtime de arriba solo avisa cuando cambia el Excel. Los cambios de HORA
+// (Inicio/Finalización) y de USUARIO (quién inició, finalizó o agregó un funcionario) los
+// hace cualquier operario desde su propio celular, así que en vez de depender de Realtime
+// para esas tablas, se pregunta cada 10 segundos si algo cambió y se refresca solo —
+// para que a los demás usuarios les llegue sin tener que tocar "Sincronizar" a mano.
+let intervaloPollingCambios = null;
+function activarPollingCambios() {
+    if (intervaloPollingCambios) return; // ya estaba activo, no duplicar el intervalo
+    intervaloPollingCambios = setInterval(() => sincronizar(true), 10000);
+}
+function desactivarPollingCambios() {
+    if (intervaloPollingCambios) {
+        clearInterval(intervaloPollingCambios);
+        intervaloPollingCambios = null;
     }
 }
 
@@ -716,6 +736,20 @@ async function sincronizar(silencioso = false) {
 
         renderizarPestañasPrincipales();
         renderizarPorAgencia();
+        // Si hay un contenedor abierto en detalle, se refresca también su Hora y sus
+        // Funcionarios — así el usuario que lo tiene abierto ve al instante lo que otro
+        // usuario acabe de registrar. Los campos de Hora solo se tocan si la persona NO
+        // está escribiendo en ellos en este momento, para no borrarle lo que está tecleando.
+        const vistaContenedorEl = document.getElementById('vistaContenedor');
+        if (vistaContenedorEl && vistaContenedorEl.style.display === 'block' && contenedorActualOperacion) {
+            const enfocado = document.activeElement;
+            const inicioInputEl = document.getElementById('horaInicioInput');
+            const finInputEl = document.getElementById('horaFinInput');
+            if (enfocado !== inicioInputEl && enfocado !== finInputEl) {
+                cargarOperacion(contenedorActualOperacion);
+            }
+            cargarFuncionarios(contenedorActualOperacion);
+        }
         if (!silencioso) mostrarToast(`✅ Sincronizado: ${indiceContenedores.size} contenedores`);
     } catch (e) {
         syncBar.textContent = '⚠️ No se pudo sincronizar — revisa tu conexión';
