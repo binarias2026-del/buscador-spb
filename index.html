@@ -257,6 +257,7 @@
     .dash-detalle-categoria .detalle-titulo { font-size: 0.84rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
     .dash-detalle-categoria .detalle-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 4px; border-bottom: 1px solid var(--border-light); }
     .dash-detalle-categoria .detalle-item:last-child { border-bottom: none; }
+    .dash-detalle-categoria .detalle-items-scroll { max-height: 400px; overflow-y: auto; }
     .dash-detalle-categoria .detalle-item .cont { font-weight: 700; font-size: 0.82rem; color: var(--text-dark); }
     .dash-detalle-categoria .detalle-item .ag { font-size: 0.72rem; color: var(--text-muted); text-align: right; }
     .dash-detalle-categoria .detalle-vacia { text-align: center; padding: 14px; color: var(--text-muted); font-size: 0.8rem; }
@@ -1051,11 +1052,11 @@ function mostrarDetalleDashboard(categoria) {
         <div class="detalle-titulo">${meta.titulo} (${items.length})</div>
         ${items.length === 0
             ? `<div class="detalle-vacia">${meta.vacio}</div>`
-            : items.map(it => `
+            : `<div class="detalle-items-scroll">${items.map(it => `
                 <div class="detalle-item">
                     <span class="cont">${it.contenedor}</span>
                     <span class="ag">${it.agencia}</span>
-                </div>`).join('')}
+                </div>`).join('')}</div>`}
     `;
     panel.classList.remove('hidden');
     document.getElementById('barraBtn' + categoria.charAt(0).toUpperCase() + categoria.slice(1)).classList.add('activa');
