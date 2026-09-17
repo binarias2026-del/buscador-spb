@@ -847,7 +847,7 @@ function renderizarPestañasPrincipales() {
                     <div class="mini-seccion">
                         <label>🔴 Hora de Finalización</label>
                         <div class="mini-fila">
-                            <input type="text" id="horaFinInputLista-${contenedor}" inputmode="numeric" placeholder="00:00" maxlength="5">
+                            <input type="text" id="horaFinInputLista-${contenedor}" inputmode="numeric" placeholder="00:00" maxlength="5" value="${horaActualStr()}">
                             <button class="btn-mini btn-mini-rojo" id="btnFinalizarLista-${contenedor}" data-finalizar-lista="${contenedor}">🔴 FINALIZAR OPERACIÓN</button>
                         </div>
                     </div>
@@ -855,7 +855,7 @@ function renderizarPestañasPrincipales() {
                         <label>👥 Funcionarios (<span id="contadorFuncLista-${contenedor}">0</span>)</label>
                         <div id="listaFuncLista-${contenedor}"></div>
                         <div class="mini-fila">
-                            <input type="text" id="horaFuncInputLista-${contenedor}" inputmode="numeric" placeholder="00:00" maxlength="5">
+                            <input type="text" id="horaFuncInputLista-${contenedor}" inputmode="numeric" placeholder="00:00" maxlength="5" value="${horaActualStr()}">
                             <button class="btn-mini btn-mini-azul" id="btnAgregarFuncLista-${contenedor}" data-agregar-func-lista="${contenedor}">➕ Agregar</button>
                         </div>
                     </div>
@@ -1352,9 +1352,16 @@ function horaValida(hora) {
 // no se puede adelantar el reloj. Como todos estos registros son siempre del día de hoy,
 // basta comparar HH:MM contra la hora actual del dispositivo.
 function horaEsFutura(hora) {
+    return hora > horaActualStr();
+}
+
+// Devuelve la hora actual del sistema en formato militar HH:MM — se usa para
+// precargar por defecto los campos de Hora de Inicio, Finalización y Hora de
+// llegada de Funcionario. La persona puede editarla o borrarla y escribir la
+// que necesite; esto solo evita tener que escribirla siempre desde cero.
+function horaActualStr() {
     const ahora = new Date();
-    const horaActual = String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
-    return hora > horaActual;
+    return String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
 }
 
 async function cargarOperacion(contenedor) {
@@ -1365,8 +1372,9 @@ async function cargarOperacion(contenedor) {
     const btnInicio = document.getElementById('btnInicioOperacion');
     const btnFin = document.getElementById('btnFinOperacion');
 
-    // Estado por defecto: campos libres, sin nada guardado todavía.
-    inicioInput.value = ''; inicioInput.disabled = false; inicioMeta.textContent = '';
+    // Estado por defecto: campos libres, sin nada guardado todavía — se precargan
+    // con la hora actual del sistema, pero la persona puede editarlos o borrarlos.
+    inicioInput.value = horaActualStr(); inicioInput.disabled = false; inicioMeta.textContent = '';
     finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
     btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
@@ -1387,8 +1395,10 @@ async function cargarOperacion(contenedor) {
         inicioMeta.textContent = `Iniciado por ${data.iniciado_por || '—'}`;
         btnInicio.disabled = true;
         btnInicio.textContent = '✅ OPERACIÓN INICIADA';
-        // Ya hay Hora de Inicio registrada: se desbloquea la Finalización.
+        // Ya hay Hora de Inicio registrada: se desbloquea la Finalización, precargada
+        // con la hora actual del sistema (editable) hasta que se registre la real.
         finInput.disabled = false;
+        finInput.value = horaActualStr();
         btnFin.disabled = false;
     }
     if (data.hora_fin) {
@@ -1450,7 +1460,7 @@ async function agregarFuncionarioDesdeLista(contenedor) {
     });
     btn.disabled = false; btn.textContent = '➕ Agregar';
     if (error) { mostrarToast('❌ ' + error.message, 5000); return; }
-    horaInput.value = '';
+    horaInput.value = horaActualStr();
     mostrarToast(`✅ Funcionario agregado — ${hora}`);
     cargarFuncionariosEnLista(contenedor);
 }
@@ -1589,6 +1599,11 @@ async function cargarFuncionarios(contenedor) {
         horaFuncInput.disabled = finalizado;
         btnAgregarFunc.disabled = finalizado;
         btnAgregarFunc.textContent = finalizado ? '🔒 Operación finalizada' : '➕ AGREGAR FUNCIONARIO';
+        // Se precarga con la hora actual del sistema (editable), salvo que la persona
+        // esté escribiendo en el campo en este momento — para no borrarle lo tecleado.
+        if (!finalizado && document.activeElement !== horaFuncInput) {
+            horaFuncInput.value = horaActualStr();
+        }
     }
 
     lista.querySelectorAll('.btn-quitar-func').forEach(btn => {
@@ -1627,7 +1642,7 @@ async function agregarFuncionario() {
 
     if (error) { mostrarToast('❌ ' + error.message, 5000); return; }
 
-    horaInput.value = '';
+    horaInput.value = horaActualStr();
     mostrarToast(`✅ Funcionario ${numeroFuncionario} agregado — ${hora}`);
     cargarFuncionarios(contenedorActualOperacion);
 }
