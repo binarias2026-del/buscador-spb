@@ -157,14 +157,12 @@
         background: white; border: none; cursor: pointer; text-align: left;
     }
     .agencia-acordeon-header .agencia-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .agencia-acordeon-header .punto-semaforo-agencia { display: inline-block; width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
+    .agencia-acordeon-header .punto-semaforo-agencia { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
     .punto-semaforo-agencia.semaforo-rojo { background: #c62828; }
     .punto-semaforo-agencia.semaforo-amarillo { background: #f9a825; }
     .punto-semaforo-agencia.semaforo-verde { background: #2e7d32; }
     .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
     .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
-    .semaforo-conteo-agencia { display: flex; gap: 8px; margin-top: 4px; }
-    .semaforo-conteo-agencia .badge-conteo-sem { font-size: 0.72rem; font-weight: 700; color: var(--text-dark); white-space: nowrap; }
     .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
@@ -184,11 +182,6 @@
     .semaforo-rojo .punto-semaforo { background: #c62828; }
     .semaforo-amarillo .punto-semaforo { background: #f9a825; }
     .semaforo-verde .punto-semaforo { background: #2e7d32; }
-    /* Prioridad sobre las reglas de arriba: si el punto trae su propio color (clase directa),
-       ese color manda — así no se hereda por error el color agregado de la agencia que lo envuelve. */
-    .contenedor-acordeon-header .punto-semaforo.semaforo-rojo { background: #c62828; }
-    .contenedor-acordeon-header .punto-semaforo.semaforo-amarillo { background: #f9a825; }
-    .contenedor-acordeon-header .punto-semaforo.semaforo-verde { background: #2e7d32; }
     .contenedor-acordeon-header .texto { flex: 1; min-width: 0; }
     .contenedor-acordeon-header .nombre-cont { font-weight: 700; font-size: 0.84rem; color: var(--text-dark); }
     .contenedor-acordeon-header .estado-cont { font-size: 0.68rem; color: var(--text-muted); }
@@ -237,17 +230,17 @@
     .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
     .dash-selector-fecha .btn-mini { height: 44px; }
     .dash-barras-container {
-        display: flex; align-items: flex-end; gap: 10px; height: 190px; margin-bottom: 12px;
-        background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px 10px 12px;
+        display: flex; flex-direction: column; gap: 12px; max-height: 440px; overflow-y: auto; margin-bottom: 12px;
+        background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px 14px;
     }
     .dash-barra-vertical {
-        flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-        background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; -webkit-tap-highlight-color: transparent;
+        width: 100%; display: flex; flex-direction: row; align-items: center; gap: 10px;
+        background: none; border: none; cursor: pointer; padding: 4px 0; font-family: inherit; -webkit-tap-highlight-color: transparent;
     }
-    .dash-barra-vertical .barra-valor { font-size: 1.35rem; font-weight: 800; line-height: 1; margin-bottom: 8px; }
-    .dash-barra-vertical .barra-track { width: 100%; max-width: 54px; flex: 1; display: flex; align-items: flex-end; }
-    .dash-barra-vertical .barra-fill { width: 100%; min-height: 6px; height: 4%; border-radius: 8px 8px 3px 3px; transition: height 0.4s ease-out; }
-    .dash-barra-vertical .barra-etiqueta { font-size: 0.68rem; font-weight: 700; margin-top: 8px; text-align: center; line-height: 1.2; }
+    .dash-barra-vertical .barra-etiqueta { order: -1; width: 108px; flex-shrink: 0; font-size: 0.72rem; font-weight: 700; text-align: left; line-height: 1.2; }
+    .dash-barra-vertical .barra-track { flex: 1; max-width: none; height: 22px; display: flex; align-items: center; background: var(--gray-bg); border-radius: 8px; overflow: hidden; }
+    .dash-barra-vertical .barra-fill { height: 100%; min-width: 6px; width: 4%; border-radius: 8px; transition: width 0.4s ease-out; }
+    .dash-barra-vertical .barra-valor { width: 34px; flex-shrink: 0; font-size: 1rem; font-weight: 800; line-height: 1; text-align: right; margin-bottom: 0; }
     .dash-barra-vertical.activa .barra-fill { box-shadow: 0 0 0 3px rgba(10, 85, 140, 0.18) inset, 0 0 0 2px white inset; }
     .dash-barra-vertical.activa .barra-etiqueta { text-decoration: underline; }
     .dash-barra-programados .barra-fill { background: var(--primary-blue); }
@@ -1014,10 +1007,10 @@ async function consultarDashboard(fecha) {
     // para que las diferencias se vean claras incluso cuando "Programados" domina el conjunto.
     const maxValor = Math.max(programados, ejecutados, enProceso, sinIniciar, 1);
     const alturaBarra = (valor) => valor === 0 ? '4%' : Math.max(8, Math.round((valor / maxValor) * 100)) + '%';
-    document.getElementById('barraFillProgramados').style.height = alturaBarra(programados);
-    document.getElementById('barraFillEjecutados').style.height = alturaBarra(ejecutados);
-    document.getElementById('barraFillEnProceso').style.height = alturaBarra(enProceso);
-    document.getElementById('barraFillSinIniciar').style.height = alturaBarra(sinIniciar);
+    document.getElementById('barraFillProgramados').style.width = alturaBarra(programados);
+    document.getElementById('barraFillEjecutados').style.width = alturaBarra(ejecutados);
+    document.getElementById('barraFillEnProceso').style.width = alturaBarra(enProceso);
+    document.getElementById('barraFillSinIniciar').style.width = alturaBarra(sinIniciar);
 
     const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
     nota.textContent = programados === 0
@@ -1123,19 +1116,6 @@ function semaforoAgencia(contenedores) {
     return { clase: 'semaforo-amarillo', texto: 'En operación' };
 }
 
-// Conteo de los 3 colores dentro de una agencia (cuántos contenedores están en cada
-// estado), para mostrarlos siempre visibles en la tarjeta sin desplegarla: 🔴00 🟡01 🟢02
-function conteoSemaforoAgencia(contenedores) {
-    let rojo = 0, amarillo = 0, verde = 0;
-    contenedores.forEach(c => {
-        const estado = estadoOperacion(c);
-        if (estado === 'finalizado') verde++;
-        else if (estado === 'iniciado') amarillo++;
-        else rojo++;
-    });
-    return { rojo, amarillo, verde };
-}
-
 // Arma el acordeón: Agencia (nivel 1, se abre/cierra al tocarla) → Contenedores de esa
 // agencia (nivel 2, cada uno con su color) → al tocar un contenedor, se despliega ahí
 // mismo el detalle de sus BLs, sin salir de esta pantalla — y se cierra tocándolo de nuevo.
@@ -1160,7 +1140,7 @@ function renderizarPorAgencia() {
             return `
             <div class="contenedor-acordeon ${sem.clase}" data-contenedor-acordeon="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-contenedor="${contenedor}">
-                    <span class="punto-semaforo ${sem.clase}"></span>
+                    <span class="punto-semaforo"></span>
                     <div class="texto">
                         <div class="nombre-cont">${contenedor}</div>
                         <div class="estado-cont">${sem.texto} · ${info.registros.length} BL</div>
@@ -1174,21 +1154,15 @@ function renderizarPorAgencia() {
         }).join('');
 
         const semAgencia = semaforoAgencia(datos.contenedores);
-        const conteo = conteoSemaforoAgencia(datos.contenedores);
-        const conteoStr = (n) => String(n).padStart(2, '0');
 
         return `
         <div class="agencia-acordeon ${semAgencia.clase}">
             <button class="agencia-acordeon-header" data-toggle-agencia="${codigo}">
                 <div class="agencia-info">
+                    <span class="punto-semaforo-agencia ${semAgencia.clase}" title="${semAgencia.texto}"></span>
                     <div>
                         <div class="nombre-agencia">🏢 ${datos.nombre}</div>
                         <div class="conteo-agencia">${datos.contenedores.length} contenedor(es) · ${semAgencia.texto}</div>
-                        <div class="semaforo-conteo-agencia" title="Sin iniciar / En operación / Finalizado">
-                            <span class="badge-conteo-sem">🔴${conteoStr(conteo.rojo)}</span>
-                            <span class="badge-conteo-sem">🟡${conteoStr(conteo.amarillo)}</span>
-                            <span class="badge-conteo-sem">🟢${conteoStr(conteo.verde)}</span>
-                        </div>
                     </div>
                 </div>
                 <span class="flecha-plegable">▾</span>
