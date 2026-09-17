@@ -1308,6 +1308,9 @@ async function cargarOperacion(contenedor) {
     finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
     btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
+    // La Finalización queda bloqueada hasta que se registre la Hora de Inicio.
+    finInput.disabled = true;
+    btnFin.disabled = true;
 
     const hoy = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb.from('operaciones_contenedor')
@@ -1322,6 +1325,9 @@ async function cargarOperacion(contenedor) {
         inicioMeta.textContent = `Iniciado por ${data.iniciado_por || '—'}`;
         btnInicio.disabled = true;
         btnInicio.textContent = '✅ OPERACIÓN INICIADA';
+        // Ya hay Hora de Inicio registrada: se desbloquea la Finalización.
+        finInput.disabled = false;
+        btnFin.disabled = false;
     }
     if (data.hora_fin) {
         finInput.value = data.hora_fin;
@@ -1391,6 +1397,10 @@ async function finalizarDesdeLista(contenedor) {
     const btn = document.getElementById('btnFinalizarLista-' + contenedor);
     const hora = horaInput.value.trim();
     if (!horaValida(hora)) { mostrarToast('⚠️ Escribe una hora válida, ej: 14:50', 4000); return; }
+    const opActual = operacionesPorContenedor.get(contenedor);
+    const horaInicioActual = opActual && opActual.hora_inicio;
+    if (!horaValida(horaInicioActual)) { mostrarToast('⚠️ Este contenedor todavía no tiene Hora de Inicio', 4000); return; }
+    if (hora <= horaInicioActual) { mostrarToast('⚠️ La Hora de Finalización debe ser posterior a la Hora de Inicio', 4000); return; }
     const hoy = new Date().toISOString().slice(0, 10);
     btn.disabled = true; btn.textContent = '⏳ Guardando...';
     const cambios = { contenedor, fecha: hoy, hora_fin: hora, finalizado_por: nombreCompletoUsuarioActual, finalizado_en: new Date().toISOString() };
@@ -1423,6 +1433,21 @@ async function marcarOperacion(tipo) {
     if (!horaValida(hora)) {
         mostrarToast('⚠️ Escribe una hora válida en formato militar, ej: 08:10 o 14:50', 4000);
         return;
+    }
+
+    // La Finalización no puede registrarse sin Hora de Inicio, y no puede ser igual o
+    // anterior a ella.
+    if (!esInicio) {
+        const opActual = operacionesPorContenedor.get(contenedorActualOperacion);
+        const horaInicioActual = (opActual && opActual.hora_inicio) || document.getElementById('horaInicioInput').value.trim();
+        if (!horaValida(horaInicioActual)) {
+            mostrarToast('⚠️ Primero debes registrar la Hora de Inicio', 4000);
+            return;
+        }
+        if (hora <= horaInicioActual) {
+            mostrarToast('⚠️ La Hora de Finalización debe ser posterior a la Hora de Inicio', 4000);
+            return;
+        }
     }
 
     const hoy = new Date().toISOString().slice(0, 10);
