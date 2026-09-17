@@ -564,6 +564,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allRecords = [];
 let agenciasList = [];
+// Cuenta cuántas veces SEGUIDAS llegó el Excel vacío. Sirve para distinguir el instante
+// intermedio de una recarga (se borra el Excel viejo y a los pocos segundos sube el
+// nuevo — ahí NO se limpian las tarjetas) de que de verdad se bajó/borró el Excel del
+// sistema sin subir uno nuevo — ahí SÍ se limpian.
+let sincronizacionesVaciasSeguidas = 0;
 let indiceContenedores = new Map(); // Contenedor -> { agenciaNombre, agenciaCodigo, registros: [...] }
 let operacionesPorContenedor = new Map(); // Contenedor -> fila de operaciones_contenedor (de hoy)
 let ultimaSincronizacion = null;
@@ -717,23 +722,36 @@ async function sincronizar(silencioso = false) {
         if (agErr) throw agErr;
         if (opsErr) throw opsErr;
 
-        // Mientras se está recargando el Excel en el sistema del Informe, la tabla
-        // "excel_cargado" (y a veces "agencias") queda momentáneamente vacía entre que se
-        // borra lo viejo y se sube lo nuevo. Si en ese instante justo cae este sync (por
-        // Realtime o por el polling), NO se reemplazan las tarjetas por una pantalla en
-        // blanco: se conserva lo último que había en pantalla hasta que llegue el Excel
-        // nuevo completo. Solo se acepta un resultado vacío si de verdad nunca hubo datos.
+        // Si se está recargando el Excel en el sistema del Informe (se borra el viejo y a
+        // los pocos segundos sube el nuevo), la tabla "excel_cargado" queda vacía por un
+        // instante muy corto. Para no confundir eso con que alguien de verdad bajó/borró
+        // el Excel sin subir uno nuevo, se exige ver el Excel vacío DOS veces seguidas
+        // antes de limpiar las tarjetas — la primera vez se reintenta rápido (2.5s) en vez
+        // de esperar el próximo ciclo normal, y si en ese reintento ya llegó el Excel
+        // nuevo, las tarjetas ni se inmutan. Si en cambio sigue vacío, se confirma que
+        // de verdad se bajó del sistema y ahí sí se limpian por completo.
         const nuevosRegistros = (excelData && excelData.registros) ? excelData.registros : [];
         if (nuevosRegistros.length > 0) {
+            sincronizacionesVaciasSeguidas = 0;
             allRecords = nuevosRegistros;
             construirIndice();
-        } else if (allRecords.length === 0) {
-            construirIndice(); // primera vez: sí mostramos el estado vacío real
-        } // si ya había datos y el Excel llegó vacío, se dejan las tarjetas como estaban
+        } else {
+            sincronizacionesVaciasSeguidas++;
+            if (allRecords.length === 0) {
+                construirIndice(); // ya estaba vacío, no hay nada que limpiar
+            } else if (sincronizacionesVaciasSeguidas === 1) {
+                setTimeout(() => sincronizar(true), 2500); // confirmar antes de limpiar
+            } else {
+                allRecords = []; // confirmado: se bajó el Excel — tarjetas limpias
+                construirIndice();
+            }
+        }
 
         if (agData && agData.length > 0) {
             agenciasList = agData;
-        } // igual que arriba: no se reemplaza por una lista vacía momentánea
+        } else if (sincronizacionesVaciasSeguidas >= 2) {
+            agenciasList = []; // igual que arriba: solo se limpia ya confirmado
+        }
 
         registrarProgramadosDeHoy(excelData && excelData.fecha_programacion); // no se espera, no debe frenar el resto
 
