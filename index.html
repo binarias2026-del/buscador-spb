@@ -157,17 +157,13 @@
         background: white; border: none; cursor: pointer; text-align: left;
     }
     .agencia-acordeon-header .agencia-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .agencia-acordeon-header .punto-semaforo-agencia { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
-    .punto-semaforo-agencia.semaforo-rojo { background: #c62828; }
-    .punto-semaforo-agencia.semaforo-amarillo { background: #f9a825; }
-    .punto-semaforo-agencia.semaforo-verde { background: #2e7d32; }
     .agencia-acordeon-header .nombre-agencia { font-weight: 700; font-size: 0.88rem; color: var(--primary-blue); }
     .agencia-acordeon-header .conteo-agencia { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
     .badges-semaforo-agencia { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
-    .badge-conteo-semaforo { font-size: 0.66rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; color: white; flex-shrink: 0; }
-    .badge-conteo-semaforo.semaforo-rojo { background: #c62828; }
-    .badge-conteo-semaforo.semaforo-amarillo { background: #f9a825; color: #4d3600; }
-    .badge-conteo-semaforo.semaforo-verde { background: #2e7d32; }
+    .badge-conteo-semaforo { font-size: 0.66rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; background: white; border: 1.5px solid; flex-shrink: 0; }
+    .badge-conteo-semaforo.semaforo-rojo { color: #c62828; border-color: #c62828; }
+    .badge-conteo-semaforo.semaforo-amarillo { color: #a17400; border-color: #f9a825; }
+    .badge-conteo-semaforo.semaforo-verde { color: #2e7d32; border-color: #2e7d32; }
     .agencia-acordeon-body { display: none; padding: 0 10px 10px 10px; }
     .agencia-acordeon-body.abierto { display: block; }
     .agencia-acordeon .flecha-plegable { flex-shrink: 0; }
@@ -183,10 +179,6 @@
         width: 100%; display: flex; align-items: center; gap: 10px; padding: 11px 12px; background: none;
         border: none; cursor: pointer; text-align: left;
     }
-    .contenedor-acordeon-header .punto-semaforo { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-    .semaforo-rojo .punto-semaforo { background: #c62828; }
-    .semaforo-amarillo .punto-semaforo { background: #f9a825; }
-    .semaforo-verde .punto-semaforo { background: #2e7d32; }
     .contenedor-acordeon-header .texto { flex: 1; min-width: 0; }
     .contenedor-acordeon-header .nombre-cont { font-weight: 700; font-size: 0.84rem; color: var(--text-dark); }
     .contenedor-acordeon-header .estado-cont { font-size: 0.68rem; color: var(--text-muted); }
@@ -235,17 +227,17 @@
     .dash-campo-fecha input { width: 100%; height: 44px; box-sizing: border-box; padding: 0 10px; border: 1.5px solid var(--border-light); border-radius: 10px; font-size: 0.9rem; color: var(--text-dark); }
     .dash-selector-fecha .btn-mini { height: 44px; }
     .dash-barras-container {
-        display: flex; align-items: flex-end; gap: 10px; height: 190px; margin-bottom: 12px;
-        background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px 10px 12px;
+        display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;
+        background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 16px;
     }
     .dash-barra-vertical {
-        flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-        background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; -webkit-tap-highlight-color: transparent;
+        display: flex; align-items: center; gap: 10px; width: 100%;
+        background: none; border: none; cursor: pointer; padding: 4px 0; font-family: inherit; -webkit-tap-highlight-color: transparent;
     }
-    .dash-barra-vertical .barra-valor { font-size: 1.35rem; font-weight: 800; line-height: 1; margin-bottom: 8px; }
-    .dash-barra-vertical .barra-track { width: 100%; max-width: 54px; flex: 1; display: flex; align-items: flex-end; }
-    .dash-barra-vertical .barra-fill { width: 100%; min-height: 6px; height: 4%; border-radius: 8px 8px 3px 3px; transition: height 0.4s ease-out; }
-    .dash-barra-vertical .barra-etiqueta { font-size: 0.68rem; font-weight: 700; margin-top: 8px; text-align: center; line-height: 1.2; }
+    .dash-barra-vertical .barra-etiqueta { flex: 0 0 108px; font-size: 0.72rem; font-weight: 700; text-align: left; line-height: 1.2; }
+    .dash-barra-vertical .barra-track { flex: 1; height: 22px; display: flex; align-items: center; background: #eef2f6; border-radius: 20px; overflow: hidden; }
+    .dash-barra-vertical .barra-fill { height: 100%; min-width: 4%; width: 4%; border-radius: 20px; transition: width 0.4s ease-out; }
+    .dash-barra-vertical .barra-valor { flex: 0 0 30px; font-size: 1rem; font-weight: 800; text-align: right; }
     .dash-barra-vertical.activa .barra-fill { box-shadow: 0 0 0 3px rgba(10, 85, 140, 0.18) inset, 0 0 0 2px white inset; }
     .dash-barra-vertical.activa .barra-etiqueta { text-decoration: underline; }
     .dash-barra-programados .barra-fill { background: var(--primary-blue); }
@@ -260,6 +252,9 @@
     .dash-detalle-categoria { background: white; border: 1px solid var(--border-light); border-radius: 14px; padding: 14px; margin-bottom: 16px; }
     .dash-detalle-categoria.hidden { display: none; }
     .dash-detalle-categoria .detalle-titulo { font-size: 0.84rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 10px; }
+    /* Se ven hasta 8 elementos sin necesidad de scroll (8 filas de ~38px); de ahí en
+       adelante, la lista hace scroll interno en vez de estirar la pantalla. */
+    .dash-detalle-categoria .detalle-items-scroll { max-height: 304px; overflow-y: auto; }
     .dash-detalle-categoria .detalle-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 4px; border-bottom: 1px solid var(--border-light); }
     .dash-detalle-categoria .detalle-item:last-child { border-bottom: none; }
     .dash-detalle-categoria .detalle-item .cont { font-weight: 700; font-size: 0.82rem; color: var(--text-dark); }
@@ -439,24 +434,24 @@
                 <div id="dashResultado">
                     <div class="dash-barras-container">
                         <button class="dash-barra-vertical dash-barra-programados" id="barraBtnProgramados" data-categoria="programados">
-                            <div class="barra-valor" id="dashProgramados">0</div>
-                            <div class="barra-track"><div class="barra-fill" id="barraFillProgramados"></div></div>
                             <div class="barra-etiqueta">📋 Programados</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillProgramados"></div></div>
+                            <div class="barra-valor" id="dashProgramados">0</div>
                         </button>
                         <button class="dash-barra-vertical dash-barra-proceso" id="barraBtnEnProceso" data-categoria="enProceso">
-                            <div class="barra-valor" id="dashEnProceso">0</div>
-                            <div class="barra-track"><div class="barra-fill" id="barraFillEnProceso"></div></div>
                             <div class="barra-etiqueta">🟡 En Proceso</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillEnProceso"></div></div>
+                            <div class="barra-valor" id="dashEnProceso">0</div>
                         </button>
                         <button class="dash-barra-vertical dash-barra-ejecutados" id="barraBtnEjecutados" data-categoria="ejecutados">
-                            <div class="barra-valor" id="dashEjecutados">0</div>
-                            <div class="barra-track"><div class="barra-fill" id="barraFillEjecutados"></div></div>
                             <div class="barra-etiqueta">✅ Ejecutados</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillEjecutados"></div></div>
+                            <div class="barra-valor" id="dashEjecutados">0</div>
                         </button>
                         <button class="dash-barra-vertical dash-barra-sin-iniciar" id="barraBtnSinIniciar" data-categoria="sinIniciar">
-                            <div class="barra-valor" id="dashSinIniciar">0</div>
-                            <div class="barra-track"><div class="barra-fill" id="barraFillSinIniciar"></div></div>
                             <div class="barra-etiqueta">🔴 Sin Iniciar</div>
+                            <div class="barra-track"><div class="barra-fill" id="barraFillSinIniciar"></div></div>
+                            <div class="barra-valor" id="dashSinIniciar">0</div>
                         </button>
                     </div>
                     <div id="dashDetalleCategoria" class="dash-detalle-categoria hidden"></div>
@@ -803,7 +798,6 @@ function renderizarPestañasPrincipales() {
             const op = operacionesPorContenedor.get(contenedor);
             return `<div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-op="${contenedor}">
-                    <span class="punto-semaforo"></span>
                     <div class="texto">
                         <div class="nombre-cont">${contenedor}</div>
                         <div class="estado-cont">${info.agenciaNombre} · Iniciado por ${op.iniciado_por || '—'}</div>
@@ -845,7 +839,6 @@ function renderizarPestañasPrincipales() {
             const op = operacionesPorContenedor.get(contenedor);
             return `<div class="contenedor-acordeon semaforo-verde" data-contenedor-op="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-fin="${contenedor}">
-                    <span class="punto-semaforo"></span>
                     <div class="texto">
                         <div class="nombre-cont">${contenedor}</div>
                         <div class="estado-cont">${info.agenciaNombre} · Finalizado por ${op.finalizado_por || '—'}</div>
@@ -1008,14 +1001,14 @@ async function consultarDashboard(fecha) {
     document.getElementById('dashBarraCumplimiento').style.width = cumplimiento + '%';
     document.getElementById('dashCumplimientoPct').textContent = cumplimiento + '%';
 
-    // Las 4 barras se escalan entre sí (la más alta llega al 100%), no contra un total fijo,
+    // Las 4 barras se escalan entre sí (la más larga llega al 100%), no contra un total fijo,
     // para que las diferencias se vean claras incluso cuando "Programados" domina el conjunto.
     const maxValor = Math.max(programados, ejecutados, enProceso, sinIniciar, 1);
-    const alturaBarra = (valor) => valor === 0 ? '4%' : Math.max(8, Math.round((valor / maxValor) * 100)) + '%';
-    document.getElementById('barraFillProgramados').style.height = alturaBarra(programados);
-    document.getElementById('barraFillEjecutados').style.height = alturaBarra(ejecutados);
-    document.getElementById('barraFillEnProceso').style.height = alturaBarra(enProceso);
-    document.getElementById('barraFillSinIniciar').style.height = alturaBarra(sinIniciar);
+    const anchoBarra = (valor) => valor === 0 ? '4%' : Math.max(8, Math.round((valor / maxValor) * 100)) + '%';
+    document.getElementById('barraFillProgramados').style.width = anchoBarra(programados);
+    document.getElementById('barraFillEjecutados').style.width = anchoBarra(ejecutados);
+    document.getElementById('barraFillEnProceso').style.width = anchoBarra(enProceso);
+    document.getElementById('barraFillSinIniciar').style.width = anchoBarra(sinIniciar);
 
     const fechaLegible = new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', { day: '2-digit', month: 'long', year: 'numeric' });
     nota.textContent = programados === 0
@@ -1056,11 +1049,11 @@ function mostrarDetalleDashboard(categoria) {
         <div class="detalle-titulo">${meta.titulo} (${items.length})</div>
         ${items.length === 0
             ? `<div class="detalle-vacia">${meta.vacio}</div>`
-            : items.map(it => `
+            : `<div class="detalle-items-scroll">${items.map(it => `
                 <div class="detalle-item">
                     <span class="cont">${it.contenedor}</span>
                     <span class="ag">${it.agencia}</span>
-                </div>`).join('')}
+                </div>`).join('')}</div>`}
     `;
     panel.classList.remove('hidden');
     document.getElementById('barraBtn' + categoria.charAt(0).toUpperCase() + categoria.slice(1)).classList.add('activa');
@@ -1158,7 +1151,6 @@ function renderizarPorAgencia() {
             return `
             <div class="contenedor-acordeon ${sem.clase}" data-contenedor-acordeon="${contenedor}">
                 <button class="contenedor-acordeon-header" data-toggle-contenedor="${contenedor}">
-                    <span class="punto-semaforo"></span>
                     <div class="texto">
                         <div class="nombre-cont">${contenedor}</div>
                         <div class="estado-cont">${sem.texto} · ${info.registros.length} BL</div>
@@ -1178,7 +1170,6 @@ function renderizarPorAgencia() {
         <div class="agencia-acordeon ${semAgencia.clase}">
             <button class="agencia-acordeon-header" data-toggle-agencia="${codigo}">
                 <div class="agencia-info">
-                    <span class="punto-semaforo-agencia ${semAgencia.clase}" title="${semAgencia.texto}"></span>
                     <div>
                         <div class="nombre-agencia">🏢 ${datos.nombre}</div>
                         <div class="conteo-agencia">${datos.contenedores.length} contenedor(es) · ${semAgencia.texto}</div>
