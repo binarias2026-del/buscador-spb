@@ -564,13 +564,9 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let allRecords = [];
 let agenciasList = [];
-// Cuenta cuántas veces SEGUIDAS llegó el Excel vacío. Sirve para distinguir el instante
-// intermedio de una recarga (se borra el Excel viejo y a los pocos segundos sube el
-// nuevo — ahí NO se limpian las tarjetas) de que de verdad se bajó/borró el Excel del
-// sistema sin subir uno nuevo — ahí SÍ se limpian.
 let sincronizacionesVaciasSeguidas = 0;
-let indiceContenedores = new Map(); // Contenedor -> { agenciaNombre, agenciaCodigo, registros: [...] }
-let operacionesPorContenedor = new Map(); // Contenedor -> fila de operaciones_contenedor (de hoy)
+let indiceContenedores = new Map();
+let operacionesPorContenedor = new Map();
 let ultimaSincronizacion = null;
 
 function emailDesdeUsuario(username) {
@@ -585,7 +581,6 @@ function mostrarToast(msg, duracionMs = 3000) {
     window.__toastTimeout = setTimeout(() => el.classList.remove('visible'), duracionMs);
 }
 
-// ============ LOGIN ============
 async function iniciarSesion() {
     const username = document.getElementById('loginUser').value.trim();
     const password = document.getElementById('loginPass').value;
@@ -607,9 +602,6 @@ async function iniciarSesion() {
         return;
     }
 
-    // Tener usuario y contraseña válidos NO es suficiente por sí solo — el Admin debe
-    // haber dejado habilitado el permiso específico para usar este PWA. Si no, se cierra
-    // la sesión que se acaba de abrir y no se deja pasar.
     const permiso = await cargarPerfilUsuarioActual();
     btn.disabled = false; btn.textContent = 'Ingresar';
 
@@ -622,10 +614,6 @@ async function iniciarSesion() {
     mostrarApp();
 }
 
-// Trae nombre_completo y pwa_habilitado del usuario que acaba de iniciar sesión — se
-// guarda en una variable para no tener que consultarlo cada vez que se necesita mostrar
-// el nombre (en "Sesión", "Agregado por", "Iniciado por", "Finalizado por"...).
-// Devuelve true si puede usar el PWA, false si el Admin se lo tiene deshabilitado.
 async function cargarPerfilUsuarioActual() {
     const sesion = (await sb.auth.getSession()).data.session;
     if (!sesion) return false;
@@ -634,7 +622,7 @@ async function cargarPerfilUsuarioActual() {
         console.warn('No se pudo cargar el perfil del usuario:', error && error.message);
         nombreCompletoUsuarioActual = sesion.user.email.split('@')[0].toUpperCase();
         rolUsuarioActual = 'user';
-        return true; // Si no se pudo verificar por un error de red, no se bloquea a nadie.
+        return true;
     }
     nombreCompletoUsuarioActual = (data.nombre_completo && data.nombre_completo.trim())
         ? data.nombre_completo.trim().toUpperCase()
@@ -665,13 +653,9 @@ async function mostrarApp() {
     activarPollingCambios();
 }
 
-// ============ SINCRONIZACIÓN AUTOMÁTICA (Supabase Realtime) ============
-// Cuando en el sistema del Informe se carga un Excel nuevo, se borra el actual, o se
-// sincroniza, Supabase avisa AL INSTANTE a través de este canal — y la PWA se refresca
-// sola, sin que nadie tenga que tocar el botón "Sincronizar" a mano.
 let canalRealtimeExcel = null;
 function activarSincronizacionAutomatica() {
-    if (canalRealtimeExcel) return; // ya estaba activa, no duplicar el canal
+    if (canalRealtimeExcel) return;
     canalRealtimeExcel = sb
         .channel('excel_cargado_cambios')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'excel_cargado' }, () => {
@@ -687,15 +671,9 @@ function desactivarSincronizacionAutomatica() {
     }
 }
 
-// ============ POLLING CADA 10 SEGUNDOS (Horas de Inicio/Fin y Funcionarios) ============
-// El canal Realtime de arriba solo avisa cuando cambia el Excel. Los cambios de HORA
-// (Inicio/Finalización) y de USUARIO (quién inició, finalizó o agregó un funcionario) los
-// hace cualquier operario desde su propio celular, así que en vez de depender de Realtime
-// para esas tablas, se pregunta cada 10 segundos si algo cambió y se refresca solo —
-// para que a los demás usuarios les llegue sin tener que tocar "Sincronizar" a mano.
 let intervaloPollingCambios = null;
 function activarPollingCambios() {
-    if (intervaloPollingCambios) return; // ya estaba activo, no duplicar el intervalo
+    if (intervaloPollingCambios) return;
     intervaloPollingCambios = setInterval(() => sincronizar(true), 10000);
 }
 function desactivarPollingCambios() {
@@ -705,7 +683,6 @@ function desactivarPollingCambios() {
     }
 }
 
-// ============ SINCRONIZACIÓN (lee lo que cargó la app principal) ============
 async function sincronizar(silencioso = false) {
     const syncBar = document.getElementById('syncBar');
     if (!silencioso) syncBar.textContent = '🔄 Sincronizando...';
@@ -722,14 +699,6 @@ async function sincronizar(silencioso = false) {
         if (agErr) throw agErr;
         if (opsErr) throw opsErr;
 
-        // Si se está recargando el Excel en el sistema del Informe (se borra el viejo y a
-        // los pocos segundos sube el nuevo), la tabla "excel_cargado" queda vacía por un
-        // instante muy corto. Para no confundir eso con que alguien de verdad bajó/borró
-        // el Excel sin subir uno nuevo, se exige ver el Excel vacío DOS veces seguidas
-        // antes de limpiar las tarjetas — la primera vez se reintenta rápido (2.5s) en vez
-        // de esperar el próximo ciclo normal, y si en ese reintento ya llegó el Excel
-        // nuevo, las tarjetas ni se inmutan. Si en cambio sigue vacío, se confirma que
-        // de verdad se bajó del sistema y ahí sí se limpian por completo.
         const nuevosRegistros = (excelData && excelData.registros) ? excelData.registros : [];
         if (nuevosRegistros.length > 0) {
             sincronizacionesVaciasSeguidas = 0;
@@ -738,11 +707,11 @@ async function sincronizar(silencioso = false) {
         } else {
             sincronizacionesVaciasSeguidas++;
             if (allRecords.length === 0) {
-                construirIndice(); // ya estaba vacío, no hay nada que limpiar
+                construirIndice();
             } else if (sincronizacionesVaciasSeguidas === 1) {
-                setTimeout(() => sincronizar(true), 2500); // confirmar antes de limpiar
+                setTimeout(() => sincronizar(true), 2500);
             } else {
-                allRecords = []; // confirmado: se bajó el Excel — tarjetas limpias
+                allRecords = [];
                 construirIndice();
             }
         }
@@ -750,10 +719,10 @@ async function sincronizar(silencioso = false) {
         if (agData && agData.length > 0) {
             agenciasList = agData;
         } else if (sincronizacionesVaciasSeguidas >= 2) {
-            agenciasList = []; // igual que arriba: solo se limpia ya confirmado
+            agenciasList = [];
         }
 
-        registrarProgramadosDeHoy(excelData && excelData.fecha_programacion); // no se espera, no debe frenar el resto
+        registrarProgramadosDeHoy(excelData && excelData.fecha_programacion);
 
         operacionesPorContenedor.clear();
         (opsData || []).forEach(op => operacionesPorContenedor.set(op.contenedor, op));
@@ -769,10 +738,6 @@ async function sincronizar(silencioso = false) {
 
         renderizarPestañasPrincipales();
         renderizarPorAgencia();
-        // Si hay un contenedor abierto en detalle, se refresca también su Hora y sus
-        // Funcionarios — así el usuario que lo tiene abierto ve al instante lo que otro
-        // usuario acabe de registrar. Los campos de Hora solo se tocan si la persona NO
-        // está escribiendo en ellos en este momento, para no borrarle lo que está tecleando.
         const vistaContenedorEl = document.getElementById('vistaContenedor');
         if (vistaContenedorEl && vistaContenedorEl.style.display === 'block' && contenedorActualOperacion) {
             const enfocado = document.activeElement;
@@ -816,7 +781,6 @@ function construirIndice() {
     }
 }
 
-// ============ BÚSQUEDA PREDICTIVA ============
 function normalizar(t) {
     return (t || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
@@ -836,30 +800,18 @@ function estadoOperacion(contenedor) {
     return null;
 }
 
-// Arma las dos listas de la pantalla principal: contenedores EN OPERACIÓN (verde) y
-// contenedores FINALIZADOS (gris) — se actualizan solas cada vez que alguien marca un
-// inicio o una finalización, sin que haga falta buscar nada.
 function renderizarPestañasPrincipales() {
     const panel = document.getElementById('pestañasPrincipales');
-    // Esta barra (Operaciones/Finalizados/Agencias/Dashboard) muestra lo que quedó
-    // REGISTRADO durante la jornada operativa (tabla operaciones_contenedor) — eso NO
-    // depende de que el Excel siga cargado en este momento. Solo se oculta si de verdad
-    // no hay ni Excel ni ninguna operación registrada hoy; bajar el Excel por sí solo
-    // nunca debe borrar esta barra ni lo ya cargado durante el día.
     if (indiceContenedores.size === 0 && operacionesPorContenedor.size === 0) { panel.classList.add('hidden'); return; }
 
     const enOperacion = [];
     const finalizados = [];
-    // Se recorren tanto los contenedores que trae el Excel actual como los que ya
-    // tienen una operación registrada hoy (aunque el Excel que los trajo ya no esté
-    // cargado) — así "Operaciones" y "Finalizados" no pierden lo del día.
     const contenedoresAConsiderar = new Set([...indiceContenedores.keys(), ...operacionesPorContenedor.keys()]);
     for (const contenedor of contenedoresAConsiderar) {
         const estado = estadoOperacion(contenedor);
         if (estado === 'iniciado') enOperacion.push(contenedor);
         else if (estado === 'finalizado') finalizados.push(contenedor);
     }
-    // Los más recientes primero (por hora de inicio/fin registrada).
     enOperacion.sort((a, b) => (operacionesPorContenedor.get(b).hora_inicio || '').localeCompare(operacionesPorContenedor.get(a).hora_inicio || ''));
     finalizados.sort((a, b) => (operacionesPorContenedor.get(b).hora_fin || '').localeCompare(operacionesPorContenedor.get(a).hora_fin || ''));
 
@@ -870,9 +822,6 @@ function renderizarPestañasPrincipales() {
     listaOp.innerHTML = enOperacion.length === 0
         ? `<div class="lista-tab-vacia">Ningún contenedor en operación todavía.<br>Ábrelo y marca "Inicio Operación" para que aparezca aquí.</div>`
         : enOperacion.map(contenedor => {
-            // Si el Excel que trajo este contenedor ya no está cargado, se usa un
-            // respaldo en vez de romper la tarjeta — la operación registrada se sigue
-            // viendo igual, solo sin los datos de agencia/BLs que traía ese Excel.
             const info = indiceContenedores.get(contenedor) || { agenciaNombre: 'Agencia no disponible (Excel no cargado)', agenciaCodigo: '', registros: [] };
             const op = operacionesPorContenedor.get(contenedor);
             return `<div class="contenedor-acordeon semaforo-amarillo" data-contenedor-op="${contenedor}">
@@ -944,10 +893,6 @@ function renderizarPestañasPrincipales() {
             </div>`;
         }).join('');
 
-    // Acordeón de "Operaciones" y "Finalizados": tocar el nombre despliega Horas y
-    // Funcionarios; tocarlo de nuevo lo cierra; y abrir OTRO contenedor retrae
-    // automáticamente el que estuviera abierto — solo uno a la vez, por pestaña. Los BLs
-    // quedan aparte, detrás de su propio botón "Ver BLs completos".
     function conectarAcordeonLista(lista, atributoToggle, prefijoCuerpo, prefijoBLs, funcionariosEditables) {
         lista.querySelectorAll(`[${atributoToggle}]`).forEach(btn => {
             btn.onclick = (e) => {
@@ -990,8 +935,6 @@ function renderizarPestañasPrincipales() {
         });
     });
 
-    // Solo se muestran las pestañas cuando el buscador está vacío (si la persona está
-    // escribiendo una búsqueda, se le da prioridad a los resultados predictivos).
     if (!document.getElementById('searchInput').value.trim()) {
         panel.classList.remove('hidden');
     }
@@ -1018,21 +961,14 @@ document.getElementById('tabBtnAgencias').onclick = () => cambiarPestañaPrincip
 document.getElementById('tabBtnDashboard').onclick = () => cambiarPestañaPrincipal('dashboard');
 document.getElementById('btnConsultarDash').onclick = () => consultarDashboard(document.getElementById('dashFechaInput').value);
 
-// Solo Admin (super) y Programador (admin) ven la pestaña Dashboard — un Proveedor (user)
-// no la ve en absoluto.
 function actualizarVisibilidadDashboard() {
     const puedeVerDashboard = rolUsuarioActual === 'admin' || rolUsuarioActual === 'super';
     document.getElementById('tabBtnDashboard').classList.toggle('hidden', !puedeVerDashboard);
 }
 
-// Guarda, tras cada consulta, el detalle de contenedores de cada categoría del dashboard
-// (programados / en proceso / ejecutados / sin iniciar) para poder mostrarlo al tocar
-// la barra correspondiente, sin tener que volver a consultar la base de datos.
 let dashboardDetalle = { programados: [], enProceso: [], ejecutados: [], sinIniciar: [] };
 let dashboardCategoriaAbierta = null;
 
-// Trae, para la fecha elegida: cuántos contenedores estaban programados (tabla histórica
-// contenedores_programados), y cuántos de esos ya iniciaron/finalizaron (operaciones_contenedor).
 async function consultarDashboard(fecha) {
     if (!fecha) return;
     const nota = document.getElementById('dashCumplimientoNota');
@@ -1080,8 +1016,6 @@ async function consultarDashboard(fecha) {
     document.getElementById('dashBarraCumplimiento').style.width = cumplimiento + '%';
     document.getElementById('dashCumplimientoPct').textContent = cumplimiento + '%';
 
-    // Las 4 barras se escalan entre sí (la más larga llega al 100%), no contra un total fijo,
-    // para que las diferencias se vean claras incluso cuando "Programados" domina el conjunto.
     const maxValor = Math.max(programados, ejecutados, enProceso, sinIniciar, 1);
     const anchoBarra = (valor) => valor === 0 ? '4%' : Math.max(8, Math.round((valor / maxValor) * 100)) + '%';
     document.getElementById('barraFillProgramados').style.width = anchoBarra(programados);
@@ -1094,15 +1028,10 @@ async function consultarDashboard(fecha) {
         ? `No hay contenedores programados registrados para el ${fechaLegible}.`
         : `${ejecutados} de ${programados} contenedores finalizados — ${fechaLegible}.`;
 
-    // Si había una categoría desplegada de una consulta anterior, se refresca con los
-    // datos nuevos; si no había ninguna, el panel de detalle permanece oculto.
     if (dashboardCategoriaAbierta) mostrarDetalleDashboard(dashboardCategoriaAbierta);
     else document.getElementById('dashDetalleCategoria').classList.add('hidden');
 }
 
-// Al tocar una barra se despliega, debajo de las 4 barras, la lista de contenedores (con
-// su agencia) que componen esa categoría — sin necesidad de ir a la pestaña de Agencias.
-// Tocar la misma barra otra vez cierra el detalle.
 const ETIQUETAS_CATEGORIA_DASH = {
     programados: { titulo: '📋 Contenedores programados', vacio: 'No hay contenedores programados para esta fecha.' },
     enProceso: { titulo: '🟡 Contenedores en proceso', vacio: 'Ningún contenedor está en proceso en esta fecha.' },
@@ -1143,15 +1072,11 @@ document.querySelectorAll('.dash-barra-vertical').forEach(btn => {
     btn.onclick = () => mostrarDetalleDashboard(btn.getAttribute('data-categoria'));
 });
 
-// Registra en el histórico (contenedores_programados) los contenedores del Excel
-// actualmente cargado, con la fecha de programación que traiga ese Excel — así queda un
-// registro consultable de "qué estaba programado" ese día, aunque después se cargue un
-// Excel distinto y esta info ya no esté visible en pantalla.
 async function registrarProgramadosDeHoy(fechaProgramacionTexto) {
     if (indiceContenedores.size === 0) return;
     let fechaISO;
     if (fechaProgramacionTexto) {
-        const partes = fechaProgramacionTexto.split('/'); // viene como DD/MM/AAAA
+        const partes = fechaProgramacionTexto.split('/');
         if (partes.length === 3) fechaISO = `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
     }
     if (!fechaISO) fechaISO = new Date().toISOString().slice(0, 10);
@@ -1159,8 +1084,6 @@ async function registrarProgramadosDeHoy(fechaProgramacionTexto) {
     const filas = Array.from(indiceContenedores.entries()).map(([contenedor, info]) => ({
         contenedor, fecha: fechaISO, agencia_codigo: info.agenciaCodigo || null
     }));
-    // Se sube en lotes de 200 para no mandar una sola petición gigante si hay muchos
-    // contenedores, y se ignoran los duplicados (mismo contenedor+fecha ya registrado antes).
     for (let i = 0; i < filas.length; i += 200) {
         const lote = filas.slice(i, i + 200);
         const { error } = await sb.from('contenedores_programados').upsert(lote, { onConflict: 'contenedor,fecha', ignoreDuplicates: true });
@@ -1168,9 +1091,6 @@ async function registrarProgramadosDeHoy(fechaProgramacionTexto) {
     }
 }
 
-// Semáforo de 3 colores para la pestaña "Por Agencia": rojo = no ha iniciado, amarillo =
-// en operación, verde = finalizado. Es un esquema propio de ESTA pestaña — las otras dos
-// (En Operación / Finalizados) ya están filtradas de antemano y no lo necesitan.
 function semaforoContenedor(contenedor) {
     const estado = estadoOperacion(contenedor);
     if (estado === 'finalizado') return { clase: 'semaforo-verde', texto: 'Finalizado' };
@@ -1178,9 +1098,6 @@ function semaforoContenedor(contenedor) {
     return { clase: 'semaforo-rojo', texto: 'Sin iniciar' };
 }
 
-// Semáforo agregado a nivel de AGENCIA (sin desplegar el detalle): mira el estado de
-// todos sus contenedores y resume en un solo color — verde solo si TODOS finalizaron,
-// rojo solo si NINGUNO ha iniciado, y amarillo en cualquier otra mezcla (operación en curso).
 function semaforoAgencia(contenedores) {
     let finalizados = 0, sinIniciar = 0;
     contenedores.forEach(c => {
@@ -1193,8 +1110,6 @@ function semaforoAgencia(contenedores) {
     return { clase: 'semaforo-amarillo', texto: 'En operación' };
 }
 
-// Conteo por color para el semáforo visible en la cabecera de cada agencia, sin
-// necesidad de desplegar la tarjeta: cuántos contenedores están en rojo, amarillo y verde.
 function contarSemaforosAgencia(contenedores) {
     let rojo = 0, amarillo = 0, verde = 0;
     contenedores.forEach(c => {
@@ -1206,14 +1121,11 @@ function contarSemaforosAgencia(contenedores) {
     return { rojo, amarillo, verde };
 }
 
-// Arma el acordeón: Agencia (nivel 1, se abre/cierra al tocarla) → Contenedores de esa
-// agencia (nivel 2, cada uno con su color) → al tocar un contenedor, se despliega ahí
-// mismo el detalle de sus BLs, sin salir de esta pantalla — y se cierra tocándolo de nuevo.
 function renderizarPorAgencia() {
     const cont = document.getElementById('listaPorAgencia');
     if (indiceContenedores.size === 0) { cont.innerHTML = ''; return; }
 
-    const porAgencia = new Map(); // codigo -> { nombre, contenedores: [...] }
+    const porAgencia = new Map();
     for (const [contenedor, info] of indiceContenedores.entries()) {
         if (!porAgencia.has(info.agenciaCodigo)) {
             porAgencia.set(info.agenciaCodigo, { nombre: info.agenciaNombre, contenedores: [] });
@@ -1273,8 +1185,6 @@ function renderizarPorAgencia() {
             const body = document.getElementById('cuerpoAgencia-' + codigo);
             const yaEstabaAbierta = body.classList.contains('abierto');
 
-            // Cerrar TODAS las agencias antes de decidir si esta se abre — así solo una
-            // agencia queda desplegada a la vez, sin importar cuántas se hayan tocado antes.
             cont.querySelectorAll('.agencia-acordeon-body').forEach(b => b.classList.remove('abierto'));
             cont.querySelectorAll('.agencia-acordeon-header .flecha-plegable').forEach(f => f.classList.remove('abierta'));
 
@@ -1368,16 +1278,11 @@ function buscar(queryOriginal) {
     });
 }
 
-// ============ VISTA: DETALLE DE CONTENEDOR ============
-// ============ REGISTRO DE OPERACIÓN (Inicio / Finalización) ============
 let contenedorActualOperacion = null;
 let nombreCompletoUsuarioActual = '';
 let rolUsuarioActual = 'user';
 let funcionariosContenedorActual = [];
 
-// Convierte lo que se va escribiendo a formato de hora militar HH:MM en tiempo real —
-// si la persona escribe "0810" (solo números, sin dos puntos), lo va acomodando solo a
-// "08:10" a medida que teclea, sin que tenga que escribir el símbolo ":" ella misma.
 function formatearHoraEnVivo(el) {
     let digitos = el.value.replace(/\D/g, '').slice(0, 4);
     let resultado = digitos;
@@ -1392,18 +1297,10 @@ function horaValida(hora) {
     return !!m;
 }
 
-// Ninguna hora registrada en el sistema (Inicio, Finalización, llegada de Funcionario)
-// puede quedar por delante de la hora actual — todo esto se registra "en el momento",
-// no se puede adelantar el reloj. Como todos estos registros son siempre del día de hoy,
-// basta comparar HH:MM contra la hora actual del dispositivo.
 function horaEsFutura(hora) {
     return hora > horaActualStr();
 }
 
-// Devuelve la hora actual del sistema en formato militar HH:MM — se usa para
-// precargar por defecto los campos de Hora de Inicio, Finalización y Hora de
-// llegada de Funcionario. La persona puede editarla o borrarla y escribir la
-// que necesite; esto solo evita tener que escribirla siempre desde cero.
 function horaActualStr() {
     const ahora = new Date();
     return String(ahora.getHours()).padStart(2, '0') + ':' + String(ahora.getMinutes()).padStart(2, '0');
@@ -1417,13 +1314,10 @@ async function cargarOperacion(contenedor) {
     const btnInicio = document.getElementById('btnInicioOperacion');
     const btnFin = document.getElementById('btnFinOperacion');
 
-    // Estado por defecto: campos libres, sin nada guardado todavía — se precargan
-    // con la hora actual del sistema, pero la persona puede editarlos o borrarlos.
     inicioInput.value = horaActualStr(); inicioInput.disabled = false; inicioMeta.textContent = '';
     finInput.value = ''; finInput.disabled = false; finMeta.textContent = '';
     btnInicio.disabled = false; btnInicio.textContent = '🟢 INICIO OPERACIÓN';
     btnFin.disabled = false; btnFin.textContent = '🔴 FINALIZACIÓN OPERACIÓN';
-    // La Finalización queda bloqueada hasta que se registre la Hora de Inicio.
     finInput.disabled = true;
     btnFin.disabled = true;
 
@@ -1440,8 +1334,6 @@ async function cargarOperacion(contenedor) {
         inicioMeta.textContent = `Iniciado por ${data.iniciado_por || '—'}`;
         btnInicio.disabled = true;
         btnInicio.textContent = '✅ OPERACIÓN INICIADA';
-        // Ya hay Hora de Inicio registrada: se desbloquea la Finalización, precargada
-        // con la hora actual del sistema (editable) hasta que se registre la real.
         finInput.disabled = false;
         finInput.value = horaActualStr();
         btnFin.disabled = false;
@@ -1454,11 +1346,6 @@ async function cargarOperacion(contenedor) {
         btnFin.textContent = '✅ OPERACIÓN FINALIZADA';
     }
 }
-
-// ============ VERSIONES "DE LISTA" de Horas/Funcionarios ============
-// Hacen lo mismo que sus versiones de la vista completa, pero trabajan con IDs únicos por
-// contenedor (ej. "horaFinInputLista-ABCD123") para poder vivir dentro del acordeón de
-// Operaciones/Finalizados sin chocar entre sí ni con los campos de la vista de detalle.
 
 async function cargarFuncionariosEnLista(contenedor, editable = true) {
     const lista = document.getElementById('listaFuncLista-' + contenedor);
@@ -1558,8 +1445,6 @@ async function marcarOperacion(tipo) {
         return;
     }
 
-    // La Finalización no puede registrarse sin Hora de Inicio, y no puede ser igual o
-    // anterior a ella.
     if (!esInicio) {
         const opActual = operacionesPorContenedor.get(contenedorActualOperacion);
         const horaInicioActual = (opActual && opActual.hora_inicio) || document.getElementById('horaInicioInput').value.trim();
@@ -1593,7 +1478,7 @@ async function marcarOperacion(tipo) {
     }
 
     input.disabled = true;
-    meta.textContent = `${esInicio ? 'Iniciado' : 'Finalizado'} por ${username}`;
+    meta.textContent = `${esInicio ? 'Iniciado' : 'Finalizado'} por ${nombreCompletoUsuarioActual}`;
     btn.textContent = esInicio ? '✅ OPERACIÓN INICIADA' : '✅ OPERACIÓN FINALIZADA';
     mostrarToast(`✅ ${esInicio ? 'Inicio' : 'Finalización'} de operación registrado — ${hora}`);
 
@@ -1608,7 +1493,6 @@ document.getElementById('horaFinInput').addEventListener('input', (e) => formate
 document.getElementById('btnInicioOperacion').onclick = () => marcarOperacion('inicio');
 document.getElementById('btnFinOperacion').onclick = () => marcarOperacion('fin');
 
-// ============ FUNCIONARIOS DE AGENCIAS (llegadas por contenedor) ============
 async function cargarFuncionarios(contenedor) {
     const lista = document.getElementById('listaFuncionarios');
     const contador = document.getElementById('contadorFuncionarios');
@@ -1636,16 +1520,12 @@ async function cargarFuncionarios(contenedor) {
                 ${finalizado ? '' : `<button class="btn-quitar-func" data-id="${f.id}" title="Quitar">🗑️</button>`}
             </div>`).join('');
 
-    // Una vez finalizada la operación, ya no tiene sentido seguir agregando funcionarios
-    // — se deshabilita el formulario para dejarlo claro.
     const horaFuncInput = document.getElementById('horaFuncionarioInput');
     const btnAgregarFunc = document.getElementById('btnAgregarFuncionario');
     if (horaFuncInput && btnAgregarFunc) {
         horaFuncInput.disabled = finalizado;
         btnAgregarFunc.disabled = finalizado;
         btnAgregarFunc.textContent = finalizado ? '🔒 Operación finalizada' : '➕ AGREGAR FUNCIONARIO';
-        // Se precarga con la hora actual del sistema (editable), salvo que la persona
-        // esté escribiendo en el campo en este momento — para no borrarle lo tecleado.
         if (!finalizado && document.activeElement !== horaFuncInput) {
             horaFuncInput.value = horaActualStr();
         }
@@ -1725,7 +1605,6 @@ function mostrarContenedor(contenedor) {
     document.getElementById('contenedorAgenciaSub').textContent = info.agenciaNombre;
     document.getElementById('contadorBL').textContent = info.registros.length;
     document.getElementById('contenedorListaBL').innerHTML = renderizarBLsHTML(info.registros);
-    // Las 3 secciones empiezan cerradas — la persona decide cuál quiere ver.
     document.getElementById('cuerpoOperacion').classList.add('hidden');
     document.getElementById('flechaOperacion').classList.remove('abierta');
     document.getElementById('cuerpoFuncionarios').classList.add('hidden');
@@ -1748,7 +1627,6 @@ function alternarSeccion(idCuerpo, idFlecha) {
 document.getElementById('toggleOperacion').onclick = () => alternarSeccion('cuerpoOperacion', 'flechaOperacion');
 document.getElementById('toggleBL').onclick = () => alternarSeccion('cuerpoBL', 'flechaBL');
 
-// ============ VISTA: CONTENEDORES DE UNA AGENCIA ============
 function mostrarAgencia(codigo) {
     const entradas = Array.from(indiceContenedores.entries()).filter(([, info]) => info.agenciaCodigo === codigo);
     if (entradas.length === 0) return;
@@ -1787,9 +1665,6 @@ function volverABusqueda() {
     renderizarPorAgencia();
 }
 
-// ============ EVENTOS ============
-// Usuario y contraseña se escriben siempre en mayúscula sostenida, sin importar cómo
-// las teclee la persona — igual que en el sistema principal de Desembalaje.
 ['loginUser', 'loginPass'].forEach(id => {
     document.getElementById(id).addEventListener('input', (e) => {
         const inicio = e.target.selectionStart, fin = e.target.selectionEnd;
@@ -1822,14 +1697,10 @@ document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrap')) document.getElementById('predictivo').classList.add('hidden');
 });
 
-// Restaurar sesión si el navegador ya la tenía activa (evita pedir login cada vez)
 sb.auth.getSession().then(async ({ data }) => {
     if (data.session) {
         const permiso = await cargarPerfilUsuarioActual();
         if (!permiso) {
-            // Si en algún momento el Admin le quitó el permiso a alguien que todavía tenía
-            // la sesión abierta en su celular, se le cierra la sesión la próxima vez que
-            // abra la app, en vez de dejarlo pasar solo porque el navegador recordaba el login.
             await sb.auth.signOut();
             document.getElementById('loginError').textContent = 'No tienes permiso para usar esta aplicación. Contacta a un Admin.';
             return;
@@ -1838,7 +1709,6 @@ sb.auth.getSession().then(async ({ data }) => {
     }
 });
 
-// Registrar el Service Worker (permite instalar la app y abrirla más rápido)
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').catch(() => {});
