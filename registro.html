@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Crear cuenta · Despachos</title>
+<meta name="theme-color" content="#0E3B47">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F2; --panel:#FFFFFF; --ink:#132B33; --muted:#5B7078; --line:#D3DCDF;
+  --harbor:#0E3B47; --signal:#F2B705; --teal:#16697A; --teal-dark:#0F515F;
+  --danger:#B3261E; --ok-bg:#DDF0E3; --ok:#23663F;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font:16px/1.45 'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink)}
+h1{font-family:'Barlow Semi Condensed','Barlow',system-ui,sans-serif;margin:0 0 4px;line-height:1.15;font-size:24px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.muted{color:var(--muted)}
+
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--harbor)}
+.login-card{width:min(400px,100%);background:var(--panel);border-radius:10px;padding:28px 24px;border-top:6px solid var(--signal)}
+.login-card img{height:44px;display:block;margin-bottom:18px}
+.login-card p{margin:0 0 20px}
+.login-card label{display:block;font-weight:600;font-size:14px;margin-top:14px}
+.login-card input{display:block;width:100%;margin-top:5px;padding:13px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:16px}
+.err{color:var(--danger);font-size:14px;margin:12px 0 0;min-height:1em}
+.btn{border:0;background:var(--teal);color:#fff;border-radius:10px;padding:14px;cursor:pointer;font-weight:700;font-size:16px;width:100%;margin-top:14px}
+.btn:hover{background:var(--teal-dark)}
+.btn:disabled{opacity:.5}
+
+.ok-card{width:min(400px,100%);background:var(--panel);border-radius:10px;padding:32px 24px;border-top:6px solid var(--ok);text-align:center}
+.ok-icon{width:52px;height:52px;border-radius:50%;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center;margin:0 auto 16px;font-size:26px}
+</style>
+</head>
+<body>
+
+<section class="login">
+  <form id="form-registro" class="login-card">
+    <img src="icons/icon-192.png" alt="">
+    <h1>Crear cuenta</h1>
+    <p class="muted">Regístrate para pedir acceso a Despachos. Un Super Admin activará tu cuenta y te asignará tu rol.</p>
+    <label>Nombre completo
+      <input type="text" name="nombre" required autocomplete="name">
+    </label>
+    <label>Correo
+      <input type="email" name="email" required autocomplete="username" inputmode="email">
+    </label>
+    <label>Contraseña
+      <input type="password" name="password" required minlength="6" autocomplete="new-password">
+    </label>
+    <p id="reg-err" class="err" role="alert"></p>
+    <button class="btn" type="submit" id="reg-btn">Crear cuenta</button>
+    <p class="muted" style="margin:16px 0 0;font-size:13px;text-align:center">
+      ¿Ya tienes cuenta activa?
+      <a href="index.html" style="color:var(--teal);font-weight:600;text-decoration:none">App móvil</a>
+      <span style="margin:0 4px">·</span>
+      <a href="admin.html" style="color:var(--teal);font-weight:600;text-decoration:none">Panel Administrativo</a>
+    </p>
+  </form>
+
+  <div class="ok-card" id="ok-card" hidden>
+    <div class="ok-icon">✓</div>
+    <h1>Cuenta creada</h1>
+    <p class="muted">Ya puedes cerrar esta página. Avísale a tu Super Admin para que active tu acceso y te asigne un rol — después de eso podrás ingresar a la app.</p>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://glzhwoswyditummgfbin.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsemh3b3N3eWRpdHVtbWdmYmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NDQyMzIsImV4cCI6MjEwNTMyMDIzMn0.ZY5bVbeahJ2mGXjWwN4IcofoyEvztHMIg1jR3tZ4Hug';
+
+const $ = s => document.querySelector(s);
+let sb = null;
+
+if (window.supabase) {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+  $('#reg-err').textContent = 'No se pudo cargar la librería de Supabase. Revisa tu conexión a internet.';
+}
+
+$('#form-registro').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  if (!sb) return;
+  const fd = new FormData(ev.target);
+  const err = $('#reg-err');
+  err.textContent = '';
+  const nombre = String(fd.get('nombre')).trim();
+  const email = String(fd.get('email')).trim();
+  const password = String(fd.get('password'));
+  const btn = $('#reg-btn');
+  btn.disabled = true;
+  const { error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { nombre } }
+  });
+  btn.disabled = false;
+  if (error) { err.textContent = 'No se pudo crear la cuenta: ' + error.message; return; }
+  // Por seguridad, cierra cualquier sesión que signUp haya podido abrir automáticamente:
+  // el acceso real solo debe darse cuando el Super Admin active y asigne el rol.
+  await sb.auth.signOut();
+  $('#form-registro').hidden = true;
+  $('#ok-card').hidden = false;
+});
+</script>
+</body>
+</html>

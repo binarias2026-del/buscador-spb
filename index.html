@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Despachos · Operativo</title>
+<meta name="theme-color" content="#0E3B47">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Despachos">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F2; --panel:#FFFFFF; --ink:#132B33; --muted:#5B7078; --line:#D3DCDF;
+  --harbor:#0E3B47; --harbor-ink:#CFE2E6; --signal:#F2B705; --teal:#16697A; --teal-dark:#0F515F;
+  --danger:#B3261E;
+  --pend-bg:#FBEFD3; --pend:#8A5A00;
+  --proc-bg:#DCEAF8; --proc:#1D5FA8;
+  --ok-bg:#DDF0E3; --ok:#23663F;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{font:16px/1.45 'Barlow',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);background:var(--bg);overscroll-behavior-y:contain}
+h1,h2,h3{font-family:'Barlow Semi Condensed','Barlow',system-ui,sans-serif;margin:0;line-height:1.15}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.muted{color:var(--muted)}
+
+/* Login */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--harbor)}
+.login-card{width:min(400px,100%);background:var(--panel);border-radius:10px;padding:28px 24px;border-top:6px solid var(--signal)}
+.login-card img{height:44px;display:block;margin-bottom:18px}
+.login-card h1{font-size:24px;margin-bottom:4px}
+.login-card p{margin:0 0 20px}
+.login-card label{display:block;font-weight:600;font-size:14px;margin-top:14px}
+.login-card input{display:block;width:100%;margin-top:5px;padding:13px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:16px}
+.err{color:var(--danger);font-size:14px;margin:12px 0 0;min-height:1em}
+
+/* App shell */
+.app{display:flex;flex-direction:column;min-height:100vh}
+header.top{background:var(--harbor);color:#fff;padding:calc(14px + var(--safe-t)) 18px 14px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
+header.top img{height:26px}
+header.top .quien{flex:1;min-width:0}
+header.top b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header.top span{font-size:12px;opacity:.75}
+header.top button{background:none;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:6px;padding:8px 12px;font-size:13px;font-weight:600}
+
+.tabs{display:flex;background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:calc(54px + var(--safe-t));z-index:9}
+.tabs button{flex:1;padding:13px 8px;background:none;border:0;font-weight:600;color:var(--muted);border-bottom:3px solid transparent}
+.tabs button.on{color:var(--harbor);border-bottom-color:var(--signal)}
+
+main{flex:1;padding:14px 14px calc(24px + var(--safe-b))}
+
+.search{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;margin-bottom:12px;font-size:16px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:block;width:100%;text-align:left}
+.card .fila1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.card .tt{font:700 18px 'Barlow Semi Condensed',sans-serif}
+.card .bl{color:var(--muted);font-size:13px;margin-top:1px}
+.card .ruta{margin-top:6px;font-size:14px}
+.card .avance{margin-top:10px;display:flex;align-items:center;gap:8px}
+.barra{flex:1;height:8px;border-radius:4px;background:#E4EAEC;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--teal)}
+.card .avance span{font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+.pill{display:inline-block;padding:2px 10px;border-radius:3px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.pendiente{background:var(--pend-bg);color:var(--pend)}
+.pill.en_proceso{background:var(--proc-bg);color:var(--proc)}
+.empty{padding:48px 16px;text-align:center;color:var(--muted)}
+
+.feed{list-style:none;margin:0;padding:0}
+.feed li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.feed .cant{font:700 18px 'Barlow Semi Condensed',sans-serif;white-space:nowrap}
+.feed .cuando{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* Hoja de despacho (bottom sheet) */
+dialog{border:0;border-radius:16px 16px 0 0;padding:0;width:100%;max-width:520px;margin:auto auto 0;max-height:88vh;color:var(--ink)}
+dialog::backdrop{background:rgba(14,59,71,.55)}
+.sheet-h{padding:18px 20px 6px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sheet-h button{background:none;border:0;font-size:22px;line-height:1;color:var(--muted);padding:4px}
+.sheet-b{padding:6px 20px 20px}
+.info{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 16px;font-size:14px}
+.info dt{color:var(--muted)}
+.info dd{margin:0;font-weight:500}
+.qty-lbl{font-weight:700;font-size:14px;margin-bottom:6px;display:block}
+.qty-row{display:flex;gap:10px;align-items:center}
+.qty-row input{flex:1;padding:16px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;text-align:center}
+.qty-quick{display:flex;gap:8px;margin-top:10px}
+.qty-quick button{flex:1;padding:9px 6px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13px;font-weight:600}
+.sheet-f{padding:14px 20px calc(18px + var(--safe-b));display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);background:#F6F9F9}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:14px;cursor:pointer;font-weight:700;font-size:16px;text-align:center}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}
+.btn.primary:active{background:var(--teal-dark)}
+.btn.ghost{background:none;border:0;color:var(--muted)}
+.btn:disabled{opacity:.5}
+
+#toast{position:fixed;bottom:calc(20px + var(--safe-b));left:50%;transform:translateX(-50%);background:var(--harbor);color:#fff;padding:11px 20px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;font-weight:500}
+#toast.show{opacity:1}
+#toast.bad{background:var(--danger)}
+
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+
+<section id="login" class="login" hidden>
+  <form id="form-login" class="login-card" autocomplete="on">
+    <img src="icons/icon-192.png" alt="">
+    <h1>Despachos</h1>
+    <p class="muted">Acceso para personal Operativo.</p>
+    <label>Correo
+      <input type="email" name="email" required autocomplete="username" inputmode="email">
+    </label>
+    <label>Contraseña
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <p id="login-err" class="err" role="alert"></p>
+    <button class="btn primary" type="submit" style="width:100%;margin-top:14px">Ingresar</button>
+    <p class="muted" style="margin:16px 0 0;font-size:13px;text-align:center">
+      <a href="registro.html" style="color:var(--teal);font-weight:600;text-decoration:none">Crear cuenta</a>
+      <span style="margin:0 6px">·</span>
+      <a href="admin.html" style="color:var(--muted);text-decoration:none">Acceso Administrativo</a>
+    </p>
+  </form>
+</section>
+
+<div id="app" class="app" hidden>
+  <header class="top">
+    <img src="icons/icon-192.png" alt="">
+    <div class="quien"><b id="yo-nombre"></b><span>Operativo</span></div>
+    <button type="button" data-acc="salir">Salir</button>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button type="button" data-acc="tab" data-t="pendientes" class="on">Por despachar</button>
+    <button type="button" data-acc="tab" data-t="mios">Mis despachos</button>
+  </nav>
+  <main id="main"><p class="muted">Cargando…</p></main>
+</div>
+
+<dialog id="dlg-despacho">
+  <form id="form-despacho">
+    <div class="sheet-h">
+      <div>
+        <h2 id="dp-tt">TT</h2>
+        <span class="muted" id="dp-bl"></span>
+      </div>
+      <button type="button" data-acc="cerrar" aria-label="Cerrar">×</button>
+    </div>
+    <div class="sheet-b">
+      <dl class="info">
+        <dt>Carga</dt><dd id="dp-producto"></dd>
+        <dt>Ruta</dt><dd id="dp-ruta"></dd>
+        <dt>Por despachar</dt><dd id="dp-pendiente"></dd>
+      </dl>
+      <span class="qty-lbl">Cantidad a despachar</span>
+      <div class="qty-row">
+        <input type="number" name="cantidad" id="dp-cantidad" inputmode="decimal" min="0.01" step="any" required>
+      </div>
+      <div class="qty-quick">
+        <button type="button" data-acc="cuota" data-f="0.25">25%</button>
+        <button type="button" data-acc="cuota" data-f="0.5">50%</button>
+        <button type="button" data-acc="cuota" data-f="1">Todo</button>
+      </div>
+      <p class="err" id="dp-err" role="alert"></p>
+    </div>
+    <div class="sheet-f">
+      <button type="submit" class="btn primary" id="dp-guardar">Registrar despacho</button>
+      <button type="button" class="btn ghost" data-acc="cerrar">Cancelar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ---------- Configuración ---------- */
+// La clave "anon" es pública por diseño; la seguridad la dan las políticas RLS (setup_supabase.sql).
+const SUPABASE_URL = 'https://glzhwoswyditummgfbin.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsemh3b3N3eWRpdHVtbWdmYmluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3NDQyMzIsImV4cCI6MjEwNTMyMDIzMn0.ZY5bVbeahJ2mGXjWwN4IcofoyEvztHMIg1jR3tZ4Hug';
+
+/* ---------- Utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => new Intl.NumberFormat('es-CO', {maximumFractionDigits: 2}).format(Number(n) || 0);
+const fechaHora = d => new Date(d).toLocaleString('es-CO', {dateStyle: 'medium', timeStyle: 'short'});
+const ESTADOS = {pendiente: 'Pendiente', en_proceso: 'En proceso'};
+
+let toastTmr;
+function aviso(msg, malo) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'show' + (malo ? ' bad' : '');
+  clearTimeout(toastTmr);
+  toastTmr = setTimeout(() => t.className = '', 3200);
+}
+
+const state = {
+  user: null, perfil: null,
+  traslados: [], misDespachos: [],
+  tab: 'pendientes', q: '',
+  activoId: null, canal: null
+};
+
+let sb = null;
+
+/* ---------- Arranque y sesión ---------- */
+async function arrancar() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+  if (!window.supabase) {
+    mostrarLogin('No se pudo cargar la librería de Supabase. Revisa tu conexión a internet.');
+    return;
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  sb.auth.onAuthStateChange(ev => {
+    if (ev === 'SIGNED_OUT' && state.user) { limpiar(); mostrarLogin(); }
+  });
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) await entrar(session.user); else mostrarLogin();
+}
+
+function mostrarLogin(msg) {
+  $('#app').hidden = true;
+  $('#login').hidden = false;
+  $('#login-err').textContent = msg || '';
+}
+
+function limpiar() {
+  if (state.canal) { sb.removeChannel(state.canal); state.canal = null; }
+  state.user = null; state.perfil = null;
+  state.traslados = []; state.misDespachos = [];
+}
+
+async function entrar(user) {
+  const { data: perfil, error } = await sb.from('profiles').select('*').eq('id', user.id).maybeSingle();
+  let problema = '';
+  if (error) problema = 'No se pudo leer tu perfil: ' + error.message;
+  else if (!perfil) problema = 'Tu usuario aún no tiene un perfil. Pide al Super Admin que lo cree.';
+  else if (!perfil.activo) problema = 'Tu usuario está desactivado. Habla con el Super Admin.';
+  else if (perfil.rol === 'administrativo') problema = 'Este acceso es para personal Operativo. El área Administrativa usa la app de escritorio.';
+  if (problema) {
+    await sb.auth.signOut();
+    mostrarLogin(problema);
+    return;
+  }
+  state.user = user;
+  state.perfil = perfil;
+  $('#login').hidden = true;
+  $('#app').hidden = false;
+  $('#yo-nombre').textContent = perfil.nombre;
+  await cargarDatos();
+  render();
+  suscribir();
+}
+
+/* ---------- Datos ---------- */
+async function cargarDatos() {
+  const [t, d] = await Promise.all([
+    sb.from('traslados').select('*').in('estado', ['pendiente', 'en_proceso']).order('created_at', { ascending: false }),
+    sb.from('despachos').select('*, traslados(tt,bl)').eq('operador', state.user.id).order('created_at', { ascending: false }).limit(50)
+  ]);
+  if (t.error) { aviso('Error al cargar traslados: ' + t.error.message, true); return; }
+  state.traslados = t.data;
+  state.misDespachos = d.error ? [] : d.data;
+}
+
+function suscribir() {
+  if (state.canal) sb.removeChannel(state.canal);
+  state.canal = sb.channel('cambios-despacho')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'traslados' }, refrescar)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'despachos' }, refrescar)
+    .subscribe();
+}
+
+let refTmr;
+function refrescar() {
+  clearTimeout(refTmr);
+  refTmr = setTimeout(async () => {
+    if (!state.user) return;
+    await cargarDatos();
+    render();
+  }, 250);
+}
+
+const buscarTraslado = id => state.traslados.find(t => t.id === id);
+
+/* ---------- Render ---------- */
+function render() {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === state.tab));
+  const main = $('#main');
+  const teniaFoco = document.activeElement && document.activeElement.id === 'q';
+  if (state.tab === 'mios') main.innerHTML = vistaMios();
+  else { main.innerHTML = vistaPendientes(); pintarLista(); }
+  if (teniaFoco && $('#q')) { const el = $('#q'); el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+}
+
+function barra(t) {
+  const total = Number(t.cantidad_total) || 0;
+  const hecho = Number(t.cantidad_despachada) || 0;
+  const pct = total > 0 ? Math.min(100, (hecho / total) * 100) : 0;
+  return '<div class="avance"><div class="barra"><i style="width:' + pct + '%"></i></div>' +
+    '<span>' + fmt(hecho) + ' / ' + fmt(total) + '</span></div>';
+}
+
+function vistaPendientes() {
+  return '<input id="q" class="search" type="search" placeholder="Buscar por TT o BL" value="' + esc(state.q) + '" aria-label="Buscar traslados">' +
+    '<div id="lista"></div>';
+}
+
+function pintarLista() {
+  const cont = $('#lista');
+  if (!cont) return;
+  const q = state.q.trim().toLowerCase();
+  const lista = state.traslados.filter(t =>
+    !q || [t.tt, t.bl, t.producto].some(v => String(v || '').toLowerCase().includes(q)));
+  if (!lista.length) {
+    cont.innerHTML = '<div class="empty">' + (state.traslados.length
+      ? 'Ningún traslado coincide con la búsqueda.'
+      : 'No hay traslados pendientes por despachar.') + '</div>';
+    return;
+  }
+  cont.innerHTML = lista.map(t =>
+    '<button type="button" class="card" data-acc="abrir" data-id="' + t.id + '">' +
+      '<div class="fila1"><span class="tt">' + esc(t.tt) + '</span>' + '<span class="pill ' + t.estado + '">' + ESTADOS[t.estado] + '</span></div>' +
+      '<div class="bl">BL ' + esc(t.bl) + '</div>' +
+      '<div class="ruta">' + esc(t.producto || 'Sin descripción') + (t.origen ? ' · ' + esc(t.origen) : '') + (t.destino ? ' a ' + esc(t.destino) : '') + '</div>' +
+      barra(t) +
+    '</button>').join('');
+}
+
+function vistaMios() {
+  if (!state.misDespachos.length) return '<div class="empty">Todavía no has registrado despachos.</div>';
+  return '<ul class="feed">' + state.misDespachos.map(d => {
+    const tt = d.traslados ? d.traslados.tt : 'Traslado eliminado';
+    const bl = d.traslados ? d.traslados.bl : '—';
+    return '<li><div><b>' + esc(tt) + '</b> <span class="muted">BL ' + esc(bl) + '</span>' +
+      '<div class="cuando">' + fechaHora(d.created_at) + '</div></div>' +
+      '<span class="cant">' + fmt(d.cantidad) + '</span></li>';
+  }).join('') + '</ul>';
+}
+
+/* ---------- Registrar despacho ---------- */
+function abrirDespacho(id) {
+  const t = buscarTraslado(id);
+  if (!t) return;
+  state.activoId = id;
+  const pendiente = Number(t.cantidad_total) - Number(t.cantidad_despachada);
+  $('#dp-tt').textContent = 'TT ' + t.tt;
+  $('#dp-bl').textContent = 'BL ' + t.bl;
+  $('#dp-producto').textContent = t.producto || '—';
+  $('#dp-ruta').textContent = (t.origen || '—') + (t.destino ? ' a ' + t.destino : '');
+  $('#dp-pendiente').textContent = fmt(pendiente);
+  $('#dp-cantidad').value = '';
+  $('#dp-cantidad').max = pendiente;
+  $('#dp-err').textContent = '';
+  $('#dlg-despacho').showModal();
+  setTimeout(() => $('#dp-cantidad').focus(), 50);
+}
+
+$('#form-despacho').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const t = buscarTraslado(state.activoId);
+  const err = $('#dp-err');
+  err.textContent = '';
+  if (!t) { err.textContent = 'Este traslado ya no está disponible.'; return; }
+  const cantidad = Number($('#dp-cantidad').value);
+  const pendiente = Number(t.cantidad_total) - Number(t.cantidad_despachada);
+  if (!(cantidad > 0)) { err.textContent = 'Escribe una cantidad mayor que cero.'; return; }
+  if (cantidad > pendiente) { err.textContent = 'La cantidad supera lo pendiente (' + fmt(pendiente) + ').'; return; }
+  const btn = $('#dp-guardar');
+  btn.disabled = true;
+  const { error } = await sb.from('despachos').insert({ traslado_id: t.id, cantidad });
+  btn.disabled = false;
+  if (error) { err.textContent = 'No se pudo registrar: ' + error.message; return; }
+  $('#dlg-despacho').close();
+  aviso('Despacho registrado');
+  await cargarDatos();
+  render();
+});
+
+/* ---------- Eventos ---------- */
+$('#form-login').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const fd = new FormData(ev.target);
+  $('#login-err').textContent = '';
+  const btn = ev.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email: String(fd.get('email')).trim(), password: String(fd.get('password')) });
+  btn.disabled = false;
+  if (error) { $('#login-err').textContent = 'Correo o contraseña incorrectos.'; return; }
+  ev.target.reset();
+  await entrar(data.user);
+});
+
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-acc]');
+  if (!b) return;
+  const id = b.dataset.id;
+  switch (b.dataset.acc) {
+    case 'tab': state.tab = b.dataset.t; render(); break;
+    case 'abrir': abrirDespacho(id); break;
+    case 'cerrar': b.closest('dialog').close(); break;
+    case 'cuota': {
+      const t = buscarTraslado(state.activoId);
+      if (!t) break;
+      const pendiente = Number(t.cantidad_total) - Number(t.cantidad_despachada);
+      const f = Number(b.dataset.f);
+      $('#dp-cantidad').value = f >= 1 ? pendiente : Math.round(pendiente * f * 100) / 100;
+      break;
+    }
+    case 'salir': await sb.auth.signOut(); break;
+  }
+});
+
+document.addEventListener('input', ev => {
+  if (ev.target.id === 'q') { state.q = ev.target.value; pintarLista(); }
+});
+
+$('#dlg-despacho').addEventListener('click', e => { if (e.target === $('#dlg-despacho')) $('#dlg-despacho').close(); });
+$('#dlg-despacho').addEventListener('close', () => { state.activoId = null; });
+
+arrancar();
+</script>
+</body>
+</html>
